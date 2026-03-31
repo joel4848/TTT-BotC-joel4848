@@ -1,6 +1,6 @@
 local EVENT = {}
 
-EVENT.Title = "Legally distinct sanguinous fluid on the time-spire"
+EVENT.Title = "JoelBotC"
 EVENT.Description = "You know how this works!"
 EVENT.id = "joelbotc"
 EVENT.Categories = {"gamemode", "largeimpact", "rolechange"}
@@ -42,31 +42,176 @@ local poEnabled = CreateConVar("randomat_joelbotc_po_enabled", 1, FCVAR_NONE, "W
 local ojoEnabled = CreateConVar("randomat_joelbotc_ojo_enabled", 1, FCVAR_NONE, "Whether the Ojo is on the script", 0, 1):GetBool()
 -- /'Script' ----------------------------------------------------------------------------------------------------------------
 
-local players = {}
-local townsfolkAmount = nil
-local outsidersAmount = nil
-local minionsAmount = nil
-local demonsAmount = nil
-local enabledTownsfolk = {}
-local enabledOutsiders = {}
-local enabledMinions = {}
-local enabledDemons = {}
+local original_COLOR_DETECTIVE = {}
+local original_COLOR_SPECIAL_INNOCENT = {}
+local original_COLOR_SPECIAL_TRAITOR = {}
+local original_COLOR_MONSTER = {}
 
 function EVENT:Begin()
+
+    local players = {}
+    local townsfolkAmount = nil
+    local outsidersAmount = nil
+    local minionsAmount = nil
+    local demonsAmount = nil
+    local enabledTownsfolk = {}
+    local enabledOutsiders = {}
+    local enabledMinions = {}
+    local enabledDemons = {}
+
+    -- Custom role colours
+    original_COLOR_DETECTIVE = table.Copy(COLOR_DETECTIVE)
+    original_COLOR_SPECIAL_INNOCENT = table.Copy(COLOR_SPECIAL_INNOCENT)
+    original_COLOR_SPECIAL_TRAITOR = table.Copy(COLOR_SPECIAL_TRAITOR)
+    original_COLOR_MONSTER = table.Copy(COLOR_MONSTER)
+
+    COLOR_DETECTIVE = {
+        ["default"] = Color(31, 101, 255, 255),
+        ["simple"] = Color(31, 101, 255, 255),
+        ["protan"] = Color(31, 101, 255, 255),
+        ["deutan"] = Color(31, 101, 255, 255),
+        ["tritan"] = Color(31, 101, 255, 255)
+    }
+
+    COLOR_SPECIAL_INNOCENT = {
+        ["default"] = Color(70, 213, 255, 255),
+        ["simple"] = Color(70, 213, 255, 255),
+        ["protan"] = Color(70, 213, 255, 255),
+        ["deutan"] = Color(70, 213, 255, 255),
+        ["tritan"] = Color(70, 213, 255, 255)
+    }
+
+    COLOR_SPECIAL_TRAITOR = {
+        ["default"] = Color(255, 105, 0, 255),
+        ["simple"] = Color(255, 105, 0, 255),
+        ["protan"] = Color(255, 105, 0, 255),
+        ["deutan"] = Color(255, 105, 0, 255),
+        ["tritan"] = Color(255, 105, 0, 255)
+    }
+
+    COLOR_MONSTER = {
+        ["default"] = Color(206, 1, 0, 255),
+        ["simple"] = Color(206, 1, 0, 255),
+        ["protan"] = Color(206, 1, 0, 255),
+        ["deutan"] = Color(206, 1, 0, 255),
+        ["tritan"] = Color(206, 1, 0, 255)
+    }
+
+    UpdateRoleColours()
 
 ----------------------------------------------------------------------------------------------------------------------------
 -- ASSIGN ROLES
 ----------------------------------------------------------------------------------------------------------------------------
 
     -- Determine roles on the 'script'
-
-
-
+    if stewardEnabled then
+        table.insert(enabledTownsfolk, ROLE_STEWARDJBC)
+    end
+    if knightEnabled then
+        table.insert(enabledTownsfolk, ROLE_KNIGHTJBC)
+    end
+    if oracleEnabled then
+        table.insert(enabledTownsfolk, ROLE_ORACLEJBC)
+    end
+    if chefEnabled then
+        table.insert(enabledTownsfolk, ROLE_CHEFJBC)
+    end
+    if undertakerEnabled then
+        table.insert(enabledTownsfolk, ROLE_UNDERTAKERJBC)
+    end
+    if nobleEnabled then
+        table.insert(enabledTownsfolk, ROLE_NOBLEJBC)
+    end
+    if investigatorEnabled then
+        table.insert(enabledTownsfolk, ROLE_INVESTIGATORJBC)
+    end
+    if monkEnabled then
+        table.insert(enabledTownsfolk, ROLE_MONKJBC)
+    end
+    if washerwomanEnabled then
+        table.insert(enabledTownsfolk, ROLE_WASHERWOMANJBC)
+    end
+    if nightwatchmanEnabled then
+        table.insert(enabledTownsfolk, ROLE_NIGHTWATCHMANJBC)
+    end
+    if grandmotherEnabled then
+        table.insert(enabledTownsfolk, ROLE_GRANDMOTHERJBC)
+    end
+    if seamstressEnabled then
+        table.insert(enabledTownsfolk, ROLE_SEAMSTRESSJBC)
+    end
+    if librarianEnabled then
+        table.insert(enabledTownsfolk, ROLE_LIBRARIANJBC)
+    end
+    if slayerEnabled then
+        table.insert(enabledTownsfolk, ROLE_SLAYERJBC)
+    end
+    if empathEnabled then
+        table.insert(enabledTownsfolk, ROLE_EMPATHJBC)
+    end
+    if soldierEnabled then
+        table.insert(enabledTownsfolk, ROLE_SOLDIERJBC)
+    end
+    if ravenkeeperEnabled then
+        table.insert(enabledTownsfolk, ROLE_RAVENKEEPERJBC)
+    end
+    if fortunetellerEnabled then
+        table.insert(enabledTownsfolk, ROLE_FORTUNETELLERJBC)
+    end
+    if virginEnabled then
+        table.insert(enabledTownsfolk, ROLE_VIRGINJBC)
+    end
+    if ogreEnabled then
+        table.insert(enabledOutsiders, ROLE_OGREJBC)
+    end
+    if moonchildEnabled then
+        table.insert(enabledOutsiders, ROLE_MOONCHILDJBC)
+    end
+    if saintEnabled then
+        table.insert(enabledOutsiders, ROLE_SAINTJBC)
+    end
+    if drunkEnabled then
+        table.insert(enabledOutsiders, ROLE_DRUNKJBC)
+    end
+    if recluseEnabled then
+        table.insert(enabledOutsiders, ROLE_RECLUSEJBC)
+    end
+    if poisonerEnabled then
+        table.insert(enabledMinions, ROLE_POISONERJBC)
+    end
+    if scarletwomanEnabled then
+        table.insert(enabledMinions, ROLE_SCARLETWOMANJBC)
+    end
+    if organgrinderEnabled then
+        table.insert(enabledMinions, ROLE_ORGANGRINDERJBC)
+    end
+    if assassinEnabled then
+        table.insert(enabledMinions, ROLE_ASSASSINJBC)
+    end
+    if baronEnabled then
+        table.insert(enabledMinions, ROLE_BARONJBC)
+    end
+    if pukkaEnabled then
+        table.insert(enabledDemons, ROLE_PUKKAJBC)
+    end
+    if impEnabled then
+        table.insert(enabledDemons, ROLE_IMPJBC)
+    end
+    if shabalothEnabled then
+        table.insert(enabledDemons, ROLE_SHABALOTHJBC)
+    end
+    if poEnabled then
+        table.insert(enabledDemons, ROLE_POJBC)
+    end
+    if ojoEnabled then
+        table.insert(enabledDemons, ROLE_OJOJBC)
+    end
 
     -- Get a table of (tabulate?) living players
-    for _, p in player.Iterator() do
-        if IsValid(p) and not p:IsSpec() then
-            table.insert(players, p)
+    for _, ply in player.Iterator() do
+        if IsValid(ply) and not ply:IsSpec() then
+            table.insert(players, ply)
+            ply.hasRole = nil
         end
     end
 
@@ -126,12 +271,87 @@ function EVENT:Begin()
         outsidersAmount = 0
         minionsAmount = 1
         demonsAmount = 1
+    elseif #players == 1 then
+        townsfolkAmount = 1
+        outsidersAmount = 1
+        minionsAmount = 1
+        demonsAmount = 1
     elseif #players < 5 then
 
     elseif #players > 15 then
 
     end
 
+    -- Assign character types to players
+
+    -- Shuffle players
+    table.Shuffle(players)
+
+    -- Make working copies of character type tables and shuffle (Can one shuffle too much?)
+    local townsfolkPool = table.Copy(enabledTownsfolk)
+    local outsiderPool  = table.Copy(enabledOutsiders)
+    local minionPool    = table.Copy(enabledMinions)
+    local demonPool     = table.Copy(enabledDemons)
+
+    table.Shuffle(townsfolkPool)
+    table.Shuffle(outsiderPool)
+    table.Shuffle(minionPool)
+    table.Shuffle(demonPool)
+
+    -- Fill the master role pool
+    local rolePool = {}
+
+    local function AddRoles(pool, amount, alignment)
+        for i = 1, amount do
+            local role = table.remove(pool)
+            if role then
+                rolePool[#rolePool + 1] = {role = role, alignment = alignment}
+            end
+        end
+    end
+
+    AddRoles(townsfolkPool, townsfolkAmount, "townsfolk")
+    AddRoles(outsiderPool,  outsidersAmount, "outsider")
+    AddRoles(minionPool,    minionsAmount,   "minion")
+    AddRoles(demonPool,     demonsAmount,    "demon")
+
+    -- More shufflage
+    table.Shuffle(rolePool)
+
+    -- Time to actually assign roles to players!
+    for i, ply in ipairs(players) do
+        local entry = rolePool[i]
+
+        if entry.alignment == "townsfolk" then
+            ply.townsfolk = true
+        elseif entry.alignment == "outsider" then
+            ply.outsider = true
+        elseif entry.alignment == "minion" then
+            ply.minion = true
+        elseif entry.alignment == "demon" then
+            ply.demon = true
+        end
+
+        ply.botc_role = entry.role
+    end
+
+    -- ... and make them that role!
+    for _, ply in ipairs(players) do
+        Randomat:SetRole(ply, ply.botc_role)
+    end
+    SendFullStateUpdate()
+
+end
+
+function EVENT:End()
+    if isActive then
+        COLOR_DETECTIVE = table.Copy(original_COLOR_DETECTIVE)
+        COLOR_SPECIAL_INNOCENT = table.Copy(original_COLOR_SPECIAL_INNOCENT)
+        COLOR_SPECIAL_TRAITOR = table.Copy(original_COLOR_SPECIAL_TRAITOR)
+        COLOR_MONSTER = table.Copy(original_COLOR_MONSTER)
+    end
+
+    UpdateRoleColours()
 end
 
 Randomat:register(EVENT)

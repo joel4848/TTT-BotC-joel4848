@@ -10,7 +10,7 @@ ROLE.desc = [[]]
 
 ROLE.shortdesc = ""
 
-ROLE.team = ROLE_TEAM_TRAITOR
+ROLE.team = ROLE_TEAM_MONSTER
 
 ROLE.shop = nil
 ROLE.loadout = {}
