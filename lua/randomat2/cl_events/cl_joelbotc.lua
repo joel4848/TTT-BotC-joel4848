@@ -1,12 +1,18 @@
 local EVENT = {}
 EVENT.id = "joelbotc"
 
+local titleFrame
+local titleFrameScale = 1
+local isShowingTitle = false
+
 local original_COLOR_DETECTIVE = {}
 local original_COLOR_SPECIAL_INNOCENT = {}
 local original_COLOR_SPECIAL_TRAITOR = {}
 local original_COLOR_MONSTER = {}
 
 function EVENT:Begin()
+
+    local client = LocalPlayer()
 
     -- Custom role colours
     original_COLOR_DETECTIVE = table.Copy(COLOR_DETECTIVE)
@@ -48,6 +54,33 @@ function EVENT:Begin()
 
     UpdateRoleColours()
 
+    if IsValid(client) and not client:IsSpec() then
+        isShowingTitle = true
+        local scrW, scrH = ScrW(), ScrH()
+        local height = 1048 * scale
+        local width = 269 * scale
+        local top = (scrH * 0.75) - (height / 2)
+        local left = (scrW / 2) - (width / 2)
+
+        local botcTitleParent = vgui.Create("DFrame")
+        botcTitleParent:SetSize(width, height)
+        botcTitleParent:SetPos(left, top)
+        botcTitleParent:SetTitle("")
+        botcTitleParent:SetDraggable(false)
+        botcTitleParent:ShowCloseButton(true)
+        botcTitleParent:SetDeleteOnClose(true)
+
+        -- Have to draw something apparently but then make it alpha 0
+        botcTitleParent.Paint = function(self,w,h)
+            draw.RoundedBox(0,4,4,w-8,h-8,Color(0, 0, 0))
+        end
+
+        -- Start Reactor UI background image
+        botcTitleImage = vgui.Create("DImage", botcTitleParent)
+        botcTitleImage:SetSize(width, height)
+        botcTitleImage:SetImage("vgui/ttt/joelbotc/joelbotctitle.png")
+    end
+
 end
 
 function EVENT:End()
@@ -59,6 +92,10 @@ function EVENT:End()
     end
 
     UpdateRoleColours()
+
+    if IsValid(botcTitleParent) then
+        botcTitleParent:Close()
+    end
 end
 
 Randomat:register(EVENT)
