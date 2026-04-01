@@ -1,7 +1,7 @@
 local EVENT = {}
 EVENT.id = "joelbotc"
 
-local titleFrame
+local botcTitleParent
 local titleFrameScale = 1
 local isShowingTitle = false
 
@@ -57,12 +57,16 @@ function EVENT:Begin()
     if IsValid(client) and not client:IsSpec() then
         isShowingTitle = true
         local scrW, scrH = ScrW(), ScrH()
-        local height = 1048 * scale
-        local width = 269 * scale
-        local top = (scrH * 0.75) - (height / 2)
+
+        local imgW, imgH = 2096, 538
+        local maxScale = math.min(scrW / imgW, scrH / imgH)
+        local finalScale = maxScale * 0.87 * titleFrameScale
+        local width  = imgW * finalScale
+        local height = imgH * finalScale
+        local top  = (scrH / 2) - (height / 2)
         local left = (scrW / 2) - (width / 2)
 
-        local botcTitleParent = vgui.Create("DFrame")
+        botcTitleParent = vgui.Create("DFrame")
         botcTitleParent:SetSize(width, height)
         botcTitleParent:SetPos(left, top)
         botcTitleParent:SetTitle("")
