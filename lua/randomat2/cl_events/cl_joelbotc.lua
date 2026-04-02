@@ -14,7 +14,9 @@ function EVENT:Begin()
 
     local client = LocalPlayer()
 
+    -------------------------------------------------------------------------------------
     -- Custom role colours
+    -------------------------------------------------------------------------------------
     original_COLOR_DETECTIVE = table.Copy(COLOR_DETECTIVE)
     original_COLOR_SPECIAL_INNOCENT = table.Copy(COLOR_SPECIAL_INNOCENT)
     original_COLOR_SPECIAL_TRAITOR = table.Copy(COLOR_SPECIAL_TRAITOR)
@@ -54,6 +56,10 @@ function EVENT:Begin()
 
     UpdateRoleColours()
 
+    -------------------------------------------------------------------------------------
+    -- Title image
+    -------------------------------------------------------------------------------------
+
     if IsValid(client) and not client:IsSpec() then
         isShowingTitle = true
         local scrW, scrH = ScrW(), ScrH()
@@ -71,7 +77,7 @@ function EVENT:Begin()
         botcTitleParent:SetPos(left, top)
         botcTitleParent:SetTitle("")
         botcTitleParent:SetDraggable(false)
-        botcTitleParent:ShowCloseButton(true)
+        botcTitleParent:ShowCloseButton(false)
         botcTitleParent:SetDeleteOnClose(true)
 
         -- Have to draw something apparently but then make it alpha 0
@@ -79,11 +85,19 @@ function EVENT:Begin()
             draw.RoundedBox(0,4,4,w-8,h-8,Color(0, 0, 0))
         end
 
-        -- Start Reactor UI background image
+        -- Joel BotC title image
         botcTitleImage = vgui.Create("DImage", botcTitleParent)
         botcTitleImage:SetSize(width, height)
         botcTitleImage:SetImage("vgui/ttt/joelbotc/joelbotctitle.png")
     end
+
+    timer.Simple(5, function()
+        if IsValid(botcTitleParent) then
+            botcTitleParent:Close()
+        end
+
+        isShowingTitle = false
+    end)
 
 end
 
@@ -99,6 +113,7 @@ function EVENT:End()
 
     if IsValid(botcTitleParent) then
         botcTitleParent:Close()
+        isShowingTitle = false
     end
 end
 
