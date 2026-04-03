@@ -64,6 +64,7 @@ function EVENT:Begin()
     local minionPlayers = {}
     local demonPlayers = {}
     local evilPlayers = {}
+    local seatingOrder = {}
 
     -- Custom role colours
     original_COLOR_DETECTIVE = table.Copy(COLOR_DETECTIVE)
@@ -369,6 +370,13 @@ function EVENT:Begin()
         end
     end
 
+    -- Create seating order table
+    seatingOrder = table.Copy(players)
+
+    for i, ply in ipairs(seatingOrder) do
+        PrintMessage(HUD_PRINTTALK, "Seat " .. i .. ": " .. ply:Nick())
+    end
+
     ----------------------------------------------------------------------------------------------------------------------------
     -- ROLE FUNCTIONS
     ----------------------------------------------------------------------------------------------------------------------------
@@ -426,7 +434,6 @@ function EVENT:Begin()
                 self:SmallNotify("Your starting information: Neither " .. knightInfo1:Nick() .. " nor " .. knightInfo2:Nick() .. " is the Demon", 5, ply)
             end
         end
-
     end
 
     -- oracle
