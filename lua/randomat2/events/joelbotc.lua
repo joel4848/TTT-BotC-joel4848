@@ -58,6 +58,12 @@ function EVENT:Begin()
     local enabledOutsiders = {}
     local enabledMinions = {}
     local enabledDemons = {}
+    local townsfolkPlayers = {}
+    local outsiderPlayers = {}
+    local goodPlayers = {}
+    local minionPlayers = {}
+    local demonPlayers = {}
+    local evilPlayers = {}
 
     -- Custom role colours
     original_COLOR_DETECTIVE = table.Copy(COLOR_DETECTIVE)
@@ -276,10 +282,13 @@ function EVENT:Begin()
         outsidersAmount = 1
         minionsAmount = 1
         demonsAmount = 1
-    elseif #players < 5 then
 
-    elseif #players > 15 then
-
+    --for testing
+    else
+        townsfolkAmount = 0
+        outsidersAmount = 0
+        minionsAmount = 4
+        demonsAmount = 0
     end
 
     -- Assign character types to players
@@ -340,6 +349,227 @@ function EVENT:Begin()
         Randomat:SetRole(ply, ply.botc_role)
     end
     SendFullStateUpdate()
+
+    -- Create tables of which players are each character type
+    for _, ply in player.Iterator() do
+        if IsValid(ply) and not ply:IsSpec() then
+            if ply.townsfolk then
+                table.insert(townsfolkPlayers, ply)
+                table.insert(goodPlayers, ply)
+            elseif ply.outsider then
+                table.insert(outsiderPlayers, ply)
+                table.insert(goodPlayers, ply)
+            elseif ply.minion then
+                table.insert(minionPlayers, ply)
+                table.insert(evilPlayers, ply)
+            elseif ply.demon then
+                table.insert(demonPlayers, ply)
+                table.insert(evilPlayers, ply)
+            end
+        end
+    end
+
+    ----------------------------------------------------------------------------------------------------------------------------
+    -- ROLE FUNCTIONS
+    ----------------------------------------------------------------------------------------------------------------------------
+
+    -- steward
+    local function StewardInfo()
+        local stewardInfo = nil
+        
+        for _, ply in ipairs(players) do
+            if ply:IsSteward() then
+                if ply.droisoned then
+                    repeat
+                        table.Shuffle(players)
+                        stewardInfo = players[1]
+                    until not (stewardInfo == ply)
+                else
+                    repeat
+                        table.Shuffle(goodPlayers)
+                        stewardInfo = goodPlayers[1]
+                    until not stewardInfo == ply
+                end
+
+                self:SmallNotify("Your starting information: " .. stewardInfo:Nick() .. " is good", 5, ply)
+            end
+        end
+    end
+
+    -- knight
+    local function KnightInfo()
+        local knightInfo1 = nil
+        local knightInfo2 = nil
+        local knightInfoPool = {}
+
+        for _, ply in ipairs(players) do
+            if ply:IsKnight() then
+                if ply.droisoned then
+                    repeat
+                        table.Shuffle(players)
+
+                        knightInfo1 = players[1]
+                        knightInfo1 = players[2]
+                    until not (knightInfo1 == ply or knightInfo2 == ply or knightInfo1 == knightInfo2)
+                else
+                    table.Add(knightInfoPool, goodPlayers)
+                    table.Add(knightInfoPool, minionPlayers)
+                    
+                    repeat
+                        table.Shuffle(knightInfoPool)
+
+                        knightInfo1 = knightInfoPool[1]
+                        knightInfo2 = knightInfoPool[2]
+                    until not (knightInfo1 == ply or knightInfo2 == ply or knightInfo1 == knightInfo2)
+                end
+
+                self:SmallNotify("Your starting information: Neither " .. knightInfo1:Nick() .. " nor " .. knightInfo2:Nick() .. " is the Demon", 5, ply)
+            end
+        end
+
+    end
+
+    -- oracle
+
+
+
+    -- chef
+
+
+
+    -- undertaker
+
+
+
+    -- noble
+
+
+
+    -- investigator
+
+
+
+    -- monk
+
+
+
+    -- washerwoman
+
+
+
+    -- nightwatchman
+
+
+
+    -- grandmother
+
+
+
+    -- seamstress
+
+
+
+    -- librarian
+
+
+
+    -- slayer
+
+
+
+    -- empath
+
+
+
+    -- soldier
+
+
+
+    -- ravenkeeper
+
+
+
+    -- fortuneteller
+
+
+
+    -- virgin
+
+
+
+    -- ogre
+
+
+
+    -- moonchild
+
+
+
+    -- saint
+
+
+
+    -- drunk
+
+
+
+    -- recluse
+
+
+
+    -- poisoner
+
+
+
+    -- scarletwoman
+
+
+
+    -- organgrinder
+
+
+
+    -- assassin
+
+
+
+    -- baron
+
+
+
+    -- pukka
+
+
+
+    -- imp
+
+
+
+    -- shabaloth
+
+
+
+    -- po
+
+
+
+    -- ojo
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 end
 
