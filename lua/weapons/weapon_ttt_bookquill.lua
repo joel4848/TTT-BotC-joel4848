@@ -1,7 +1,7 @@
 AddCSLuaFile()
 
 SWEP.Base = "weapon_tttbase"
-SWEP.PrintName         = "Book & Quill"
+SWEP.PrintName         = "Notebook"
 SWEP.Author            = "lolixtin/joel4848"
 SWEP.Instructions      = "Right-click to open/write. ESC to close and save."
 

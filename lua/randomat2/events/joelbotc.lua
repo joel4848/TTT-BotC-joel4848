@@ -383,13 +383,13 @@ function EVENT:Begin()
 
     timer.Simple(1, function()
         for _, ply in ipairs(players) do
+            -- Give notebook
             GiveBookQuill(ply)
-            print("Gave book & quill")
 
             -- Prepare seating text segments
             local seatingSegments = {}
                     
-            -- Header: SEATING:
+            -- "SEATING" title
             table.insert(seatingSegments, {
                 text = "SEATING:\n\n",
                 color = Color(100,0,200),
@@ -424,34 +424,19 @@ function EVENT:Begin()
             
             -- Give the signed book
             GiveSignedBook(ply, {
-    title  = "Your Information",
-    author = "The Storyteller",
-    pages  = {
-
-        { Segments = seatingSegments },
-
-        { Segments = {
-            { text = "RULES\n\n", bold = true, align = "center" },
-            { text = "Do not share.\n" },
-            { text = "Do not share.\n" },
-            { text = "Do not share.\n" },
-            { text = "Do not share.\n" },
-            { text = "Do not share.\n" },
-            { text = "Do not share.\n" },
-            { text = "Do not share.\n" },
-            { text = "Do not share.\n" },
-            { text = "Do not share.\n" },
-            { text = "Do not share.\n" },
-            { text = "Do not share.\n" },
-            { text = "Do not share.\n" },
-            { text = "Do not share.\n" },
-            { text = "Do not share.\n" },
-            { text = "Follow the seating order.\n" }
-        }}
-
-    }
-})
-            print("Gave signed book")
+                title  = "Your Information",
+                author = "The Storyteller",
+                pages  = {
+                
+                    { Segments = seatingSegments },
+                
+                    -- Next page etc.
+                    -- { Segments = {
+                    --     { text = "Test", bold = true, align = "center" }
+                    -- }}
+                
+                }
+            })
         end
     end)
 

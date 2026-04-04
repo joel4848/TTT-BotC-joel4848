@@ -4,7 +4,7 @@
 AddCSLuaFile()
 
 SWEP.Base = "weapon_tttbase"
-SWEP.PrintName      = "Signed Book"
+SWEP.PrintName      = "Info Book"
 SWEP.Author         = "lolixtin/joel4848"
 SWEP.Instructions   = "Right-click to read. ESC to close."
 
