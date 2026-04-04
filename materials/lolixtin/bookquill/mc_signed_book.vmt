@@ -1,0 +1,5 @@
+"VertexlitGeneric"
+{
+	"$basetexture" "lolixtin/bookquill/mc_signed_book"
+	"$surfaceprop" "Metal"
+}

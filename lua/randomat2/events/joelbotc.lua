@@ -378,6 +378,84 @@ function EVENT:Begin()
     end
 
     ----------------------------------------------------------------------------------------------------------------------------
+    -- GIVE STARTING BOOKS
+    ----------------------------------------------------------------------------------------------------------------------------
+
+    timer.Simple(1, function()
+        for _, ply in ipairs(players) do
+            GiveBookQuill(ply)
+            print("Gave book & quill")
+
+            -- Prepare seating text segments
+            local seatingSegments = {}
+                    
+            -- Header: SEATING:
+            table.insert(seatingSegments, {
+                text = "SEATING:\n\n",
+                color = Color(100,0,200),
+                bold = true,
+                italic = true,
+                underline = true,
+                align = "center"
+            })
+            
+            -- Add each player
+            for i, ply in ipairs(seatingOrder) do
+                if i < 10 then
+                    table.insert(seatingSegments, {
+                        text = "Seat " .. i .. ":   " .. ply:Nick() .. "\n",
+                        color = Color(0,0,0), -- black text
+                        bold = false,
+                        italic = false,
+                        underline = false,
+                        align = "left"
+                    })
+                else
+                    table.insert(seatingSegments, {
+                        text = "Seat " .. i .. ": " .. ply:Nick() .. "\n",
+                        color = Color(0,0,0), -- black text
+                        bold = false,
+                        italic = false,
+                        underline = false,
+                        align = "left"
+                    })
+                end
+            end
+            
+            -- Give the signed book
+            GiveSignedBook(ply, {
+    title  = "Your Information",
+    author = "The Storyteller",
+    pages  = {
+
+        { Segments = seatingSegments },
+
+        { Segments = {
+            { text = "RULES\n\n", bold = true, align = "center" },
+            { text = "Do not share.\n" },
+            { text = "Do not share.\n" },
+            { text = "Do not share.\n" },
+            { text = "Do not share.\n" },
+            { text = "Do not share.\n" },
+            { text = "Do not share.\n" },
+            { text = "Do not share.\n" },
+            { text = "Do not share.\n" },
+            { text = "Do not share.\n" },
+            { text = "Do not share.\n" },
+            { text = "Do not share.\n" },
+            { text = "Do not share.\n" },
+            { text = "Do not share.\n" },
+            { text = "Do not share.\n" },
+            { text = "Follow the seating order.\n" }
+        }}
+
+    }
+})
+            print("Gave signed book")
+        end
+    end)
+
+    ----------------------------------------------------------------------------------------------------------------------------
     -- ROLE FUNCTIONS
     ----------------------------------------------------------------------------------------------------------------------------
 
