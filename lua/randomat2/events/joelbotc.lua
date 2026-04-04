@@ -332,14 +332,26 @@ function EVENT:Begin()
     for i, ply in ipairs(players) do
         local entry = rolePool[i]
 
+        -- Reset flags because I forgot this like an idiot and got VERY confused during testing
+        ply.townsfolk = nil
+        ply.outsider = nil
+        ply.minion = nil
+        ply.demon = nil
+        ply.goodTeam = nil
+        ply.evilTeam = nil
+
         if entry.alignment == "townsfolk" then
             ply.townsfolk = true
+            ply.goodTeam = true
         elseif entry.alignment == "outsider" then
             ply.outsider = true
+            ply.goodTeam = true
         elseif entry.alignment == "minion" then
             ply.minion = true
+            ply.evilTeam = true
         elseif entry.alignment == "demon" then
             ply.demon = true
+            ply.evilTeam = true
         end
 
         ply.botc_role = entry.role
@@ -356,15 +368,17 @@ function EVENT:Begin()
         if IsValid(ply) and not ply:IsSpec() then
             if ply.townsfolk then
                 table.insert(townsfolkPlayers, ply)
-                table.insert(goodPlayers, ply)
             elseif ply.outsider then
                 table.insert(outsiderPlayers, ply)
-                table.insert(goodPlayers, ply)
             elseif ply.minion then
                 table.insert(minionPlayers, ply)
-                table.insert(evilPlayers, ply)
             elseif ply.demon then
                 table.insert(demonPlayers, ply)
+            end
+
+            if ply.goodTeam then
+                table.insert(goodPlayers, ply)
+            elseif ply.evilTeam then
                 table.insert(evilPlayers, ply)
             end
         end
@@ -431,9 +445,9 @@ function EVENT:Begin()
                     { Segments = seatingSegments },
                 
                     -- Next page etc.
-                    -- { Segments = {
-                    --     { text = "Test", bold = true, align = "center" }
-                    -- }}
+                    { Segments = {
+                        { text = "Test", bold = true, align = "center" }
+                    }}
                 
                 }
             })
@@ -500,24 +514,173 @@ function EVENT:Begin()
     end
 
     -- oracle
+    local function OracleInfo()
+        for _, ply in ipairs (players) do
+            if ply:IsOracle() then
+                local evilDead = 0
 
+                -- Helper function to determine if a player registers as evil
+                local function RegistersEvil(ply)
+                    if not IsValid(ply) then return false end
+                    return ply.evilTeam or ply.botc_role == ROLE_RECLUSEJBC
+                end
 
+                for _, ply in ipairs (players) do
+                    if RegistersEvil(ply) and not ply:Alive() then
+                        evilDead = evilDead + 1
+                    end
+                end
+
+                self:SmallNotify(
+                    "Your starting information: " .. evilDead .. " dead players are evil",
+                    5,
+                    ply
+                )
+            end
+        end
+    end
 
     -- chef
+    local function ChefInfo()
+        for _, ply in ipairs(players) do
+            if ply:IsChef() then
+                local evilPairs = 0
+                local seatCount = #seatingOrder
 
+                -- Helper function to determine if a player registers as evil
+                local function RegistersEvil(ply)
+                    if not IsValid(ply) then return false end
+                    return ply.evilTeam or ply:IsRecluse()
+                end
 
+                for i = 1, seatCount do
+                    local current = seatingOrder[i]
+                    local nextSeat = seatingOrder[i % seatCount + 1] -- wraps last seat to 1
+
+                    if RegistersEvil(current) and RegistersEvil(nextSeat) then
+                        evilPairs = evilPairs + 1
+                    end
+                end
+
+                if ply.droisoned then
+                    local recluseAmount = 0
+
+                    for _, ply in ipairs(players) do
+                        if ply:IsRecluse() then
+                            recluseAmount = recluseAmount + 1
+                        end
+                    end
+
+                    evilPairs = math.random(0, #evilPlayers - 1 + recluseAmount)
+                end
+
+                self:SmallNotify(
+                    "Your starting information: There are " .. evilPairs .. " pairs of evil players sat next to each other",
+                    5,
+                    ply
+                )
+            end
+        end
+    end
 
     -- undertaker
 
 
 
     -- noble
+    local function NobleInfo()
+        for _, ply in ipairs(players) do
+            if ply:IsNoble() then
+                local nobleInfo1 = nil
+                local nobleInfo2 = nil
+                local nobleInfo3 = nil
+                local nobleInfoPool = {}
 
+                local noblePick1 = nil
+                local noblePick2 = nil
+                local noblePick3 = nil
+                local nobleGoodPool = table.Copy(goodPlayers)
+                local nobleEvilPool = {}
 
+                table.Shuffle(nobleGoodPool)
+
+                noblePick1 = nobleGoodPool[1]
+                noblePick2 = nobleGoodPool[2]
+
+                if (noblePick1:IsRecluse() or noblePick2:IsRecluse()) and math.random(0, 1) == 1 then
+                    noblepick3 = nobleGoodPool[3]
+                else
+                    if math.random(1, 10) == 10 then
+                        nobleEvilPool = table.Copy(demonPlayers)
+                    else
+                        nobleEvilPool = table.Copy(minionPlayers)
+                    end
+
+                    table.Shuffle(nobleEvilPool)
+                    noblePick3 = nobleEvilPool[1]
+                end
+
+                table.insert(nobleInfoPool, noblePick1)
+                table.insert(nobleInfoPool, noblePick2)
+                table.insert(nobleInfoPool, noblePick3)
+
+                table.Shuffle(nobleInfoPool)
+
+                nobleInfo1 = nobleInfoPool[1]
+                nobleInfo2 = nobleInfoPool[2]
+                nobleInfo3 = nobleInfoPool[3]
+
+                self:SmallNotify(
+                    "Your starting information: One of " .. nobleInfo1:Nick() .. ", " .. nobleInfo2:Nick() .. " and " .. nobleInfo3:Nick() .. " is evil",
+                    3,
+                    ply
+                )
+            end
+        end
+    end
 
     -- investigator
+    local function InvestigatorInfo()
+        for _, ply in ipairs(players) do
+            if ply:IsInvestigator() then
+                local investigatorInfo1 = nil
+                local investigatorInfo2 = nil
+                local investigatorInfoPool = {}
+                local investigatorMinion = nil
+                local investigatorOther = nil
+                local investigatorMinionPool = table.Copy(minionPlayers)
+                local investigatorOtherPool = table.Copy(players)
+                local investigatorMinionRole = nil
 
+                table.Shuffle(investigatorMinionPool)
+                investigatorMinion = investigatorMinionPool[1]
+                investigatorMinionRole = investigatorMinion:GetRoleString()
 
+                repeat
+                    table.Shuffle(investigatorOtherPool)
+
+                    investigatorOther = investigatorOtherPool[1]
+                until not (investigatorOther == ply or investigatorMinion == investigatorOther)
+
+                table.insert(investigatorInfoPool, investigatorMinion)
+                table.insert(investigatorInfoPool, investigatorOther)
+
+                table.Shuffle(investigatorInfoPool)
+                investigatorInfo1 = investigatorInfoPool[1]
+                investigatorInfo2 = investigatorInfoPool[2]
+
+                self:SmallNotify(
+                    "Your starting information: Either " .. investigatorInfo1:Nick() .. " or " .. investigatorInfo2:Nick() .. " is the " .. investigatorMinionRole,
+                    3,
+                    ply
+                )
+            end
+        end
+    end
+
+    timer.Create("testInvestigator", 6, 0, function()
+        InvestigatorInfo()
+    end)
 
     -- monk
 

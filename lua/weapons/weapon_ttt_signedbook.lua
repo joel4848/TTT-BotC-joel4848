@@ -379,8 +379,8 @@ if CLIENT then
             scroll.Paint = function(self, w, h)
                 surface.SetDrawColor(Color(255, 250, 238))
                 surface.DrawRect(0, 0, w, h)
-                surface.SetDrawColor(Color(0, 0, 0))
-                surface.DrawOutlinedRect(0, 0, w, h, 2)
+                -- surface.SetDrawColor(Color(0, 0, 0))
+                -- surface.DrawOutlinedRect(0, 0, w, h, 2)
             end
 
             local contentWidth = math.max(TAW - 24, 32)
