@@ -662,6 +662,18 @@ function EVENT:Begin()
                     investigatorOther = investigatorOtherPool[1]
                 until not (investigatorOther == ply or investigatorMinion == investigatorOther)
 
+                for _, p in ipairs(players) do
+                    if p:IsRecluse() then
+                        print("There is a recluse")
+                        if math.random(1, 3) == 1 then
+                            investigatorMinion = p
+                            local investigatorMinionRolePool = table.Copy(enabledMinions)
+                            table.Shuffle(investigatorMinionRolePool)
+                            investigatorMinionRole = ROLE_STRINGS[investigatorMinionRolePool[1]]
+                        end
+                    end
+                end
+
                 table.insert(investigatorInfoPool, investigatorMinion)
                 table.insert(investigatorInfoPool, investigatorOther)
 
@@ -678,16 +690,53 @@ function EVENT:Begin()
         end
     end
 
-    timer.Create("testInvestigator", 6, 0, function()
-        InvestigatorInfo()
-    end)
-
     -- monk
 
 
 
     -- washerwoman
+    local function WasherwomanInfo()
+        for _, ply in ipairs(players) do
+            if ply:IsWasherwoman() then
+                local washerwomanInfo1 = nil
+                local washerwomanInfo2 = nil
+                local washerwomanInfoPool = {}
+                local washerwomanTownsfolk = nil
+                local washerwomanOther = nil
+                local washerwomanTownsfolkPool = table.Copy(townsfolkPlayers)
+                local washerwomanOtherPool = table.Copy(players)
+                local washerwomanTownsfolkRole = nil
 
+                repeat
+                    table.Shuffle(washerwomanTownsfolkPool)
+                    washerwomanTownsfolk = washerwomanTownsfolkPool[1]
+                until not (washerwomanTownsfolk == ply)
+                washerwomanTownsfolkRole = washerwomanTownsfolk:GetRoleString()
+
+                repeat
+                    table.Shuffle(washerwomanOtherPool)
+                    washerwomanOther = washerwomanOtherPool[1]
+                until not (washerwomanOther == ply or washerwomanTownsfolk == washerwomanOther)
+
+                table.insert(washerwomanInfoPool, washerwomanTownsfolk)
+                table.insert(washerwomanInfoPool, washerwomanOther)
+
+                table.Shuffle(washerwomanInfoPool)
+                washerwomanInfo1 = washerwomanInfoPool[1]
+                washerwomanInfo2 = washerwomanInfoPool[2]
+
+                self:SmallNotify(
+                    "Your starting information: Either " .. washerwomanInfo1:Nick() .. " or " .. washerwomanInfo2:Nick() .. " is the " .. washerwomanTownsfolkRole,
+                    3,
+                    ply
+                )
+            end
+        end
+    end
+
+    timer.Create("testWasherwoman", 6, 0, function()
+        InvestigatorInfo()
+    end)
 
 
     -- nightwatchman
