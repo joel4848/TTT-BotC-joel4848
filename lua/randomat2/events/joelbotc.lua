@@ -632,7 +632,7 @@ function EVENT:Begin()
 
                 self:SmallNotify(
                     "Your starting information: One of " .. nobleInfo1:Nick() .. ", " .. nobleInfo2:Nick() .. " and " .. nobleInfo3:Nick() .. " is evil",
-                    3,
+                    5,
                     ply
                 )
             end
@@ -683,7 +683,7 @@ function EVENT:Begin()
 
                 self:SmallNotify(
                     "Your starting information: Either " .. investigatorInfo1:Nick() .. " or " .. investigatorInfo2:Nick() .. " is the " .. investigatorMinionRole,
-                    3,
+                    5,
                     ply
                 )
             end
@@ -727,17 +727,12 @@ function EVENT:Begin()
 
                 self:SmallNotify(
                     "Your starting information: Either " .. washerwomanInfo1:Nick() .. " or " .. washerwomanInfo2:Nick() .. " is the " .. washerwomanTownsfolkRole,
-                    3,
+                    5,
                     ply
                 )
             end
         end
     end
-
-    timer.Create("testWasherwoman", 6, 0, function()
-        InvestigatorInfo()
-    end)
-
 
     -- nightwatchman
 
@@ -752,7 +747,56 @@ function EVENT:Begin()
 
 
     -- librarian
+    local function LibrarianInfo()
+        for _, ply in ipairs(players) do
+            if ply:IsLibrarian() then
+                local librarianInfo1 = nil
+                local librarianInfo2 = nil
+                local librarianInfoPool = {}
+                local librarianOutsider = nil
+                local librarianOther = nil
+                local librarianOutsiderPool = table.Copy(outsiderPlayers)
+                local librarianOtherPool = table.Copy(players)
+                local librarianOutsiderRole = nil
 
+                if #librarianOutsiderPool == 0 then
+                    self:SmallNotify(
+                        "Your starting information: There are no Outsiders",
+                        5,
+                        ply
+                    )
+                else
+                    repeat
+                        table.Shuffle(librarianOutsiderPool)
+                        librarianOutsider = librarianOutsiderPool[1]
+                    until not (librarianOutsider == ply)
+                    librarianOutsiderRole = librarianOutsider:GetRoleString()
+
+                    repeat
+                        table.Shuffle(librarianOtherPool)
+                        librarianOther = librarianOtherPool[1]
+                    until not (librarianOther == ply or librarianOutsider == librarianOther)
+
+                    table.insert(librarianInfoPool, librarianOutsider)
+                    table.insert(librarianInfoPool, librarianOther)
+
+                    table.Shuffle(librarianInfoPool)
+                    librarianInfo1 = librarianInfoPool[1]
+                    librarianInfo2 = librarianInfoPool[2]
+
+                    self:SmallNotify(
+                        "Your starting information: Either " .. librarianInfo1:Nick() .. " or " .. librarianInfo2:Nick() .. " is the " .. librarianOutsiderRole,
+                        5,
+                        ply
+                    )
+                end
+            end
+        end
+    end
+
+    timer.Create("testLibrarian", 6, 0, function()
+        LibrarianInfo()
+    end)
 
 
     -- slayer
