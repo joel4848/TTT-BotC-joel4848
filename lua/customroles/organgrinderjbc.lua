@@ -2,8 +2,8 @@ local ROLE = {}
 
 ROLE.nameraw = "organgrinderjbc"
 ROLE.name = "Organ Grinder"
-ROLE.nameplural = "Organs"
-ROLE.nameext = "the Organ"
+ROLE.nameplural = "Organ Grinders"
+ROLE.nameext = "the Organ Grinder"
 ROLE.nameshort = "jbcorg"
 
 ROLE.desc = [[]]

@@ -2,8 +2,8 @@ local ROLE = {}
 
 ROLE.nameraw = "fortunertellerjbc"
 ROLE.name = "Fortune Teller"
-ROLE.nameplural = "Fortunes"
-ROLE.nameext = "the Fortune"
+ROLE.nameplural = "Fortune Tellers"
+ROLE.nameext = "the Fortune Teller"
 ROLE.nameshort = "jbcfrt"
 
 ROLE.desc = [[]]

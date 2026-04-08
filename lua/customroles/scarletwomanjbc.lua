@@ -2,8 +2,8 @@ local ROLE = {}
 
 ROLE.nameraw = "scarletwomanjbc"
 ROLE.name = "Scarlet Woman"
-ROLE.nameplural = "Scarlets"
-ROLE.nameext = "the Scarlet"
+ROLE.nameplural = "Scarlet Women"
+ROLE.nameext = "the Scarlet Woman"
 ROLE.nameshort = "jbcswm"
 
 ROLE.desc = [[]]
