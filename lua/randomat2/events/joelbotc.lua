@@ -327,40 +327,92 @@ function EVENT:Begin()
     AddRoles(minionPool,    minionsAmount,   "minion")
     AddRoles(demonPool,     demonsAmount,    "demon")
 
-    -- Create Demon's bluff pool (not-in-play good roles)
+    -- Create Demon's bluff pool (not-in-play good roles) -------------------------------------------------------
     local demonBluffsTownsfolkPool = {}
     local demonBluffsOutsiderPool = {}
 
     table.Add(demonBluffsTownsfolkPool, townsfolkPool)
     table.Add(demonBluffsOutsiderPool, outsiderPool)
 
+    -- Remove any roles we don't want to be Demon bluffs here
     table.RemoveByValue(demonBluffsOutsiderPool, ROLE_RECLUSEJBC)
     table.RemoveByValue(demonBluffsOutsiderPool, ROLE_DRUNKJBC)
     -- table.RemoveByValue(demonBluffsPool, ROLE_NIGHTWATCHMANJBC)
 
-    --~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    --  ADD FUNCTION TO SELECT DEMON BLUFFS (below is in just so roles don't break in the interim)
-    --~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    -- demonbluffs = table.Copy(demonBluffsPool)
-
+    -- Pick which roles should be bluffs - two Townsfolk, one Outsider
     table.Shuffle(demonBluffsTownsfolkPool)
     table.insert(demonBluffs, 1, demonBluffsTownsfolkPool[1])
     table.insert(demonBluffs, 2, demonBluffsTownsfolkPool[2])
     table.Shuffle(demonBluffsOutsiderPool)
     table.insert(demonBluffs, 3, demonBluffsOutsiderPool[1])
 
+    -- Try and make one of either the Empath or the Fortune Teller (or any ongoing info role added in the future) a bluff
+    local empathAvailableAsBluff = nil
+    local fortunetellerAvailableAsBluff = nil
+    local empathOrFTAreBluff = nil
+
     for _, role in ipairs(demonBluffsTownsfolkPool) do
-        if role == ROLE_EMPATHJBC and demonBluffs[2] ~= ROLE_EMPATHJBC then
-            demonBluffs[1] = ROLE_EMPATHJBC
+        if role == ROLE_EMPATHJBC then
+            empathAvailableAsBluff = true
         end
-        if role == ROLE_FORTUNETELLERJBC and demonBluffs[1] ~= ROLE_FORTUNETELLERJBC then
-            demonBluffs[2] = ROLE_FORTUNETELLERJBC
+        if role == ROLE_FORTUNETELLERJBC  then
+            fortunetellerAvailableAsBluff = true
         end
     end
 
-    for key, value in ipairs(demonBluffs) do
-        print(key, ROLE_STRINGS[value])
-    end 
+    -- print("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~")
+    -- for key, value in ipairs(demonBluffsTownsfolkPool) do
+    --     print(key, ROLE_STRINGS[value])
+    -- end
+    -- print("Empath avaialable as bluff = ".. tostring(empathAvailableAsBluff))
+    -- print("FT avaialable as bluff = ".. tostring(fortunetellerAvailableAsBluff))
+
+    for _, role in ipairs(demonBluffs) do
+        if role == ROLE_EMPATHJBC or role == ROLE_FORTUNETELLERJBC then
+            empathOrFTAreBluff = true
+        end
+    end
+
+    -- print("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~")
+    -- for key, value in ipairs(demonBluffs) do
+    --     print(key, ROLE_STRINGS[value])
+    -- end
+    -- print("Empath or FT are bluff: " .. tostring(empathOrFTAreBluff))
+
+    if not empathOrFTAreBluff then
+        local empathFTPool = {}
+        table.insert(empathFTPool, ROLE_EMPATHJBC)
+        table.insert(empathFTPool, ROLE_FORTUNETELLERJBC)
+
+        -- print("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~")
+        -- print("Empath/FT pool pre-remove:")
+        -- for key, value in ipairs(empathFTPool) do
+        --     print(key, ROLE_STRINGS[value])
+        -- end
+
+        for _, role in ipairs(rolePool) do
+            if role == ROLE_EMPATHJBC or role == ROLE_FORTUNETELLERJBC then
+                table.RemoveByValue(empathFTPool, role)
+            end
+        end
+
+        -- print("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~")
+        -- print("Empath/FT pool post-remove:")
+        -- for key, value in ipairs(empathFTPool) do
+        --     print(key, ROLE_STRINGS[value])
+        -- end
+        -- print("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~")
+
+        if #empathFTPool > 0 then
+            -- table.Shuffle(empathFTPool)
+            -- Not using table.Shuffle because it didn't actually seem to shuffle
+            demonBluffs[1] = empathFTPool[math.random(1,2)]
+        end
+    end
+
+    -- for key, value in ipairs(demonBluffs) do
+    --     print(key, ROLE_STRINGS[value])
+    -- end
 
     -- More shufflage
     table.Shuffle(rolePool)
@@ -418,6 +470,19 @@ function EVENT:Begin()
             elseif ply.evilTeam then
                 table.insert(evilPlayers, ply)
             end
+        end
+    end
+
+    -- Tell the Demon their bluffs
+    for _, ply in ipairs(players) do
+        if ply.demon then
+            timer.Simple(4, function()
+                self:SmallNotify(
+                    "Your bluffs are " .. ROLE_STRINGS[demonBluffs[1]] .. ", " .. ROLE_STRINGS[demonBluffs[2]] .. " and " .. ROLE_STRINGS[demonBluffs[3]],
+                    5,
+                    ply
+                )
+            end)
         end
     end
 
