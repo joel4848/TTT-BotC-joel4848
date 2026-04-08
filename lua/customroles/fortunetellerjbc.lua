@@ -1,6 +1,6 @@
 local ROLE = {}
 
-ROLE.nameraw = "fortunertellerjbc"
+ROLE.nameraw = "fortunetellerjbc"
 ROLE.name = "Fortune Teller"
 ROLE.nameplural = "Fortune Tellers"
 ROLE.nameext = "the Fortune Teller"
