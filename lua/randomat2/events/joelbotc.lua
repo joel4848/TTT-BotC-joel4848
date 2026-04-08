@@ -23,7 +23,7 @@ local slayerEnabled = CreateConVar("randomat_joelbotc_slayer_enabled", 1, FCVAR_
 local empathEnabled = CreateConVar("randomat_joelbotc_empath_enabled", 1, FCVAR_NONE, "Whether the Empath is on the script", 0, 1):GetBool()
 local soldierEnabled = CreateConVar("randomat_joelbotc_soldier_enabled", 1, FCVAR_NONE, "Whether the Soldier is on the script", 0, 1):GetBool()
 local ravenkeeperEnabled = CreateConVar("randomat_joelbotc_ravenkeeper_enabled", 1, FCVAR_NONE, "Whether the Ravenkeeper is on the script", 0, 1):GetBool()
-local fortunetellerEnabled = CreateConVar("randomat_joelbotc_fortuneteller_enabled", 1, FCVAR_NONE, "Whether the Fortune is on the script", 0, 1):GetBool()
+local fortunetellerEnabled = CreateConVar("randomat_joelbotc_fortuneteller_enabled", 1, FCVAR_NONE, "Whether the Fortune Teller is on the script", 0, 1):GetBool()
 local virginEnabled = CreateConVar("randomat_joelbotc_virgin_enabled", 1, FCVAR_NONE, "Whether the Virgin is on the script", 0, 1):GetBool()
 local ogreEnabled = CreateConVar("randomat_joelbotc_ogre_enabled", 1, FCVAR_NONE, "Whether the Ogre is on the script", 0, 1):GetBool()
 local moonchildEnabled = CreateConVar("randomat_joelbotc_moonchild_enabled", 1, FCVAR_NONE, "Whether the Moonchild is on the script", 0, 1):GetBool()
@@ -31,8 +31,8 @@ local saintEnabled = CreateConVar("randomat_joelbotc_saint_enabled", 1, FCVAR_NO
 local drunkEnabled = CreateConVar("randomat_joelbotc_drunk_enabled", 1, FCVAR_NONE, "Whether the Drunk is on the script", 0, 1):GetBool()
 local recluseEnabled = CreateConVar("randomat_joelbotc_recluse_enabled", 1, FCVAR_NONE, "Whether the Recluse is on the script", 0, 1):GetBool()
 local poisonerEnabled = CreateConVar("randomat_joelbotc_poisoner_enabled", 1, FCVAR_NONE, "Whether the Poisoner is on the script", 0, 1):GetBool()
-local scarletwomanEnabled = CreateConVar("randomat_joelbotc_scarletwoman_enabled", 1, FCVAR_NONE, "Whether the Scarlet is on the script", 0, 1):GetBool()
-local organgrinderEnabled = CreateConVar("randomat_joelbotc_organgrinder_enabled", 1, FCVAR_NONE, "Whether the Organ is on the script", 0, 1):GetBool()
+local scarletwomanEnabled = CreateConVar("randomat_joelbotc_scarletwoman_enabled", 1, FCVAR_NONE, "Whether the Scarlet Woman is on the script", 0, 1):GetBool()
+local organgrinderEnabled = CreateConVar("randomat_joelbotc_organgrinder_enabled", 1, FCVAR_NONE, "Whether the Organ Grinder is on the script", 0, 1):GetBool()
 local assassinEnabled = CreateConVar("randomat_joelbotc_assassin_enabled", 1, FCVAR_NONE, "Whether the Assassin is on the script", 0, 1):GetBool()
 local baronEnabled = CreateConVar("randomat_joelbotc_baron_enabled", 1, FCVAR_NONE, "Whether the Baron is on the script", 0, 1):GetBool()
 local pukkaEnabled = CreateConVar("randomat_joelbotc_pukka_enabled", 1, FCVAR_NONE, "Whether the Pukka is on the script", 0, 1):GetBool()
@@ -65,6 +65,8 @@ function EVENT:Begin()
     local demonPlayers = {}
     local evilPlayers = {}
     local seatingOrder = {}
+    local demonBluffsPool = {}
+    local demonBluffs = {}
 
     -- Custom role colours
     original_COLOR_DETECTIVE = table.Copy(COLOR_DETECTIVE)
@@ -324,6 +326,41 @@ function EVENT:Begin()
     AddRoles(outsiderPool,  outsidersAmount, "outsider")
     AddRoles(minionPool,    minionsAmount,   "minion")
     AddRoles(demonPool,     demonsAmount,    "demon")
+
+    -- Create Demon's bluff pool (not-in-play good roles)
+    local demonBluffsTownsfolkPool = {}
+    local demonBluffsOutsiderPool = {}
+
+    table.Add(demonBluffsTownsfolkPool, townsfolkPool)
+    table.Add(demonBluffsOutsiderPool, outsiderPool)
+
+    table.RemoveByValue(demonBluffsOutsiderPool, ROLE_RECLUSEJBC)
+    table.RemoveByValue(demonBluffsOutsiderPool, ROLE_DRUNKJBC)
+    -- table.RemoveByValue(demonBluffsPool, ROLE_NIGHTWATCHMANJBC)
+
+    --~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    --  ADD FUNCTION TO SELECT DEMON BLUFFS (below is in just so roles don't break in the interim)
+    --~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    -- demonbluffs = table.Copy(demonBluffsPool)
+
+    table.Shuffle(demonBluffsTownsfolkPool)
+    table.insert(demonBluffs, 1, demonBluffsTownsfolkPool[1])
+    table.insert(demonBluffs, 2, demonBluffsTownsfolkPool[2])
+    table.Shuffle(demonBluffsOutsiderPool)
+    table.insert(demonBluffs, 3, demonBluffsOutsiderPool[1])
+
+    for _, role in ipairs(demonBluffsTownsfolkPool) do
+        if role == ROLE_EMPATHJBC and demonBluffs[2] ~= ROLE_EMPATHJBC then
+            demonBluffs[1] = ROLE_EMPATHJBC
+        end
+        if role == ROLE_FORTUNETELLERJBC and demonBluffs[1] ~= ROLE_FORTUNETELLERJBC then
+            demonBluffs[2] = ROLE_FORTUNETELLERJBC
+        end
+    end
+
+    for key, value in ipairs(demonBluffs) do
+        print(key, ROLE_STRINGS[value])
+    end 
 
     -- More shufflage
     table.Shuffle(rolePool)
@@ -739,8 +776,66 @@ function EVENT:Begin()
 
 
     -- grandmother
+    local function GrandmotherInfo()
+        for _, ply in ipairs(players) do
+            if ply:IsGrandmother() then
+                print("Reached 1")
+                local grandchild = nil 
+                local grandchildRole = nil 
+                local grandmotherPool = {}
+                print("Reached 2")
+                
+                if math.random(0,4) == 4 then
+                    grandmotherPool = outsiderPlayers
+                    print("Reached 3.5")
+                else
+                    grandmotherPool = townsfolkPlayers
+                    print("Reached 3.5")
+                end
 
+                repeat
+                    table.Shuffle(grandmotherPool)
+                    grandchild = grandmotherPool[1]
+                    print("Reached 4")
+                until not (grandchild == ply)
+                print("Reached 5")
+                grandchildRole = grandchild:GetRoleString()
+                print("Reached 6")
 
+                if ply.droisoned then
+                    local droisonedGrandmotherRolePool = {}
+
+                    if math.random(0,4) == 4 then
+                        droisonedGrandmotherPool = demonPlayers
+                        droisonedGrandmotherRolePool = table.Copy(demonBluffs)
+
+                        table.Shuffle(droisonedGrandmotherPool)
+                        grandchild = droisonedGrandmotherPool[1]
+                        table.Shuffle(droisonedGrandmotherRolePool)
+                        grandchildRole = ROLE_STRINGS[droisonedGrandmotherRolePool[1]]
+                    else
+                        droisonedGrandmotherPool = minionPlayers
+                        droisonedGrandmotherRolePool = table.Copy(demonBluffsPool)
+
+                        table.Shuffle(droisonedGrandmotherPool)
+                        grandchild = droisonedGrandmotherPool[1]
+                        table.Shuffle(droisonedGrandmotherRolePool)
+                        grandchildRole = ROLE_STRINGS[droisonedGrandmotherRolePool[1]]
+                    end
+                end
+
+                self:SmallNotify(
+                    "Your starting information: Your grandchild is " .. grandchild:Nick() .. ", the " .. grandchildRole,
+                    5,
+                    ply
+                )
+            end
+        end
+    end
+
+    timer.Create("testGrandmother", 6, 0, function()
+        GrandmotherInfo()
+    end)
 
     -- seamstress
 
@@ -902,9 +997,7 @@ function EVENT:Begin()
         end
     end
 
-    timer.Create("testEmpath", 6, 0, function()
-        EmpathInfo()
-    end)
+    
 
     -- soldier
 
