@@ -794,18 +794,117 @@ function EVENT:Begin()
         end
     end
 
-    timer.Create("testLibrarian", 6, 0, function()
-        LibrarianInfo()
-    end)
-
-
     -- slayer
 
 
 
     -- empath
+    local function EmpathInfo()
+        for _, ply in ipairs(players) do
+            if ply:IsEmpath() and ply:Alive() then
+                local previousEmpathInfo = empathInfo or nil
+                local empathInfo = 0 
+                local seatCount = #seatingOrder
+                local previousDeadNeighbours = deadNeighbours or nil
+                local deadNeighbours = 0
 
+                -- Helper function to determine if a player registers as evil
+                local function RegistersEvil(ply)
+                    if not IsValid(ply) then return false end
+                    return ply.evilTeam or ply:IsRecluse()
+                end
 
+                -- Find the Empath's seat
+                local seatIndex = nil
+                for i, p in ipairs(seatingOrder) do
+                    if p == ply then
+                        seatIndex = i
+                        break
+                    end
+                end
+
+                -- Find leftwards living neighbour
+                local leftIndex = seatIndex
+                repeat
+                    leftIndex = (leftIndex - 2) % seatCount + 1
+                    if not seatingOrder[leftIndex]:Alive() then
+                        deadNeighbours = deadNeighbours + 1
+                    end
+                until seatingOrder[leftIndex]:Alive()
+
+                local leftNeighbour = seatingOrder[leftIndex]
+
+                -- Find rightwards living neighbour
+                local rightIndex = seatIndex
+                repeat
+                    rightIndex = rightIndex % seatCount + 1
+                    if not seatingOrder[rightIndex]:Alive() then
+                        deadNeighbours = deadNeighbours + 1
+                    end
+                until seatingOrder[rightIndex]:Alive()
+
+                local rightNeighbour = seatingOrder[rightIndex]
+
+                -- Check if neighbours register as evil
+                if RegistersEvil(leftNeighbour) then
+                    empathInfo = empathInfo + 1
+                end
+
+                if RegistersEvil(rightNeighbour) then
+                    empathInfo = empathInfo + 1
+                end
+
+                -- Droisoned bollocks
+                if ply.droisoned then
+                    if not previousEmpathInfo then previousEmpathInfo = math.random (0,2) end
+                    if previousDeadNeighbours == deadNeighbours then
+                        empathInfo = previousEmpathInfo
+                    else
+                        if empathInfo == 0 then
+                            empathInfo = 1
+                        elseif empathInfo == 1 then
+                            if previousEmpathInfo == 0 or previousEmpathInfo == 1 then
+                                empathInfo = 0
+                            elseif previousEmpathInfo == 2 then
+                                empathInfo = 1
+                            end
+                        elseif empathInfo == 2 then
+                            if previousEmpathInfo == 0 or previousEmpathInfo == 1 then
+                                empathInfo = 0
+                            elseif previousEmpathInfo == 2 then
+                                empathInfo = 1
+                            end
+                        end
+                    end
+                end
+
+                -- Actually give the information
+                if empathInfo == 0 then
+                    self:SmallNotify(
+                            "Your nightly information: None of your alive neighbours are evil",
+                            5,
+                            ply
+                        )
+                elseif empathInfo == 1 then
+                    self:SmallNotify(
+                            "Your nightly information: One of your alive neighbours is evil",
+                            5,
+                            ply
+                        )
+                elseif empathInfo == 2 then
+                    self:SmallNotify(
+                            "Your nightly information: Both of your alive neighbours are evil",
+                            5,
+                            ply
+                        )
+                end
+            end
+        end
+    end
+
+    timer.Create("testEmpath", 6, 0, function()
+        EmpathInfo()
+    end)
 
     -- soldier
 
