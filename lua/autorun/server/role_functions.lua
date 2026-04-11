@@ -1,0 +1,579 @@
+JoelBotC = JoelBotC or {}
+
+----------------------------------------------------------------------------------------------------------------------------
+-- ROLE FUNCTIONS
+----------------------------------------------------------------------------------------------------------------------------
+
+-- steward
+function JoelBotC:StewardInfo()
+    local stewardInfo = nil
+    
+    for _, ply in ipairs(players) do
+        if ply:IsSteward() then
+            if ply.droisoned then
+                repeat
+                    table.Shuffle(players)
+                    stewardInfo = players[1]
+                until not (stewardInfo == ply)
+            else
+                repeat
+                    table.Shuffle(goodPlayers)
+                    stewardInfo = goodPlayers[1]
+                until not stewardInfo == ply
+            end
+
+            self:SmallNotify("Your starting information: " .. stewardInfo:Nick() .. " is good", 5, ply)
+        end
+    end
+end
+
+-- knight
+function JoelBotC:KnightInfo()
+    local knightInfo1 = nil
+    local knightInfo2 = nil
+    local knightInfoPool = {}
+
+    for _, ply in ipairs(players) do
+        if ply:IsKnight() then
+            if ply.droisoned then
+                repeat
+                    table.Shuffle(players)
+
+                    knightInfo1 = players[1]
+                    knightInfo1 = players[2]
+                until not (knightInfo1 == ply or knightInfo2 == ply or knightInfo1 == knightInfo2)
+            else
+                table.Add(knightInfoPool, goodPlayers)
+                table.Add(knightInfoPool, minionPlayers)
+                
+                repeat
+                    table.Shuffle(knightInfoPool)
+
+                    knightInfo1 = knightInfoPool[1]
+                    knightInfo2 = knightInfoPool[2]
+                until not (knightInfo1 == ply or knightInfo2 == ply or knightInfo1 == knightInfo2)
+            end
+
+            self:SmallNotify("Your starting information: Neither " .. knightInfo1:Nick() .. " nor " .. knightInfo2:Nick() .. " is the Demon", 5, ply)
+        end
+    end
+end
+
+-- oracle
+function JoelBotC:OracleInfo()
+    for _, ply in ipairs (players) do
+        if ply:IsOracle() then
+            local evilDead = 0
+
+            -- Helper function to determine if a player registers as evil
+            local function RegistersEvil(ply)
+                if not IsValid(ply) then return false end
+                return ply.evilTeam or ply.botc_role == ROLE_RECLUSEJBC
+            end
+
+            for _, ply in ipairs (players) do
+                if RegistersEvil(ply) and not ply:Alive() then
+                    evilDead = evilDead + 1
+                end
+            end
+
+            self:SmallNotify(
+                "Your starting information: " .. evilDead .. " dead players are evil",
+                5,
+                ply
+            )
+        end
+    end
+end
+
+-- chef
+function JoelBotC:ChefInfo()
+    for _, ply in ipairs(players) do
+        if ply:IsChef() then
+            local evilPairs = 0
+            local seatCount = #seatingOrder
+
+            -- Helper function to determine if a player registers as evil
+            local function RegistersEvil(ply)
+                if not IsValid(ply) then return false end
+                return ply.evilTeam or ply:IsRecluse()
+            end
+
+            for i = 1, seatCount do
+                local current = seatingOrder[i]
+                local nextSeat = seatingOrder[i % seatCount + 1] -- wraps last seat to 1
+
+                if RegistersEvil(current) and RegistersEvil(nextSeat) then
+                    evilPairs = evilPairs + 1
+                end
+            end
+
+            if ply.droisoned then
+                local recluseAmount = 0
+
+                for _, ply in ipairs(players) do
+                    if ply:IsRecluse() then
+                        recluseAmount = recluseAmount + 1
+                    end
+                end
+
+                evilPairs = math.random(0, #evilPlayers - 1 + recluseAmount)
+            end
+
+            self:SmallNotify(
+                "Your starting information: There are " .. evilPairs .. " pairs of evil players sat next to each other",
+                5,
+                ply
+            )
+        end
+    end
+end
+
+-- undertaker
+
+
+
+-- noble
+function JoelBotC:NobleInfo()
+    for _, ply in ipairs(players) do
+        if ply:IsNoble() then
+            local nobleInfo1 = nil
+            local nobleInfo2 = nil
+            local nobleInfo3 = nil
+            local nobleInfoPool = {}
+
+            local noblePick1 = nil
+            local noblePick2 = nil
+            local noblePick3 = nil
+            local nobleGoodPool = table.Copy(goodPlayers)
+            local nobleEvilPool = {}
+
+            table.Shuffle(nobleGoodPool)
+
+            noblePick1 = nobleGoodPool[1]
+            noblePick2 = nobleGoodPool[2]
+
+            if (noblePick1:IsRecluse() or noblePick2:IsRecluse()) and math.random(0, 1) == 1 then
+                noblepick3 = nobleGoodPool[3]
+            else
+                if math.random(1, 10) == 10 then
+                    nobleEvilPool = table.Copy(demonPlayers)
+                else
+                    nobleEvilPool = table.Copy(minionPlayers)
+                end
+
+                table.Shuffle(nobleEvilPool)
+                noblePick3 = nobleEvilPool[1]
+            end
+
+            table.insert(nobleInfoPool, noblePick1)
+            table.insert(nobleInfoPool, noblePick2)
+            table.insert(nobleInfoPool, noblePick3)
+
+            table.Shuffle(nobleInfoPool)
+
+            nobleInfo1 = nobleInfoPool[1]
+            nobleInfo2 = nobleInfoPool[2]
+            nobleInfo3 = nobleInfoPool[3]
+
+            self:SmallNotify(
+                "Your starting information: One of " .. nobleInfo1:Nick() .. ", " .. nobleInfo2:Nick() .. " and " .. nobleInfo3:Nick() .. " is evil",
+                5,
+                ply
+            )
+        end
+    end
+end
+
+-- investigator
+function JoelBotC:InvestigatorInfo()
+    for _, ply in ipairs(players) do
+        if ply:IsInvestigator() then
+            local investigatorInfo1 = nil
+            local investigatorInfo2 = nil
+            local investigatorInfoPool = {}
+            local investigatorMinion = nil
+            local investigatorOther = nil
+            local investigatorMinionPool = table.Copy(minionPlayers)
+            local investigatorOtherPool = table.Copy(players)
+            local investigatorMinionRole = nil
+
+            table.Shuffle(investigatorMinionPool)
+            investigatorMinion = investigatorMinionPool[1]
+            investigatorMinionRole = investigatorMinion:GetRoleString()
+
+            repeat
+                table.Shuffle(investigatorOtherPool)
+
+                investigatorOther = investigatorOtherPool[1]
+            until not (investigatorOther == ply or investigatorMinion == investigatorOther)
+
+            for _, p in ipairs(players) do
+                if p:IsRecluse() then
+                    print("There is a recluse")
+                    if math.random(1, 3) == 1 then
+                        investigatorMinion = p
+                        local investigatorMinionRolePool = table.Copy(enabledMinions)
+                        table.Shuffle(investigatorMinionRolePool)
+                        investigatorMinionRole = ROLE_STRINGS[investigatorMinionRolePool[1]]
+                    end
+                end
+            end
+
+            table.insert(investigatorInfoPool, investigatorMinion)
+            table.insert(investigatorInfoPool, investigatorOther)
+
+            table.Shuffle(investigatorInfoPool)
+            investigatorInfo1 = investigatorInfoPool[1]
+            investigatorInfo2 = investigatorInfoPool[2]
+
+            self:SmallNotify(
+                "Your starting information: Either " .. investigatorInfo1:Nick() .. " or " .. investigatorInfo2:Nick() .. " is the " .. investigatorMinionRole,
+                5,
+                ply
+            )
+        end
+    end
+end
+
+-- monk
+
+
+
+-- washerwoman
+function JoelBotC:WasherwomanInfo()
+    for _, ply in ipairs(players) do
+        if ply:IsWasherwoman() then
+            local washerwomanInfo1 = nil
+            local washerwomanInfo2 = nil
+            local washerwomanInfoPool = {}
+            local washerwomanTownsfolk = nil
+            local washerwomanOther = nil
+            local washerwomanTownsfolkPool = table.Copy(townsfolkPlayers)
+            local washerwomanOtherPool = table.Copy(players)
+            local washerwomanTownsfolkRole = nil
+
+            repeat
+                table.Shuffle(washerwomanTownsfolkPool)
+                washerwomanTownsfolk = washerwomanTownsfolkPool[1]
+            until not (washerwomanTownsfolk == ply)
+            washerwomanTownsfolkRole = washerwomanTownsfolk:GetRoleString()
+
+            repeat
+                table.Shuffle(washerwomanOtherPool)
+                washerwomanOther = washerwomanOtherPool[1]
+            until not (washerwomanOther == ply or washerwomanTownsfolk == washerwomanOther)
+
+            table.insert(washerwomanInfoPool, washerwomanTownsfolk)
+            table.insert(washerwomanInfoPool, washerwomanOther)
+
+            table.Shuffle(washerwomanInfoPool)
+            washerwomanInfo1 = washerwomanInfoPool[1]
+            washerwomanInfo2 = washerwomanInfoPool[2]
+
+            self:SmallNotify(
+                "Your starting information: Either " .. washerwomanInfo1:Nick() .. " or " .. washerwomanInfo2:Nick() .. " is the " .. washerwomanTownsfolkRole,
+                5,
+                ply
+            )
+        end
+    end
+end
+
+-- nightwatchman
+
+
+
+-- grandmother
+function JoelBotC:GrandmotherInfo()
+    for _, ply in ipairs(players) do
+        if ply:IsGrandmother() then
+            print("Reached 1")
+            local grandchild = nil 
+            local grandchildRole = nil 
+            local grandmotherPool = {}
+            print("Reached 2")
+            
+            if math.random(0,4) == 4 then
+                grandmotherPool = outsiderPlayers
+                print("Reached 3.5")
+            else
+                grandmotherPool = townsfolkPlayers
+                print("Reached 3.5")
+            end
+
+            repeat
+                table.Shuffle(grandmotherPool)
+                grandchild = grandmotherPool[1]
+                print("Reached 4")
+            until not (grandchild == ply)
+            print("Reached 5")
+            grandchildRole = grandchild:GetRoleString()
+            print("Reached 6")
+
+            if ply.droisoned then
+                local droisonedGrandmotherRolePool = {}
+
+                if math.random(0,4) == 4 then
+                    droisonedGrandmotherPool = demonPlayers
+                    droisonedGrandmotherRolePool = table.Copy(demonBluffs)
+
+                    table.Shuffle(droisonedGrandmotherPool)
+                    grandchild = droisonedGrandmotherPool[1]
+                    table.Shuffle(droisonedGrandmotherRolePool)
+                    grandchildRole = ROLE_STRINGS[droisonedGrandmotherRolePool[1]]
+                else
+                    droisonedGrandmotherPool = minionPlayers
+                    droisonedGrandmotherRolePool = table.Copy(demonBluffsPool)
+
+                    table.Shuffle(droisonedGrandmotherPool)
+                    grandchild = droisonedGrandmotherPool[1]
+                    table.Shuffle(droisonedGrandmotherRolePool)
+                    grandchildRole = ROLE_STRINGS[droisonedGrandmotherRolePool[1]]
+                end
+            end
+
+            self:SmallNotify(
+                "Your starting information: Your grandchild is " .. grandchild:Nick() .. ", the " .. grandchildRole,
+                5,
+                ply
+            )
+        end
+    end
+end
+
+-- seamstress
+
+
+
+-- librarian
+function JoelBotC:LibrarianInfo()
+    for _, ply in ipairs(players) do
+        if ply:IsLibrarian() then
+            local librarianInfo1 = nil
+            local librarianInfo2 = nil
+            local librarianInfoPool = {}
+            local librarianOutsider = nil
+            local librarianOther = nil
+            local librarianOutsiderPool = table.Copy(outsiderPlayers)
+            local librarianOtherPool = table.Copy(players)
+            local librarianOutsiderRole = nil
+
+            if #librarianOutsiderPool == 0 then
+                self:SmallNotify(
+                    "Your starting information: There are no Outsiders",
+                    5,
+                    ply
+                )
+            else
+                repeat
+                    table.Shuffle(librarianOutsiderPool)
+                    librarianOutsider = librarianOutsiderPool[1]
+                until not (librarianOutsider == ply)
+                librarianOutsiderRole = librarianOutsider:GetRoleString()
+
+                repeat
+                    table.Shuffle(librarianOtherPool)
+                    librarianOther = librarianOtherPool[1]
+                until not (librarianOther == ply or librarianOutsider == librarianOther)
+
+                table.insert(librarianInfoPool, librarianOutsider)
+                table.insert(librarianInfoPool, librarianOther)
+
+                table.Shuffle(librarianInfoPool)
+                librarianInfo1 = librarianInfoPool[1]
+                librarianInfo2 = librarianInfoPool[2]
+
+                self:SmallNotify(
+                    "Your starting information: Either " .. librarianInfo1:Nick() .. " or " .. librarianInfo2:Nick() .. " is the " .. librarianOutsiderRole,
+                    5,
+                    ply
+                )
+            end
+        end
+    end
+end
+
+-- slayer
+
+
+
+-- empath
+function JoelBotC:EmpathInfo()
+    for _, ply in ipairs(players) do
+        if ply:IsEmpath() and ply:Alive() then
+            local previousEmpathInfo = empathInfo or nil
+            local empathInfo = 0 
+            local seatCount = #seatingOrder
+            local previousDeadNeighbours = deadNeighbours or nil
+            local deadNeighbours = 0
+
+            -- Helper function to determine if a player registers as evil
+            local function RegistersEvil(ply)
+                if not IsValid(ply) then return false end
+                return ply.evilTeam or ply:IsRecluse()
+            end
+
+            -- Find the Empath's seat
+            local seatIndex = nil
+            for i, p in ipairs(seatingOrder) do
+                if p == ply then
+                    seatIndex = i
+                    break
+                end
+            end
+
+            -- Find leftwards living neighbour
+            local leftIndex = seatIndex
+            repeat
+                leftIndex = (leftIndex - 2) % seatCount + 1
+                if not seatingOrder[leftIndex]:Alive() then
+                    deadNeighbours = deadNeighbours + 1
+                end
+            until seatingOrder[leftIndex]:Alive()
+
+            local leftNeighbour = seatingOrder[leftIndex]
+
+            -- Find rightwards living neighbour
+            local rightIndex = seatIndex
+            repeat
+                rightIndex = rightIndex % seatCount + 1
+                if not seatingOrder[rightIndex]:Alive() then
+                    deadNeighbours = deadNeighbours + 1
+                end
+            until seatingOrder[rightIndex]:Alive()
+
+            local rightNeighbour = seatingOrder[rightIndex]
+
+            -- Check if neighbours register as evil
+            if RegistersEvil(leftNeighbour) then
+                empathInfo = empathInfo + 1
+            end
+
+            if RegistersEvil(rightNeighbour) then
+                empathInfo = empathInfo + 1
+            end
+
+            -- Droisoned bollocks
+            if ply.droisoned then
+                if not previousEmpathInfo then previousEmpathInfo = math.random (0,2) end
+                if previousDeadNeighbours == deadNeighbours then
+                    empathInfo = previousEmpathInfo
+                else
+                    if empathInfo == 0 then
+                        empathInfo = 1
+                    elseif empathInfo == 1 then
+                        if previousEmpathInfo == 0 or previousEmpathInfo == 1 then
+                            empathInfo = 0
+                        elseif previousEmpathInfo == 2 then
+                            empathInfo = 1
+                        end
+                    elseif empathInfo == 2 then
+                        if previousEmpathInfo == 0 or previousEmpathInfo == 1 then
+                            empathInfo = 0
+                        elseif previousEmpathInfo == 2 then
+                            empathInfo = 1
+                        end
+                    end
+                end
+            end
+
+            -- Actually give the information
+            if empathInfo == 0 then
+                self:SmallNotify(
+                        "Your nightly information: None of your alive neighbours are evil",
+                        5,
+                        ply
+                    )
+            elseif empathInfo == 1 then
+                self:SmallNotify(
+                        "Your nightly information: One of your alive neighbours is evil",
+                        5,
+                        ply
+                    )
+            elseif empathInfo == 2 then
+                self:SmallNotify(
+                        "Your nightly information: Both of your alive neighbours are evil",
+                        5,
+                        ply
+                    )
+            end
+        end
+    end
+end
+
+
+
+-- soldier
+
+
+
+-- ravenkeeper
+
+
+
+-- fortuneteller
+
+
+
+-- virgin
+
+
+
+-- ogre
+
+
+
+-- moonchild
+
+
+
+-- saint
+
+
+
+-- drunk
+
+
+
+-- recluse
+
+
+
+-- poisoner
+
+
+
+-- scarletwoman
+
+
+
+-- organgrinder
+
+
+
+-- assassin
+
+
+
+-- baron
+
+
+
+-- pukka
+
+
+
+-- imp
+
+
+
+-- shabaloth
+
+
+
+-- po
+
+
+
+-- ojo

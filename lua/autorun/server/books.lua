@@ -1,8 +1,3 @@
--- lua/autorun/server/ttt_books_server.lua
--- Server-side helper functions for giving TTT books to players.
--- Include this file or let it autorun; then call the functions below
--- from your randomat or any other server-side code.
-
 if not SERVER then return end
 
 util.AddNetworkString("ttt_books_signedbook_sync")
@@ -68,9 +63,9 @@ local function SendSignedBookData(ply, wep, payload)
     net.Send(ply)
 end
 
--- ============================================================
+---------------------------------------------------------------
 --  GiveBookQuill(ply)
--- ============================================================
+---------------------------------------------------------------
 function GiveBookQuill(ply)
     if not IsValid(ply) then return nil end
 
@@ -90,9 +85,9 @@ function GiveBookQuill(ply)
     return wep
 end
 
--- ============================================================
+---------------------------------------------------------------
 --  GiveSignedBook(ply, bookData)
--- ============================================================
+---------------------------------------------------------------
 function GiveSignedBook(ply, bookData)
     if not IsValid(ply) then return nil end
 
@@ -134,9 +129,9 @@ function GiveSignedBook(ply, bookData)
     return wep
 end
 
--- ============================================================
+---------------------------------------------------------------
 --  UpdateSignedBook(ply, newBookData)
--- ============================================================
+---------------------------------------------------------------
 function UpdateSignedBook(ply, newBookData)
     if not IsValid(ply) then return nil end
 
@@ -146,9 +141,9 @@ function UpdateSignedBook(ply, newBookData)
     return GiveSignedBook(ply, newBookData)
 end
 
--- ============================================================
+---------------------------------------------------------------
 --  USAGE EXAMPLES
--- ============================================================
+---------------------------------------------------------------
 --[[
 GiveBookQuill(ply)
 
