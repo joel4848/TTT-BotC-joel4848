@@ -11,15 +11,15 @@ SWEP.Instructions   = "Right-click to read. ESC to close."
 SWEP.Spawnable      = false
 SWEP.AdminSpawnable = false
 
-SWEP.Kind           = WEAPON_EQUIP
+SWEP.Kind           = WEAPON_EQUIP2
 SWEP.CanBuy         = {}
 SWEP.LimitedStock   = false
 SWEP.AllowDrop      = false
 SWEP.IsSilent       = true
 SWEP.NoSights       = true
 
-SWEP.Slot           = 6
-SWEP.SlotPos        = 2
+SWEP.Slot           = 7
+SWEP.SlotPos        = 1
 SWEP.EquipMenuData  = { type = "Book" }
 
 SWEP.DrawAmmo       = false

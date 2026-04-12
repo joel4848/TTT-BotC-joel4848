@@ -8,7 +8,7 @@ SWEP.Instructions      = "Right-click to open/write. ESC to close and save."
 SWEP.Spawnable         = false
 SWEP.AdminSpawnable    = false
 
-SWEP.Kind = WEAPON_ROLE
+SWEP.Kind = WEAPON_EQUIP1
 SWEP.CanBuy = {}
 SWEP.LimitedStock = false
 SWEP.AllowDrop = false

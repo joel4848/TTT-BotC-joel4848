@@ -12,7 +12,7 @@ function EVENT:Begin()
 
     -- Opening splash screen
     JoelBotC:BotCTitleCreate()
-    timer.Simple(5, function()
+    timer.Simple(1, function()
         JoelBotC:BotCTitleDestroy()
     end)
 

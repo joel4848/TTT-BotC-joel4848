@@ -1,12 +1,13 @@
 local EVENT = {}
 
+JoelBotC = JoelBotC or {}
+
 EVENT.Title = "JoelBotC"
 EVENT.Description = "You know how this works!"
 EVENT.id = "joelbotc"
 EVENT.Categories = {"gamemode", "largeimpact", "rolechange"}
 
 util.AddNetworkString("rdmtJoelBotCSeatingOrder")
-util.AddNetworkString("rdmtJoelBotCOpenSeatingGUI")
 
 -- 'Script' -----------------------------------------------------------------------------------------------------------------
 local stewardEnabled = CreateConVar("randomat_joelbotc_steward_enabled", 1, FCVAR_NONE, "Whether the Steward is on the script", 0, 1):GetBool()
@@ -50,9 +51,19 @@ local original_COLOR_SPECIAL_INNOCENT = {}
 local original_COLOR_SPECIAL_TRAITOR = {}
 local original_COLOR_MONSTER = {}
 
-local players = {}
+JoelBotC.players = JoelBotC.players or {}
 
 function EVENT:Begin()
+
+    hook.Add("Think", "PrintButtonPressed", function()
+        if JoelBotC.seatingGUIPressingPlayer ~= nil then
+            print(JoelBotC.seatingGUIPressingPlayer:Nick() .. " pressed: " .. JoelBotC.seatingGUIButtonPressed)
+            timer.Simple(0.1, function()
+                JoelBotC.seatingGUIPressingPlayer = nil
+                JoelBotC.seatingGUIButtonPressed = nil
+            end)
+        end
+    end)
 
     local townsfolkAmount = nil
     local outsidersAmount = nil
@@ -60,18 +71,18 @@ function EVENT:Begin()
     local demonsAmount = nil
     local enabledTownsfolk = {}
     local enabledOutsiders = {}
-    local enabledMinions = {}
+    JoelBotC.enabledMinions = {}
     local enabledDemons = {}
-    local townsfolkPlayers = {}
-    local outsiderPlayers = {}
-    local goodPlayers = {}
-    local minionPlayers = {}
-    local demonPlayers = {}
-    local evilPlayers = {}
-    local seatingOrder = {}
-    local demonBluffsPool = {}
-    local demonBluffs = {}
-    players = {}
+    JoelBotC.townsfolkPlayers = {}
+    JoelBotC.outsiderPlayers = {}
+    JoelBotC.goodPlayers = {}
+    JoelBotC.minionPlayers = {}
+    JoelBotC.demonPlayers = {}
+    JoelBotC.evilPlayers = {}
+    JoelBotC.seatingOrder = {}
+    JoelBotC.demonBluffsPool = {}
+    JoelBotC.demonBluffs = {}
+    JoelBotC.players = {}
 
     -- Custom role colours
     original_COLOR_DETECTIVE = table.Copy(COLOR_DETECTIVE)
@@ -191,19 +202,19 @@ function EVENT:Begin()
         table.insert(enabledOutsiders, ROLE_RECLUSEJBC)
     end
     if poisonerEnabled then
-        table.insert(enabledMinions, ROLE_POISONERJBC)
+        table.insert(JoelBotC.enabledMinions, ROLE_POISONERJBC)
     end
     if scarletwomanEnabled then
-        table.insert(enabledMinions, ROLE_SCARLETWOMANJBC)
+        table.insert(JoelBotC.enabledMinions, ROLE_SCARLETWOMANJBC)
     end
     if organgrinderEnabled then
-        table.insert(enabledMinions, ROLE_ORGANGRINDERJBC)
+        table.insert(JoelBotC.enabledMinions, ROLE_ORGANGRINDERJBC)
     end
     if assassinEnabled then
-        table.insert(enabledMinions, ROLE_ASSASSINJBC)
+        table.insert(JoelBotC.enabledMinions, ROLE_ASSASSINJBC)
     end
     if baronEnabled then
-        table.insert(enabledMinions, ROLE_BARONJBC)
+        table.insert(JoelBotC.enabledMinions, ROLE_BARONJBC)
     end
     if pukkaEnabled then
         table.insert(enabledDemons, ROLE_PUKKAJBC)
@@ -224,69 +235,72 @@ function EVENT:Begin()
     -- Get a table of (tabulate?) living players
     for _, ply in player.Iterator() do
         if IsValid(ply) and not ply:IsSpec() then
-            table.insert(players, ply)
+            table.insert(JoelBotC.players, ply)
+            PrintTable(JoelBotC.players)
+            print(tostring(JoelBotC.players))
             ply.hasRole = nil
             ply.currentRole = ply:GetRole() or nil
+            ply.BotCDead = false
         end
     end
 
     -- Determine character type amounts
-    if #players == 15 then
+    if #JoelBotC.players == 15 then
         townsfolkAmount = 9
         outsidersAmount = 2
         minionsAmount = 3
         demonsAmount = 1
-    elseif #players == 14 then
+    elseif #JoelBotC.players == 14 then
         townsfolkAmount = 9
         outsidersAmount = 1
         minionsAmount = 3
         demonsAmount = 1
-    elseif #players == 13 then
+    elseif #JoelBotC.players == 13 then
         townsfolkAmount = 9
         outsidersAmount = 0
         minionsAmount = 3
         demonsAmount = 1
-    elseif #players == 12 then
+    elseif #JoelBotC.players == 12 then
         townsfolkAmount = 7
         outsidersAmount = 2
         minionsAmount = 2
         demonsAmount = 1
-    elseif #players == 11 then
+    elseif #JoelBotC.players == 11 then
         townsfolkAmount = 7
         outsidersAmount = 1
         minionsAmount = 2
         demonsAmount = 1
-    elseif #players == 10 then
+    elseif #JoelBotC.players == 10 then
         townsfolkAmount = 7
         outsidersAmount = 0
         minionsAmount = 2
         demonsAmount = 1
-    elseif #players == 9 then
+    elseif #JoelBotC.players == 9 then
         townsfolkAmount = 5
         outsidersAmount = 2
         minionsAmount = 1
         demonsAmount = 1
-    elseif #players == 8 then
+    elseif #JoelBotC.players == 8 then
         townsfolkAmount = 5
         outsidersAmount = 1
         minionsAmount = 1
         demonsAmount = 1
-    elseif #players == 7 then
+    elseif #JoelBotC.players == 7 then
         townsfolkAmount = 5
         outsidersAmount = 0
         minionsAmount = 1
         demonsAmount = 1
-    elseif #players == 6 then
+    elseif #JoelBotC.players == 6 then
         townsfolkAmount = 3
         outsidersAmount = 1
         minionsAmount = 1
         demonsAmount = 1
-    elseif #players == 5 then
+    elseif #JoelBotC.players == 5 then
         townsfolkAmount = 3
         outsidersAmount = 0
         minionsAmount = 1
         demonsAmount = 1
-    elseif #players == 1 then
+    elseif #JoelBotC.players == 1 then
         townsfolkAmount = 1
         outsidersAmount = 1
         minionsAmount = 1
@@ -303,12 +317,12 @@ function EVENT:Begin()
     -- Assign character types to players
 
     -- Shuffle players
-    table.Shuffle(players)
+    table.Shuffle(JoelBotC.players)
 
     -- Make working copies of character type tables and shuffle (Can one shuffle too much?)
     local townsfolkPool = table.Copy(enabledTownsfolk)
     local outsiderPool  = table.Copy(enabledOutsiders)
-    local minionPool    = table.Copy(enabledMinions)
+    local minionPool    = table.Copy(JoelBotC.enabledMinions)
     local demonPool     = table.Copy(enabledDemons)
 
     table.Shuffle(townsfolkPool)
@@ -334,30 +348,30 @@ function EVENT:Begin()
     AddRoles(demonPool,     demonsAmount,    "demon")
 
     -- Create Demon's bluff pool (not-in-play good roles) -------------------------------------------------------
-    local demonBluffsTownsfolkPool = {}
-    local demonBluffsOutsiderPool = {}
+    JoelBotC.demonBluffsTownsfolkPool = {}
+    JoelBotC.demonBluffsOutsiderPool = {}
 
-    table.Add(demonBluffsTownsfolkPool, townsfolkPool)
-    table.Add(demonBluffsOutsiderPool, outsiderPool)
+    table.Add(JoelBotC.demonBluffsTownsfolkPool, townsfolkPool)
+    table.Add(JoelBotC.demonBluffsOutsiderPool, outsiderPool)
 
     -- Remove any roles we don't want to be Demon bluffs here
-    table.RemoveByValue(demonBluffsOutsiderPool, ROLE_RECLUSEJBC)
-    table.RemoveByValue(demonBluffsOutsiderPool, ROLE_DRUNKJBC)
-    -- table.RemoveByValue(demonBluffsPool, ROLE_NIGHTWATCHMANJBC)
+    table.RemoveByValue(JoelBotC.demonBluffsOutsiderPool, ROLE_RECLUSEJBC)
+    table.RemoveByValue(JoelBotC.demonBluffsOutsiderPool, ROLE_DRUNKJBC)
+    -- table.RemoveByValue(JoelBotC.demonBluffsPool, ROLE_NIGHTWATCHMANJBC)
 
     -- Pick which roles should be bluffs - two Townsfolk, one Outsider
-    table.Shuffle(demonBluffsTownsfolkPool)
-    table.insert(demonBluffs, 1, demonBluffsTownsfolkPool[1])
-    table.insert(demonBluffs, 2, demonBluffsTownsfolkPool[2])
-    table.Shuffle(demonBluffsOutsiderPool)
-    table.insert(demonBluffs, 3, demonBluffsOutsiderPool[1])
+    table.Shuffle(JoelBotC.demonBluffsTownsfolkPool)
+    table.insert(JoelBotC.demonBluffs, 1, JoelBotC.demonBluffsTownsfolkPool[1])
+    table.insert(JoelBotC.demonBluffs, 2, JoelBotC.demonBluffsTownsfolkPool[2])
+    table.Shuffle(JoelBotC.demonBluffsOutsiderPool)
+    table.insert(JoelBotC.demonBluffs, 3, JoelBotC.demonBluffsOutsiderPool[1])
 
     -- Try and make one of either the Empath or the Fortune Teller (or any ongoing info role added in the future) a bluff
     local empathAvailableAsBluff = nil
     local fortunetellerAvailableAsBluff = nil
     local empathOrFTAreBluff = nil
 
-    for _, role in ipairs(demonBluffsTownsfolkPool) do
+    for _, role in ipairs(JoelBotC.demonBluffsTownsfolkPool) do
         if role == ROLE_EMPATHJBC then
             empathAvailableAsBluff = true
         end
@@ -367,20 +381,20 @@ function EVENT:Begin()
     end
 
     -- print("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~")
-    -- for key, value in ipairs(demonBluffsTownsfolkPool) do
+    -- for key, value in ipairs(JoelBotC.demonBluffsTownsfolkPool) do
     --     print(key, ROLE_STRINGS[value])
     -- end
     -- print("Empath avaialable as bluff = ".. tostring(empathAvailableAsBluff))
     -- print("FT avaialable as bluff = ".. tostring(fortunetellerAvailableAsBluff))
 
-    for _, role in ipairs(demonBluffs) do
+    for _, role in ipairs(JoelBotC.demonBluffs) do
         if role == ROLE_EMPATHJBC or role == ROLE_FORTUNETELLERJBC then
             empathOrFTAreBluff = true
         end
     end
 
     -- print("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~")
-    -- for key, value in ipairs(demonBluffs) do
+    -- for key, value in ipairs(JoelBotC.demonBluffs) do
     --     print(key, ROLE_STRINGS[value])
     -- end
     -- print("Empath or FT are bluff: " .. tostring(empathOrFTAreBluff))
@@ -412,11 +426,11 @@ function EVENT:Begin()
         if #empathFTPool > 0 then
             -- table.Shuffle(empathFTPool)
             -- Not using table.Shuffle because it didn't actually seem to shuffle
-            demonBluffs[1] = empathFTPool[math.random(1,2)]
+            JoelBotC.demonBluffs[1] = empathFTPool[math.random(1,2)]
         end
     end
 
-    -- for key, value in ipairs(demonBluffs) do
+    -- for key, value in ipairs(JoelBotC.demonBluffs) do
     --     print(key, ROLE_STRINGS[value])
     -- end
 
@@ -424,7 +438,7 @@ function EVENT:Begin()
     table.Shuffle(rolePool)
 
     -- Time to actually assign roles to players!
-    for i, ply in ipairs(players) do
+    for i, ply in ipairs(JoelBotC.players) do
         local entry = rolePool[i]
 
         -- Reset flags because I forgot this like an idiot and got VERY confused during testing
@@ -453,7 +467,7 @@ function EVENT:Begin()
     end
 
     -- ... and make them that role!
-    for _, ply in ipairs(players) do
+    for _, ply in ipairs(JoelBotC.players) do
         Randomat:SetRole(ply, ply.botc_role)
     end
     SendFullStateUpdate()
@@ -462,29 +476,29 @@ function EVENT:Begin()
     for _, ply in player.Iterator() do
         if IsValid(ply) and not ply:IsSpec() then
             if ply.townsfolk then
-                table.insert(townsfolkPlayers, ply)
+                table.insert(JoelBotC.townsfolkPlayers, ply)
             elseif ply.outsider then
-                table.insert(outsiderPlayers, ply)
+                table.insert(JoelBotC.outsiderPlayers, ply)
             elseif ply.minion then
-                table.insert(minionPlayers, ply)
+                table.insert(JoelBotC.minionPlayers, ply)
             elseif ply.demon then
-                table.insert(demonPlayers, ply)
+                table.insert(JoelBotC.demonPlayers, ply)
             end
 
             if ply.goodTeam then
-                table.insert(goodPlayers, ply)
+                table.insert(JoelBotC.goodPlayers, ply)
             elseif ply.evilTeam then
-                table.insert(evilPlayers, ply)
+                table.insert(JoelBotC.evilPlayers, ply)
             end
         end
     end
 
     -- Tell the Demon their bluffs
-    for _, ply in ipairs(players) do
+    for _, ply in ipairs(JoelBotC.players) do
         if ply.demon then
             timer.Simple(4, function()
                 self:SmallNotify(
-                    "Your bluffs are " .. ROLE_STRINGS[demonBluffs[1]] .. ", " .. ROLE_STRINGS[demonBluffs[2]] .. " and " .. ROLE_STRINGS[demonBluffs[3]],
+                    "Your bluffs are " .. ROLE_STRINGS[JoelBotC.demonBluffs[1]] .. ", " .. ROLE_STRINGS[JoelBotC.demonBluffs[2]] .. " and " .. ROLE_STRINGS[JoelBotC.demonBluffs[3]],
                     5,
                     ply
                 )
@@ -493,29 +507,32 @@ function EVENT:Begin()
     end
 
     -- Create seating order table
-    seatingOrder = table.Copy(players)
+    JoelBotC.seatingOrder = table.Copy(JoelBotC.players)
 
-    for i, ply in ipairs(seatingOrder) do
+    for i, ply in ipairs(JoelBotC.seatingOrder) do
         PrintMessage(HUD_PRINTTALK, "Seat " .. i .. ": " .. ply:Nick())
+        ply.seatNumber = i
     end
 
     net.Start("rdmtJoelBotCSeatingOrder")
-        net.WriteTable(seatingOrder)
+        net.WriteTable(JoelBotC.seatingOrder)
     net.Broadcast()
 
-    timer.Simple(8, function()
-        net.Start("rdmtJoelBotCOpenSeatingGUI")
-        net.Broadcast()
-    end)
+    -- timer.Simple(8, function()
+    --     net.Start("rdmtJoelBotCOpenSeatingGUI")
+    --     net.Broadcast()
+    -- end)
 
     ----------------------------------------------------------------------------------------------------------------------------
     -- GIVE STARTING BOOKS
     ----------------------------------------------------------------------------------------------------------------------------
 
     timer.Simple(1, function()
-        for _, ply in ipairs(players) do
+        for _, ply in ipairs(JoelBotC.players) do
             -- Give notebook
             GiveBookQuill(ply)
+
+            ply:Give("weapon_ttt_joelbotc_adminbook")
 
             -- Prepare seating text segments
             local seatingSegments = {}
@@ -531,7 +548,7 @@ function EVENT:Begin()
             })
             
             -- Add each player
-            for i, ply in ipairs(seatingOrder) do
+            for i, ply in ipairs(JoelBotC.seatingOrder) do
                 if i < 10 then
                     table.insert(seatingSegments, {
                         text = "Seat " .. i .. ":   " .. ply:Nick() .. "\n",
@@ -597,7 +614,7 @@ function EVENT:End(isActive)
     -- Revert players to original roles
     if isActive then
         print("Is Active")
-        for _, ply in ipairs(players) do
+        for _, ply in ipairs(JoelBotC.players) do
             print("Doing ipairs for" .. tostring(ply))
             if ply.currentRole ~= nil and IsValid(ply) and not ply:IsSpec() then
                 print("Setting role")
@@ -606,6 +623,21 @@ function EVENT:End(isActive)
         end
     end
     SendFullStateUpdate()
+
+    --------------------------------------------------------------------------------
+    -- Role function stuff
+    --------------------------------------------------------------------------------
+    timer.Remove("rdmtJoelBotCMonk10")
+    timer.Remove("rdmtJoelBotCMonk5")
+    timer.Remove("rdmtJoelBotCMonk4")
+    timer.Remove("rdmtJoelBotCMonk3")
+    timer.Remove("rdmtJoelBotCMonk2")
+    timer.Remove("rdmtJoelBotCMonk1")
+    timer.Remove("rdmtJoelBotCMonk0")
+    hook.Remove("Think", "rdmtJoelBotcMonkProtect")
+
+
+
 end
 
 Randomat:register(EVENT)
