@@ -1,11 +1,18 @@
 JoelBotC = JoelBotC or {}
 
 JoelBotC.monkProtectedPlayer = nil
+JoelBotC.poisonerPoisonedPlayer = nil
 JoelBotC.players = JoelBotC.players or {}
 
 ----------------------------------------------------------------------------------------------------------------------------
 -- ROLE FUNCTIONS
 ----------------------------------------------------------------------------------------------------------------------------
+
+-- Is droisoned
+function JoelBotC:IsDroisoned(ply)
+    if not IsValid(ply) then return false end
+    return ply.poisonerPoisoned or ply.pukkaPoisoned or ply.organgrinderDrunk or ply.botc_role == ROLE_DRUNKJBC
+end
 
 -- steward
 function JoelBotC:StewardInfo()
@@ -13,7 +20,7 @@ function JoelBotC:StewardInfo()
     
     for _, ply in ipairs(JoelBotC.players) do
         if ply:IsSteward() then
-            if ply.droisoned then
+            if JoelBotC:IsDroisoned(ply) then
                 repeat
                     table.Shuffle(JoelBotC.players)
                     stewardInfo = JoelBotC.players[1]
@@ -38,7 +45,7 @@ function JoelBotC:KnightInfo()
 
     for _, ply in ipairs(JoelBotC.players) do
         if ply:IsKnight() then
-            if ply.droisoned then
+            if JoelBotC:IsDroisoned(ply) then
                 repeat
                     table.Shuffle(JoelBotC.players)
 
@@ -111,7 +118,7 @@ function JoelBotC:ChefInfo()
                 end
             end
 
-            if ply.droisoned then
+            if JoelBotC:IsDroisoned(ply) then
                 local recluseAmount = 0
 
                 for _, ply in ipairs(JoelBotC.players) do
@@ -244,7 +251,7 @@ function JoelBotC:MonkProtect()
     for _, ply in ipairs(JoelBotC.players) do
         if ply:IsMonk() and not ply.BotCDead then
             JoelBotC:SendSeatingGUICreate(ply)
-            
+
             Randomat:SmallNotify("15 Seconds: Choose a player to protect from the Demon tonight", 5, ply)
             
             timer.Create("rdmtJoelBotCMonk10", 5, 1, function()
@@ -275,7 +282,7 @@ function JoelBotC:MonkProtect()
             JoelBotC.monkProtectedPlayer = nil
             hook.Add("Think", "rdmtJoelBotcMonkProtect", function()
                 if JoelBotC.seatingGUIPressingPlayer == ply and JoelBotC.seatingGUIButtonPressed ~= nil and JoelBotC.seatingGUIButtonPressed ~= ply.seatNumber then
-                    if not ply.droisoned then
+                    if not JoelBotC:IsDroisoned(ply) then
                         JoelBotC.monkProtectedPlayer = JoelBotC.players[JoelBotC.seatingGUIButtonPressed]
                     end
                     JoelBotC:SendSeatingGUIDestroy(ply)
@@ -365,7 +372,7 @@ function JoelBotC:GrandmotherInfo()
             grandchildRole = grandchild:GetRoleString()
             print("Reached 6")
 
-            if ply.droisoned then
+            if JoelBotC:IsDroisoned(ply) then
                 local droisonedGrandmotherRolePool = {}
 
                 if math.random(0,4) == 4 then
@@ -509,7 +516,7 @@ function JoelBotC:EmpathInfo()
             end
 
             -- Droisoned bollocks
-            if ply.droisoned then
+            if JoelBotC:IsDroisoned(ply) then
                 if not previousEmpathInfo then previousEmpathInfo = math.random (0,2) end
                 if previousDeadNeighbours == deadNeighbours then
                     empathInfo = previousEmpathInfo
@@ -595,7 +602,60 @@ end
 
 
 -- poisoner
+function JoelBotC:PoisonerPoison()
+    for _, ply in ipairs(JoelBotC.players) do
+        if ply:IsRole(ROLE_POSIONERJBC) and not ply.BotCDead then
+            JoelBotC:SendSeatingGUICreate(ply)
 
+            Randomat:SmallNotify("15 Seconds: Choose a player to poison for tonight and tomorrow", 5, ply)
+            
+            timer.Create("rdmtJoelBotCPoisoner10", 5, 1, function()
+                Randomat:SmallNotify("10 seconds to choose", 5, ply)
+            end)
+            timer.Create("rdmtJoelBotCPoisoner5", 10, 1, function()
+                Randomat:SmallNotify("5 seconds to choose", 1, ply)
+            end)
+            timer.Create("rdmtJoelBotCPoisoner4", 11, 1, function()
+                Randomat:SmallNotify("4 seconds to choose", 1, ply)
+            end)
+            timer.Create("rdmtJoelBotCPoisoner3", 12, 1, function()
+                Randomat:SmallNotify("3 seconds to choose", 1, ply)
+            end)
+            timer.Create("rdmtJoelBotCPoisoner2", 13, 1, function()
+                Randomat:SmallNotify("2 seconds to choose", 1, ply)
+            end)
+            timer.Create("rdmtJoelBotCPoisoner1", 14, 1, function()
+                Randomat:SmallNotify("1 second to choose", 1, ply)
+            end)
+            timer.Create("rdmtJoelBotCPoisoner0", 15, 1, function()
+                hook.Remove("Think", "rdmtJoelBotcPoisonerPoison")
+                JoelBotC:SendSeatingGUIDestroy(ply)
+            end)
+
+            JoelBotC.seatingGUIButtonPressed = nil
+            JoelBotC.seatingGUIPressingPlayer = nil
+            JoelBotC.poisonerPoisonedPlayer.poisonerPoisoned = false
+            JoelBotC.poisonerPoisonedPlayer = nil
+            hook.Add("Think", "rdmtJoelBotcPoisonerPoison", function()
+                if JoelBotC.seatingGUIPressingPlayer == ply and JoelBotC.seatingGUIButtonPressed ~= nil then
+                    if not JoelBotC:IsDroisoned(ply) then
+                        JoelBotC.poisonerPoisonedPlayer = JoelBotC.players[JoelBotC.seatingGUIButtonPressed]
+                    end
+                    JoelBotC:SendSeatingGUIDestroy(ply)
+
+                    timer.Remove("rdmtJoelBotCPoisoner10")
+                    timer.Remove("rdmtJoelBotCPoisoner5")
+                    timer.Remove("rdmtJoelBotCPoisoner4")
+                    timer.Remove("rdmtJoelBotCPoisoner3")
+                    timer.Remove("rdmtJoelBotCPoisoner2")
+                    timer.Remove("rdmtJoelBotCPoisoner1")
+                    timer.Remove("rdmtJoelBotCPoisoner0")
+                    hook.Remove("Think", "rdmtJoelBotcPoisonerPoison")
+                end
+            end)
+        end
+    end
+end
 
 
 -- scarletwoman
@@ -607,7 +667,58 @@ end
 
 
 -- assassin
+function JoelBotC:AssassinKill()
+    for _, ply in ipairs(JoelBotC.players) do
+        if ply:IsRole(ROLE_ASSASSINJBC) and not ply.BotCDead then
+            JoelBotC:SendSeatingGUICreate(ply)
+            
+            Randomat:SmallNotify("15 Seconds: Use your ability tonight? Choose a player to kill", 5, ply)
+            
+            timer.Create("rdmtJoelBotCAssassin10", 5, 1, function()
+                Randomat:SmallNotify("10 seconds to choose", 5, ply)
+            end)
+            timer.Create("rdmtJoelBotCAssassin5", 10, 1, function()
+                Randomat:SmallNotify("5 seconds to choose", 1, ply)
+            end)
+            timer.Create("rdmtJoelBotCAssassin4", 11, 1, function()
+                Randomat:SmallNotify("4 seconds to choose", 1, ply)
+            end)
+            timer.Create("rdmtJoelBotCAssassin3", 12, 1, function()
+                Randomat:SmallNotify("3 seconds to choose", 1, ply)
+            end)
+            timer.Create("rdmtJoelBotCAssassin2", 13, 1, function()
+                Randomat:SmallNotify("2 seconds to choose", 1, ply)
+            end)
+            timer.Create("rdmtJoelBotCAssassin1", 14, 1, function()
+                Randomat:SmallNotify("1 second to choose", 1, ply)
+            end)
+            timer.Create("rdmtJoelBotCAssassin0", 15, 1, function()
+                hook.Remove("Think", "rdmtJoelBotcAssassinKill")
+                JoelBotC:SendSeatingGUIDestroy(ply)
+            end)
 
+            JoelBotC.seatingGUIButtonPressed = nil
+            JoelBotC.seatingGUIPressingPlayer = nil
+            hook.Add("Think", "rdmtJoelBotcAssassinKill", function()
+                if JoelBotC.seatingGUIPressingPlayer == ply and JoelBotC.seatingGUIButtonPressed ~= nil then
+                    if not JoelBotC:IsDroisoned(ply) then
+                        JoelBotC.players[JoelBotC.seatingGUIButtonPressed]:Kill()
+                    end
+                    JoelBotC:SendSeatingGUIDestroy(ply)
+
+                    timer.Remove("rdmtJoelBotCAssassin10")
+                    timer.Remove("rdmtJoelBotCAssassin5")
+                    timer.Remove("rdmtJoelBotCAssassin4")
+                    timer.Remove("rdmtJoelBotCAssassin3")
+                    timer.Remove("rdmtJoelBotCAssassin2")
+                    timer.Remove("rdmtJoelBotCAssassin1")
+                    timer.Remove("rdmtJoelBotCAssassin0")
+                    hook.Remove("Think", "rdmtJoelBotcAssassinKill")
+                end
+            end)
+        end
+    end
+end
 
 
 -- baron

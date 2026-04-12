@@ -627,6 +627,7 @@ function EVENT:End(isActive)
     --------------------------------------------------------------------------------
     -- Role function stuff
     --------------------------------------------------------------------------------
+    -- Monk
     timer.Remove("rdmtJoelBotCMonk10")
     timer.Remove("rdmtJoelBotCMonk5")
     timer.Remove("rdmtJoelBotCMonk4")
@@ -635,6 +636,16 @@ function EVENT:End(isActive)
     timer.Remove("rdmtJoelBotCMonk1")
     timer.Remove("rdmtJoelBotCMonk0")
     hook.Remove("Think", "rdmtJoelBotcMonkProtect")
+
+    -- Assassin
+    timer.Remove("rdmtJoelBotCAssassin10")
+    timer.Remove("rdmtJoelBotCAssassin5")
+    timer.Remove("rdmtJoelBotCAssassin4")
+    timer.Remove("rdmtJoelBotCAssassin3")
+    timer.Remove("rdmtJoelBotCAssassin2")
+    timer.Remove("rdmtJoelBotCAssassin1")
+    timer.Remove("rdmtJoelBotCAssassin0")
+    hook.Remove("Think", "rdmtJoelBotcAssassinKill")
 
 
 
