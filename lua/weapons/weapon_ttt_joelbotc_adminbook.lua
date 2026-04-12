@@ -56,7 +56,7 @@ if SERVER then
         elseif buttonPressed == 2 then
             JoelBotC:SendSeatingGUIDestroy(ply)
         elseif buttonPressed == 3 then
-            JoelBotC:AssassinKill()
+            JoelBotC:NightwatchmanInform()
         end
     end)
 end

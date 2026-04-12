@@ -343,7 +343,59 @@ function JoelBotC:WasherwomanInfo()
 end
 
 -- nightwatchman
+function JoelBotC:NightwatchmanInform()
+    for _, ply in ipairs(JoelBotC.players) do
+        if ply:IsNightwatchman() and not ply.BotCDead and not JoelBotC.nightwatchmanAbilityUsed then
+            JoelBotC:SendSeatingGUICreate(ply)
+            
+            Randomat:SmallNotify("15 Seconds: Use your ability tonight? Choose a player to be told you are the Nightwatchman", 5, ply)
+            
+            timer.Create("rdmtJoelBotCNightwatchman10", 5, 1, function()
+                Randomat:SmallNotify("10 seconds to choose", 5, ply)
+            end)
+            timer.Create("rdmtJoelBotCNightwatchman5", 10, 1, function()
+                Randomat:SmallNotify("5 seconds to choose", 1, ply)
+            end)
+            timer.Create("rdmtJoelBotCNightwatchman4", 11, 1, function()
+                Randomat:SmallNotify("4 seconds to choose", 1, ply)
+            end)
+            timer.Create("rdmtJoelBotCNightwatchman3", 12, 1, function()
+                Randomat:SmallNotify("3 seconds to choose", 1, ply)
+            end)
+            timer.Create("rdmtJoelBotCNightwatchman2", 13, 1, function()
+                Randomat:SmallNotify("2 seconds to choose", 1, ply)
+            end)
+            timer.Create("rdmtJoelBotCNightwatchman1", 14, 1, function()
+                Randomat:SmallNotify("1 second to choose", 1, ply)
+            end)
+            timer.Create("rdmtJoelBotCNightwatchman0", 15, 1, function()
+                hook.Remove("Think", "rdmtJoelBotcNightwatchmanInform")
+                JoelBotC:SendSeatingGUIDestroy(ply)
+            end)
 
+            JoelBotC.seatingGUIButtonPressed = nil
+            JoelBotC.seatingGUIPressingPlayer = nil
+            hook.Add("Think", "rdmtJoelBotcNightwatchmanInform", function()
+                if JoelBotC.seatingGUIPressingPlayer == ply and JoelBotC.seatingGUIButtonPressed ~= nil and JoelBotC.seatingGUIButtonPressed ~= ply.seatNumber then
+                    if not JoelBotC:IsDroisoned(ply) then
+                        Randomat:SmallNotify("Tonight you learn that " .. ply:Nick() .. " is the Nightwatchman", 5, JoelBotC.players[JoelBotC.seatingGUIButtonPressed])
+                    end
+                    JoelBotC.nightwatchmanAbilityUsed = true
+                    JoelBotC:SendSeatingGUIDestroy(ply)
+
+                    timer.Remove("rdmtJoelBotCNightwatchman10")
+                    timer.Remove("rdmtJoelBotCNightwatchman5")
+                    timer.Remove("rdmtJoelBotCNightwatchman4")
+                    timer.Remove("rdmtJoelBotCNightwatchman3")
+                    timer.Remove("rdmtJoelBotCNightwatchman2")
+                    timer.Remove("rdmtJoelBotCNightwatchman1")
+                    timer.Remove("rdmtJoelBotCNightwatchman0")
+                    hook.Remove("Think", "rdmtJoelBotcNightwatchmanInform")
+                end
+            end)
+        end
+    end
+end
 
 
 -- grandmother
