@@ -212,6 +212,7 @@ function EVENT:Begin()
     end
     if assassinEnabled then
         table.insert(JoelBotC.enabledMinions, ROLE_ASSASSINJBC)
+        JoelBotC.assassinAbilityUsed = false
     end
     if baronEnabled then
         table.insert(JoelBotC.enabledMinions, ROLE_BARONJBC)

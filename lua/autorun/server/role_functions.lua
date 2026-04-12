@@ -3,6 +3,7 @@ JoelBotC = JoelBotC or {}
 JoelBotC.monkProtectedPlayer = nil
 JoelBotC.poisonerPoisonedPlayer = nil
 JoelBotC.players = JoelBotC.players or {}
+JoelBotC.assassinAbilityUsed = nil
 
 ----------------------------------------------------------------------------------------------------------------------------
 -- ROLE FUNCTIONS
@@ -669,7 +670,7 @@ end
 -- assassin
 function JoelBotC:AssassinKill()
     for _, ply in ipairs(JoelBotC.players) do
-        if ply:IsRole(ROLE_ASSASSINJBC) and not ply.BotCDead then
+        if ply:IsRole(ROLE_ASSASSINJBC) and not ply.BotCDead and not JoelBotC.assassinAbilityUsed then
             JoelBotC:SendSeatingGUICreate(ply)
             
             Randomat:SmallNotify("15 Seconds: Use your ability tonight? Choose a player to kill", 5, ply)
@@ -704,6 +705,7 @@ function JoelBotC:AssassinKill()
                     if not JoelBotC:IsDroisoned(ply) then
                         JoelBotC.players[JoelBotC.seatingGUIButtonPressed]:Kill()
                     end
+                    JoelBotC.assassinAbilityUsed = true
                     JoelBotC:SendSeatingGUIDestroy(ply)
 
                     timer.Remove("rdmtJoelBotCAssassin10")
