@@ -7,8 +7,33 @@ local original_COLOR_DETECTIVE = {}
 local original_COLOR_SPECIAL_INNOCENT = {}
 local original_COLOR_SPECIAL_TRAITOR = {}
 local original_COLOR_MONSTER = {}
+local eventActive = nil
+
+JoelBotC.isAliveClient = JoelBotC.isAliveClient or {}
+JoelBotC.seatingOrderClient = JoelBotC.seatingOrderClient or {}
 
 function EVENT:Begin()
+
+    eventActive = true
+
+    for _, ply in ipairs(player.GetAll()) do
+        ply.originalColour = ply:GetColor()
+        ply.originalRenderMode = ply:GetRenderMode()
+    end
+
+    net.Receive("rdmtJoelBotCAliveDeadUpdate", function()
+        JoelBotC.isAliveClient = net.ReadTable()
+
+        for _, ply in ipairs(JoelBotC.seatingOrderClient) do
+            if JoelBotC.isAliveClient[ply] == false then
+                ply:SetColor(Color(255, 255, 255, 100))
+                ply:SetRenderMode(RENDERMODE_TRANSALPHA)
+            else
+                ply:SetColor(Color(255, 255, 255, 255))
+                ply:SetRenderMode(RENDERMODE_NORMAL)
+            end
+        end
+    end)
 
     -- Opening splash screen
     JoelBotC:BotCTitleCreate()
@@ -65,20 +90,27 @@ function EVENT:Begin()
     end)
 end
 
-function EVENT:End(isActive)
+function EVENT:End()
 
     -- Remove any overlays etc.
     JoelBotC:SeatingGUIDestroy()
     JoelBotC:BotCTitleDestroy()
 
     -- Reset team colours
-    if isActive then
+    if eventActive then
         COLOR_DETECTIVE = table.Copy(original_COLOR_DETECTIVE)
         COLOR_SPECIAL_INNOCENT = table.Copy(original_COLOR_SPECIAL_INNOCENT)
         COLOR_SPECIAL_TRAITOR = table.Copy(original_COLOR_SPECIAL_TRAITOR)
         COLOR_MONSTER = table.Copy(original_COLOR_MONSTER)
     end
     UpdateRoleColours()
+
+    if eventActive then
+        for _, ply in ipairs(player.GetAll()) do
+            ply:SetColor(ply.originalColour)
+            ply:SetRenderMode(ply.originalRenderMode)
+        end
+    end
     
 end
 

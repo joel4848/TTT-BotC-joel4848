@@ -1,4 +1,5 @@
 JoelBotC = JoelBotC or {}
+JoelBotC.seatingOrderClient = JoelBotC.seatingOrderClient or {}
 
 -----------------------------------------------------------------------------------------
 ---------------------------------------SERVER--------------------------------------------
@@ -44,6 +45,11 @@ end
 -----------------------------------------------------------------------------------------
 
 if CLIENT then
+
+    net.Receive("rdmtJoelBotCSeatingOrder", function()
+        JoelBotC.seatingOrderClient = {}
+        JoelBotC.seatingOrderClient = net.ReadTable()
+    end)
 
     local function SeatingGUIButtonPressed(btn)
         net.Start("rdmtJoelBotCSeatingGUIChoice")
@@ -105,17 +111,11 @@ if CLIENT then
     local nomGUIButtonSize = 60
     local nomGUIScale = 1.0
 
-    local seatingOrder = {}
-    net.Receive("rdmtJoelBotCSeatingOrder", function()
-        seatingOrder = {}
-        seatingOrder = net.ReadTable()
-    end)
-
     function JoelBotC:SeatingGUICreate()
         if IsValid(nomGUI) then return end
 
-        local players = seatingOrder
-        local count = #seatingOrder
+        local players = JoelBotC.seatingOrderClient
+        local count = #JoelBotC.seatingOrderClient
         if count <= 0 then return end
 
 
@@ -152,7 +152,7 @@ if CLIENT then
             btn:SetSize(size * ratio, size)
             btn:SetPos(finalX, finalY)
 
-            local ply = seatingOrder[i]
+            local ply = JoelBotC.seatingOrderClient[i]
             local name = (IsValid(ply) and ply:Nick()) or "Disconnected"
             btn:SetText(i .. ". " .. name)
 

@@ -221,7 +221,6 @@ function JoelBotC:InvestigatorInfo()
 
             for _, p in ipairs(JoelBotC.players) do
                 if p:IsRecluse() then
-                    print("There is a recluse")
                     if math.random(1, 3) == 1 then
                         investigatorMinion = p
                         local investigatorMinionRolePool = table.Copy(JoelBotC.enabledMinions)
@@ -402,28 +401,23 @@ end
 function JoelBotC:GrandmotherInfo()
     for _, ply in ipairs(JoelBotC.players) do
         if ply:IsGrandmother() then
-            print("Reached 1")
+
             local grandchild = nil 
             local grandchildRole = nil 
             local grandmotherPool = {}
-            print("Reached 2")
+
             
             if math.random(0,4) == 4 then
                 grandmotherPool = JoelBotC.outsiderPlayers
-                print("Reached 3.5")
             else
                 grandmotherPool = JoelBotC.townsfolkPlayers
-                print("Reached 3.5")
             end
 
             repeat
                 table.Shuffle(grandmotherPool)
                 grandchild = grandmotherPool[1]
-                print("Reached 4")
             until not (grandchild == ply)
-            print("Reached 5")
             grandchildRole = grandchild:GetRoleString()
-            print("Reached 6")
 
             if JoelBotC:IsDroisoned(ply) then
                 local droisonedGrandmotherRolePool = {}
@@ -755,7 +749,7 @@ function JoelBotC:AssassinKill()
             hook.Add("Think", "rdmtJoelBotcAssassinKill", function()
                 if JoelBotC.seatingGUIPressingPlayer == ply and JoelBotC.seatingGUIButtonPressed ~= nil then
                     if not JoelBotC:IsDroisoned(ply) then
-                        JoelBotC.players[JoelBotC.seatingGUIButtonPressed]:Kill()
+                        JoelBotC:Kill(JoelBotC.players[JoelBotC.seatingGUIButtonPressed])
                     end
                     JoelBotC.assassinAbilityUsed = true
                     JoelBotC:SendSeatingGUIDestroy(ply)

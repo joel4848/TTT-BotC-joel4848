@@ -8,6 +8,7 @@ EVENT.id = "joelbotc"
 EVENT.Categories = {"gamemode", "largeimpact", "rolechange"}
 
 util.AddNetworkString("rdmtJoelBotCSeatingOrder")
+util.AddNetworkString("rdmtJoelBotCAliveDeadUpdate")
 
 -- 'Script' -----------------------------------------------------------------------------------------------------------------
 local stewardEnabled = CreateConVar("randomat_joelbotc_steward_enabled", 1, FCVAR_NONE, "Whether the Steward is on the script", 0, 1):GetBool()
@@ -52,18 +53,39 @@ local original_COLOR_SPECIAL_TRAITOR = {}
 local original_COLOR_MONSTER = {}
 
 JoelBotC.players = JoelBotC.players or {}
+JoelBotC.isAlive = JoelBotC.isAlive or {}
 
 function EVENT:Begin()
 
-    hook.Add("Think", "PrintButtonPressed", function()
-        if JoelBotC.seatingGUIPressingPlayer ~= nil then
-            print(JoelBotC.seatingGUIPressingPlayer:Nick() .. " pressed: " .. JoelBotC.seatingGUIButtonPressed)
-            timer.Simple(0.1, function()
-                JoelBotC.seatingGUIPressingPlayer = nil
-                JoelBotC.seatingGUIButtonPressed = nil
-            end)
-        end
-    end)
+    function JoelBotC:AliveDeadUpdate()
+        net.Start("rdmtJoelBotCAliveDeadUpdate")
+            net.WriteTable(JoelBotC.isAlive)
+        net.Broadcast()
+    end
+
+    function JoelBotC:Kill(ply)
+        ply.BotCDead = true
+        JoelBotC.isAlive[ply] = false
+
+        JoelBotC:AliveDeadUpdate()
+    end
+
+    function JoelBotC:Revive(ply)
+        ply.BotCDead = false
+        JoelBotC.isAlive[ply] = true
+
+        JoelBotC:AliveDeadUpdate()
+    end
+
+    -- hook.Add("Think", "PrintButtonPressed", function()
+    --     if JoelBotC.seatingGUIPressingPlayer ~= nil then
+    --         print(JoelBotC.seatingGUIPressingPlayer:Nick() .. " pressed: " .. JoelBotC.seatingGUIButtonPressed)
+    --         timer.Simple(0.1, function()
+    --             JoelBotC.seatingGUIPressingPlayer = nil
+    --             JoelBotC.seatingGUIButtonPressed = nil
+    --         end)
+    --     end
+    -- end)
 
     local townsfolkAmount = nil
     local outsidersAmount = nil
@@ -237,11 +259,13 @@ function EVENT:Begin()
     for _, ply in player.Iterator() do
         if IsValid(ply) and not ply:IsSpec() then
             table.insert(JoelBotC.players, ply)
-            PrintTable(JoelBotC.players)
-            print(tostring(JoelBotC.players))
             ply.hasRole = nil
             ply.currentRole = ply:GetRole() or nil
             ply.BotCDead = false
+            JoelBotC.isAlive[ply] = true
+
+            -- ply:SetColor(Color(255, 255, 255, 100))
+            -- ply:SetRenderMode(RENDERMODE_TRANSALPHA)
         end
     end
 
@@ -518,6 +542,7 @@ function EVENT:Begin()
     net.Start("rdmtJoelBotCSeatingOrder")
         net.WriteTable(JoelBotC.seatingOrder)
     net.Broadcast()
+    JoelBotC:AliveDeadUpdate()
 
     -- timer.Simple(8, function()
     --     net.Start("rdmtJoelBotCOpenSeatingGUI")
@@ -592,10 +617,8 @@ function EVENT:Begin()
 end
 
 function EVENT:End(isActive)
-    print(tostring(isActive))
     -- Revert colours to default
     if isActive then
-        print("Reverting colours")
         COLOR_DETECTIVE = table.Copy(original_COLOR_DETECTIVE)
         COLOR_SPECIAL_INNOCENT = table.Copy(original_COLOR_SPECIAL_INNOCENT)
         COLOR_SPECIAL_TRAITOR = table.Copy(original_COLOR_SPECIAL_TRAITOR)
@@ -614,11 +637,8 @@ function EVENT:End(isActive)
 
     -- Revert players to original roles
     if isActive then
-        print("Is Active")
         for _, ply in ipairs(JoelBotC.players) do
-            print("Doing ipairs for" .. tostring(ply))
             if ply.currentRole ~= nil and IsValid(ply) and not ply:IsSpec() then
-                print("Setting role")
                 Randomat:SetRole(ply, ply.currentRole)
             end
         end
