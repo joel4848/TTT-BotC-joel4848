@@ -57,6 +57,12 @@ if SERVER then
             JoelBotC:SendSeatingGUIDestroy(ply)
         elseif buttonPressed == 3 then
             JoelBotC:AssassinKill()
+        elseif buttonPressed == 11 then
+            JoelBotC:StartNominations()
+        elseif buttonPressed == 5 then
+            JoelBotC:SendNominationGUICreate(ply)
+        elseif buttonPressed == 6 then
+            JoelBotC:SendNominationGUIDestroy(ply)
         end
     end)
 end
@@ -108,6 +114,18 @@ if CLIENT then
 
     function SWEP:Initialize()
         self:SetHoldType("normal")
+
+        hook.Add("ScoreboardShow", "JoelBotC_adminbook_BlockScoreboardShow", function()
+            if IsValid(AdminBookFrame)then
+                return true
+            end
+        end)
+
+        hook.Add("ScoreboardHide", "JoelBotC_adminbook_BlockScoreboardHide", function()
+            if IsValid(AdminBookFrame) then
+                return true
+            end
+        end)
     end
 
     function SWEP:Deploy()
@@ -125,6 +143,9 @@ if CLIENT then
         if CLIENT and BookOpen then
             self:CloseBook()
         end
+
+        hook.Remove("ScoreboardShow", "JoelBotC_adminbook_BlockScoreboardShow")
+        hook.Remove("ScoreboardHide", "JoelBotC_adminbook_BlockScoreboardHide")
     end
 
     function SWEP:PrimaryAttack()
@@ -148,7 +169,10 @@ if CLIENT then
 
     function SWEP:OpenBook()
         if BookOpen then return end
+
         BookOpen = true
+
+        gui.EnableScreenClicker(true)
 
         local swep = self
 
@@ -179,16 +203,19 @@ if CLIENT then
         local buttonFunctions = {
             "Open Seat GUI",
             "Close Seat GUI",
+            "Open Assassin GUI",
+            "Placeholder",
+            "Open Nomination GUI",
+            "Close Nomination GUI",
             "Placeholder",
             "Placeholder",
             "Placeholder",
             "Placeholder",
-            "Placeholder",
-            "Placeholder",
+            "Start Nominations",
             "Placeholder"
         }
 
-        for y=1,3 do
+        for y=1,4 do
             for x=1,3 do
                 local id = (y-1)*3 + x
 
@@ -206,9 +233,16 @@ if CLIENT then
                     net.Start("TTT_adminBookChoice")
                         net.WriteInt(id, 8)
                     net.SendToServer()
-                    AdminBookFrame:Remove()
+                    
+                    if IsValid(AdminBookFrame) then
+                        AdminBookFrame:Remove()
+                    end
+                
+                    gui.EnableScreenClicker(false)
+                
                     AdminBookFrame = nil
                     BookOpen = false
+
                 end
             end
         end
@@ -219,6 +253,8 @@ if CLIENT then
         if IsValid(AdminBookFrame) then
             AdminBookFrame:Remove()
         end
+
+        gui.EnableScreenClicker(false)
 
         AdminBookFrame = nil
         BookOpen = false

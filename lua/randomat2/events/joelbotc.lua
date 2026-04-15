@@ -64,6 +64,9 @@ function EVENT:Begin()
     end
 
     function JoelBotC:Kill(ply)
+        if not ply.BotCDead then
+            ply.hasGhostVote = true
+        end
         ply.BotCDead = true
         JoelBotC.isAlive[ply] = false
 
@@ -645,6 +648,17 @@ function EVENT:End(isActive)
     end
     SendFullStateUpdate()
 
+    -- Remove timers
+    if isActive then
+        local timerCount = #JoelBotC.players
+
+        for timerNumber 1, timerCount do
+            local timerName = "rdmtJoelBotCMoveBigHand_" .. timerCount
+             timer.Remove(timerName)
+        end
+    end
+
+
     --------------------------------------------------------------------------------
     -- Role function stuff
     --------------------------------------------------------------------------------
@@ -667,8 +681,6 @@ function EVENT:End(isActive)
     timer.Remove("rdmtJoelBotCAssassin1")
     timer.Remove("rdmtJoelBotCAssassin0")
     hook.Remove("Think", "rdmtJoelBotcAssassinKill")
-
-
 
 end
 

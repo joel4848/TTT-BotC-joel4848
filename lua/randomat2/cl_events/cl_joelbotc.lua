@@ -7,14 +7,43 @@ local original_COLOR_DETECTIVE = {}
 local original_COLOR_SPECIAL_INNOCENT = {}
 local original_COLOR_SPECIAL_TRAITOR = {}
 local original_COLOR_MONSTER = {}
-local eventActive = nil
 
+JoelBotC.eventActiveClient = JoelBotC.eventActiveClient or nil
 JoelBotC.isAliveClient = JoelBotC.isAliveClient or {}
 JoelBotC.seatingOrderClient = JoelBotC.seatingOrderClient or {}
 
 function EVENT:Begin()
 
-    eventActive = true
+    JoelBotC.eventActiveClient = true
+
+    hook.Add("ScoreboardShow", "JoelBotC_BlockScoreboardShow", function()
+        if JoelBotC.clientGUIOpen then
+            return true
+        end
+    end)
+
+    hook.Add("ScoreboardHide", "JoelBotC_BlockScoreboardHide", function()
+        if JoelBotC.clientGUIOpen then
+            return true
+        end
+    end)
+
+    hook.Add("PlayerButtonDown", "JoelBotC_EnableMouseInGUI", function(_, button)
+        if button ~= KEY_TAB then return end
+        if not JoelBotC.clientGUIOpen then return end
+
+        if not gui.EnableScreenClicker() then
+            gui.EnableScreenClicker(true)
+        end
+    end)
+
+    hook.Add("PlayerButtonUp", "JoelBotC_DisableMouseInGUI", function(_, button)
+        if button ~= KEY_TAB then return end
+
+        if gui.EnableScreenClicker() then
+            gui.EnableScreenClicker(false)
+        end
+    end)
 
     for _, ply in ipairs(player.GetAll()) do
         ply.originalColour = ply:GetColor()
@@ -96,8 +125,19 @@ function EVENT:End()
     JoelBotC:SeatingGUIDestroy()
     JoelBotC:BotCTitleDestroy()
 
+    -- Remove hooks
+    hook.Remove("ScoreboardShow", "JoelBotC_BlockScoreboardShow")
+    hook.Remove("ScoreboardHide", "JoelBotC_BlockScoreboardHide")
+    hook.Remove("PlayerButtonDown", "JoelBotC_EnableMouseInGUI")
+    hook.Remove("PlayerButtonUp", "JoelBotC_DisableMouseInGUI")
+
+    -- Remove timers
+    timer.Remove("rdmtJoelBotCMoveBigHand")
+    timer.Remove("rdmtJoelBotCLockInVote")
+    timer.Remove("rdmtJoelBotCReopenNominations")
+
     -- Reset team colours
-    if eventActive then
+    if JoelBotC.eventActiveClient then
         COLOR_DETECTIVE = table.Copy(original_COLOR_DETECTIVE)
         COLOR_SPECIAL_INNOCENT = table.Copy(original_COLOR_SPECIAL_INNOCENT)
         COLOR_SPECIAL_TRAITOR = table.Copy(original_COLOR_SPECIAL_TRAITOR)
@@ -105,13 +145,20 @@ function EVENT:End()
     end
     UpdateRoleColours()
 
-    if eventActive then
+    if JoelBotC.eventActiveClient then
         for _, ply in ipairs(player.GetAll()) do
-            ply:SetColor(ply.originalColour)
-            ply:SetRenderMode(ply.originalRenderMode)
+            if ply.originalColour then
+                ply:SetColor(ply.originalColour)
+            end
+            if ply.originalRenderMode then
+                ply:SetRenderMode(ply.originalRenderMode)
+            end
         end
     end
     
+
+
+    JoelBotC.eventActiveClient = nil
 end
 
 Randomat:register(EVENT)

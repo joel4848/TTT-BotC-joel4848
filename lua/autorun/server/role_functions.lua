@@ -751,7 +751,7 @@ function JoelBotC:AssassinKill()
                     if not JoelBotC:IsDroisoned(ply) then
                         JoelBotC:Kill(JoelBotC.players[JoelBotC.seatingGUIButtonPressed])
                     end
-                    JoelBotC.assassinAbilityUsed = true
+                    -- JoelBotC.assassinAbilityUsed = true
                     JoelBotC:SendSeatingGUIDestroy(ply)
 
                     timer.Remove("rdmtJoelBotCAssassin10")

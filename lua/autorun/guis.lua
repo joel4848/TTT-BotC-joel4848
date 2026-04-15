@@ -1,5 +1,6 @@
 JoelBotC = JoelBotC or {}
 JoelBotC.seatingOrderClient = JoelBotC.seatingOrderClient or {}
+JoelBotC.clientGUIOpen = JoelBotC.clientGUIOpen or nil
 
 -----------------------------------------------------------------------------------------
 ---------------------------------------SERVER--------------------------------------------
@@ -49,6 +50,10 @@ if CLIENT then
     net.Receive("rdmtJoelBotCSeatingOrder", function()
         JoelBotC.seatingOrderClient = {}
         JoelBotC.seatingOrderClient = net.ReadTable()
+
+        for i, ply in ipairs(JoelBotC.seatingOrderClient) do
+            ply.seatNumber = i
+        end
     end)
 
     local function SeatingGUIButtonPressed(btn)
@@ -107,12 +112,14 @@ if CLIENT then
     -- Seating GUI
     -------------------------------------------------------------------------------------
 
-    local nomGUI = nil
-    local nomGUIButtonSize = 60
-    local nomGUIScale = 1.0
+    local seatingGUI = nil
+    local seatingGUIButtonSize = 60
+    local seatingGUIScale = 1.0
 
     function JoelBotC:SeatingGUICreate()
-        if IsValid(nomGUI) then return end
+        if IsValid(seatingGUI) then return end
+
+        JoelBotC.clientGUIOpen = true
 
         local players = JoelBotC.seatingOrderClient
         local count = #JoelBotC.seatingOrderClient
@@ -120,35 +127,35 @@ if CLIENT then
 
 
         local ratio = 4 
-        local nomGUIVerticalStretch = 0.6
-        local nomGUIPolePush = 0.1 
+        local seatingGUIVerticalStretch = 0.6
+        local seatingGUIPolePush = 0.1 
 
 
-        nomGUI = vgui.Create("DPanel")
-        nomGUI:SetSize(ScrW(), ScrH())
-        nomGUI:SetPos(0, 0)
-        nomGUI:SetMouseInputEnabled(true)
-        nomGUI:SetKeyboardInputEnabled(false)
-        nomGUI.Paint = nil
+        seatingGUI = vgui.Create("DPanel")
+        seatingGUI:SetSize(ScrW(), ScrH())
+        seatingGUI:SetPos(0, 0)
+        seatingGUI:SetMouseInputEnabled(true)
+        seatingGUI:SetKeyboardInputEnabled(false)
+        seatingGUI.Paint = nil
 
-        local size = nomGUIButtonSize * nomGUIScale
+        local size = seatingGUIButtonSize * seatingGUIScale
         -- More players = bigger circle
-        local baseRadius = ((math.min(ScrW(), ScrH()) * 0.6) * nomGUIScale) / (15 / (count+1))
+        local baseRadius = ((math.min(ScrW(), ScrH()) * 0.6) * seatingGUIScale) / (15 / (count+1))
 
         local cx, cy = ScrW() / 2, ScrH() / 2
 
         for i = 1, count do
             local baseAngle = (i - 1) * (2 * math.pi / count)
-            local warpedAngle = baseAngle + (nomGUIPolePush * math.sin(2 * baseAngle))
+            local warpedAngle = baseAngle + (seatingGUIPolePush * math.sin(2 * baseAngle))
             local finalAngle = warpedAngle - (math.pi / 2)
 
             local x = cx + math.cos(finalAngle) * baseRadius
-            local y = cy + math.sin(finalAngle) * (baseRadius * nomGUIVerticalStretch)
+            local y = cy + math.sin(finalAngle) * (baseRadius * seatingGUIVerticalStretch)
 
             local finalX = x - (size * ratio / 2)
             local finalY = y - (size / 2)
 
-            local btn = vgui.Create("DButton", nomGUI)
+            local btn = vgui.Create("DButton", seatingGUI)
             btn:SetSize(size * ratio, size)
             btn:SetPos(finalX, finalY)
 
@@ -179,9 +186,10 @@ if CLIENT then
     end
 
     function JoelBotC:SeatingGUIDestroy()
-        if IsValid(nomGUI) then
-            nomGUI:Remove()
-            nomGUI = nil
+        if IsValid(seatingGUI) then
+            seatingGUI:Remove()
+            seatingGUI = nil
+            JoelBotC.clientGUIOpen = nil
         end
     end
 
