@@ -64,15 +64,66 @@ function EVENT:Begin()
     end
 
     function JoelBotC:Kill(ply)
+        if not IsValid(ply) then return end
+
         if not ply.BotCDead then
             ply.hasGhostVote = true
         end
+
         ply.BotCDead = true
         JoelBotC.isAlive[ply] = false
 
+        -- Play the falling death animation
         ply:DoAnimationEvent(ACT_GMOD_DEATH, 2028)
 
-        JoelBotC:AliveDeadUpdate()
+        -- Wait until the player hits the ground
+        timer.Create("JoelBotC_RagdollWait_" .. ply:EntIndex(), 0.05, 0, function()
+
+            if not IsValid(ply) then
+                timer.Remove("JoelBotC_RagdollWait_" .. ply:EntIndex())
+                return
+            end
+
+            if ply:OnGround() then
+                timer.Remove("JoelBotC_RagdollWait_" .. ply:EntIndex())
+
+                -- Create ragdoll at the exact pose the player landed in
+                local rag = ply:CreateRagdoll()
+
+                -- Hide the player and their weapons
+                ply:SetNoDraw(true)
+
+                local executeeWeapons = ply:GetWeapons() or {}
+                for _, wep in ipairs(executeeWeapons) do
+                    wep:SetNoDraw(true)
+                end
+
+                -- After 3 seconds, show the ghost player
+                timer.Simple(3, function()
+                    if not IsValid(ply) then return end
+
+                    ply:SetNoDraw(false)
+                    for _, wep in ipairs(executeeWeapons) do
+                        wep:SetNoDraw(false)
+                    end
+
+                    -- ghost appearance
+                    ply:SetColor(Color(255,255,255,100))
+                    ply:SetRenderMode(RENDERMODE_TRANSALPHA)
+
+                    JoelBotC:AliveDeadUpdate()
+
+                    -- remove ragdoll if desired
+                    -- if IsValid(rag) then
+                    --     rag:Remove()
+                    -- end
+
+                end)
+            end
+
+        end)
+
+        
     end
 
     function JoelBotC:Revive(ply)
@@ -308,8 +359,10 @@ function EVENT:Begin()
             ply.BotCDead = false
             JoelBotC.isAlive[ply] = true
 
-            -- ply:SetColor(Color(255, 255, 255, 100))
-            -- ply:SetRenderMode(RENDERMODE_TRANSALPHA)
+            ply:StripWeapons()
+            ply:SetFOV(0, 0.2)
+            ply:Give("weapon_ttt_unarmed")
+            ply:Give("weapon_zm_carry")
         end
     end
 
@@ -655,6 +708,8 @@ function EVENT:Begin()
                 
                 }
             })
+
+            ply:SelectWeapon("weapon_ttt_signedbook")
         end
     end)
 
@@ -670,14 +725,18 @@ function EVENT:End(isActive)
     end
     UpdateRoleColours()
 
-    -- Remove books
+    -- Remove books and give crowbar
     for i, ply in pairs(self:GetAlivePlayers()) do
         for _, wep in ipairs(ply:GetWeapons()) do
-            if wep:GetClass() == "weapon_ttt_bookquill" or wep:GetClass() == "weapon_ttt_signedbook" then
+            if wep:GetClass() == "weapon_ttt_bookquill" or wep:GetClass() == "weapon_ttt_signedbook" or wep:GetClass() == "weapon_ttt_joelbotc_adminbook" then
                 ply:StripWeapon(wep:GetClass())
             end
         end
+
+        ply:Give("weapon_zm_improvised")
+        ply:SelectWeapon("weapon_zm_improvised")
     end
+
 
     -- Revert players to original roles
     if isActive then
