@@ -57,12 +57,16 @@ if SERVER then
             JoelBotC:SendSeatingGUIDestroy(ply)
         elseif buttonPressed == 3 then
             JoelBotC:AssassinKill()
-        elseif buttonPressed == 11 then
-            JoelBotC:StartNominations()
+        elseif buttonPressed == 4 then
+            JoelBotC:Execute(JoelBotC.seatingOrder[2])
+        elseif buttonPressed == 7 then
+            JoelBotC:Revive(JoelBotC.seatingOrder[2])
         elseif buttonPressed == 5 then
             JoelBotC:SendNominationGUICreate(ply)
         elseif buttonPressed == 6 then
             JoelBotC:SendNominationGUIDestroy(ply)
+        elseif buttonPressed == 11 then
+            JoelBotC:StartNominations()
         end
     end)
 end
@@ -204,10 +208,10 @@ if CLIENT then
             "Open Seat GUI",
             "Close Seat GUI",
             "Open Assassin GUI",
-            "Placeholder",
+            "Execute seat 2",
             "Open Nomination GUI",
             "Close Nomination GUI",
-            "Placeholder",
+            "Revive seat 2",
             "Placeholder",
             "Placeholder",
             "Placeholder",

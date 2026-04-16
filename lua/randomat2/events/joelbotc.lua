@@ -70,6 +70,8 @@ function EVENT:Begin()
         ply.BotCDead = true
         JoelBotC.isAlive[ply] = false
 
+        ply:DoAnimationEvent(ACT_GMOD_DEATH, 2028)
+
         JoelBotC:AliveDeadUpdate()
     end
 
@@ -80,15 +82,54 @@ function EVENT:Begin()
         JoelBotC:AliveDeadUpdate()
     end
 
-    -- hook.Add("Think", "PrintButtonPressed", function()
-    --     if JoelBotC.seatingGUIPressingPlayer ~= nil then
-    --         print(JoelBotC.seatingGUIPressingPlayer:Nick() .. " pressed: " .. JoelBotC.seatingGUIButtonPressed)
-    --         timer.Simple(0.1, function()
-    --             JoelBotC.seatingGUIPressingPlayer = nil
-    --             JoelBotC.seatingGUIButtonPressed = nil
-    --         end)
-    --     end
-    -- end)
+    function JoelBotC:Execute(ply)
+        if not IsValid(ply) or not ply:Alive() then return end
+
+        ply:Freeze(true)
+        ply:SetCanWalk(false)
+        ply:DoAnimationEvent(ACT_GMOD_GESTURE_WAVE)
+
+        local anvil = ents.Create("prop_physics")
+        if not IsValid(anvil) then return end
+
+        anvil:SetModel("models/minecraft/anvil.mdl")
+        anvil:SetPos(ply:GetPos() + Vector(0, 0, 2000))
+        anvil:SetAngles(Angle(0, 0, 0))
+        anvil:SetOwner(ply)
+        anvil:SetModelScale(0.7, 0)
+
+        anvil:Spawn()
+
+        local phys = anvil:GetPhysicsObject()
+        if IsValid(phys) then
+            phys:Wake()
+            phys:ApplyForceCenter(Vector(0, 0, -6000))
+        end
+
+        timer.Simple(2.4, function()
+            ply:EmitSound("anvil_land_loud.wav", 511, 100, 1)
+        end)
+
+        timer.Simple(2.6, function()
+            if not IsValid(ply) then return end
+
+            JoelBotC:Kill(ply)
+            ply:DoAnimationEvent(ACT_GMOD_DEATH, 2028)
+
+            if ply:IsFrozen() then
+                ply:Freeze(false)
+            end
+            ply:SetCanWalk(true)
+
+            if IsValid(anvil) then
+                timer.Simple(5, function()
+                    if IsValid(anvil) then
+                        anvil:Remove()
+                    end
+                end)
+            end
+        end)
+    end
 
     local townsfolkAmount = nil
     local outsidersAmount = nil
@@ -654,7 +695,7 @@ function EVENT:End(isActive)
 
         for timerNumber = 1, timerCount do
             local timerName = "rdmtJoelBotCMoveBigHand_" .. timerCount
-             timer.Remove(timerName)
+                timer.Remove(timerName)
         end
     end
 

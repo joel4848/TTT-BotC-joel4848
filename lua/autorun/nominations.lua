@@ -247,7 +247,7 @@ if SERVER then
 
     function JoelBotC:ToggleVote(ply)
         if not JoelBotC.votingOpen then return end
-        -- Block toggling once this player's vote has already been locked in
+        -- Prevent toggling once this player's vote has already been locked in
         if JoelBotC.lockedInSeats[ply.seatNumber] then return end
 
         local currentVote = JoelBotC.playerVotes[ply] or false
@@ -290,11 +290,11 @@ if SERVER then
             local seat = order[step]
             local lockInTime = step * interval
             local timerLength = lockInTime - interval / 2
-            local timerName = "rdmtJoelBotCMoveBigHand_" .. step
+            local timerName1 = "rdmtJoelBotCMoveBigHand_" .. step
+            local timerName2 = "rdmtJoelBotCLockInVote_" .. step
 
             -- Make hand start moving halfway through the vote interval (looks kinda more like a clock ticking, maybe adjust?)
-            timer.Create(timerName, timerLength, 1, function()
-                print("Doing net start rdmtJoelBotCVoteLockIn")
+            timer.Create(timerName1, timerLength, 1, function()
                 net.Start("rdmtJoelBotCVoteLockIn")
                     net.WriteInt(seat, 6)
                     net.WriteBool(false) -- Tell big hand to move
@@ -302,7 +302,7 @@ if SERVER then
             end)
 
             -- Hand arrives; lock in and count this vote
-            timer.Create("rdmtJoelBotCLockInVote", lockInTime, 1, function()
+            timer.Create(timerName2, lockInTime, 1, function()
                 JoelBotC.lockedInSeats[seat] = true
 
                 net.Start("rdmtJoelBotCVoteLockIn")
@@ -414,7 +414,8 @@ if SERVER then
 
         -- Execute the marked player
         if IsValid(JoelBotC.marked) then
-            JoelBotC:Kill(JoelBotC.marked)
+            JoelBotC:Execute(JoelBotC.marked)
+            -- JoelBotC:Kill(JoelBotC.marked)
         end
 
         -- Reset nominations state
@@ -545,6 +546,8 @@ if CLIENT then
 
     local topBtnTop = 0
     local lowestBtnBottom = 0
+
+    local voteIcon = {}
 
     -------------------------------------------------------------------------------------
     -- Functions for the extra buttons
@@ -680,6 +683,9 @@ if CLIENT then
 
         elseif phase == "defence" then
             overlayTimer = data.defenceTime or defenceTime
+
+            CreateVoteToggleButton()
+
             if mySeat == data.nomineeSeat then
                 CreateEndSpeechButton("End defence now", false)
             end
@@ -687,8 +693,12 @@ if CLIENT then
         elseif phase == "votecountdown" then
             overlayTimer = 3
 
+            CreateVoteToggleButton()
+
         elseif phase == "voting" then
             overlayTimer = 0
+
+            CreateVoteToggleButton()
 
         elseif phase == "result" then
             overlayTimer = 0
@@ -708,6 +718,9 @@ if CLIENT then
         seatVoteOn[seat] = voteOn
         if IsValid(voteToggleBtn) and voteToggleBtn.Refresh then
             voteToggleBtn:Refresh()
+        end
+        if IsValid(voteIcon[seat]) then
+            voteIcon[seat]:SetVisible(voteOn)
         end
     end)
 
@@ -734,7 +747,7 @@ if CLIENT then
     end)
 
     -------------------------------------------------------------------------------------
-    -- NominationGUICreate
+    -- Nomination GUI Create
     -------------------------------------------------------------------------------------
 
     function JoelBotC:NominationGUICreate()
@@ -756,7 +769,7 @@ if CLIENT then
         nomGUI:SetKeyboardInputEnabled(false)
 
         local size = nomGUIButtonSize * nomGUIScale
-        local baseRadius = ((math.min(ScrW(), ScrH()) * 0.6) * nomGUIScale) / (15 / (count + 1))
+        local baseRadius = ((math.min(ScrW(), ScrH()) * 0.6) * nomGUIScale) * (0.5 + (count - 5) / 20)
         local cx, cy = ScrW() / 2, ScrH() / 2
 
         bigCurrentAngle = 0
@@ -768,6 +781,7 @@ if CLIENT then
         seatVoteOn = {}
         topBtnTop = math.huge
         lowestBtnBottom = 0
+        local buttonWidth = {}
 
         nomGUI.Paint = function(self, w, h)
             bigCurrentAngle = AnimateHand(bigStartAngle, bigTargetAngle, bigRotStartTime, bigRotPeriod)
@@ -830,6 +844,7 @@ if CLIENT then
             local finalWidth = math.max(size * ratio, textW + 30)
             local finalX = x - (finalWidth / 2)
             local finalY = y - (size / 2)
+            buttonWidth[i] = finalWidth
 
             -- Track top/bottom button extents for overlay/bottom/button placement
             if finalY < topBtnTop then
@@ -849,9 +864,9 @@ if CLIENT then
             btn.seatIndex = i
 
             btn.Paint = function(self, w, h)
-                if seatVoteOn[self.seatIndex] then
-                    surface.SetDrawColor(50, 200, 100)
-                elseif self.isPressed then
+                -- if seatVoteOn[self.seatIndex] then
+                --     surface.SetDrawColor(50, 200, 100)
+                if self.isPressed and overlayPhase == "nominations" then
                     surface.SetDrawColor(0, 120, 255)
                 else
                     local colour = (JoelBotC.seatColours and JoelBotC.seatColours[i]) or Color(200, 200, 200)
@@ -860,11 +875,56 @@ if CLIENT then
                 surface.DrawRect(0, 0, w, h)
             end
 
-            btn.OnMousePressed = function(self) self.isPressed = true  end
+            btn.OnMousePressed = function(self) self.isPressed = true end
             btn.OnMouseReleased = function(self)
                 self.isPressed = false
                 SendButtonPress(self.seatIndex)
+                print("overlayPhase = " .. overlayPhase)
             end
+        end
+
+        -- Vote icons
+        for i = 1, count do
+            local voteIconSize = size * 1.4
+            local voteIconGap = 25 + 15/count
+        
+            local baseAngle = (i - 1) * (2 * math.pi / count)
+            local warpedAngle = baseAngle + (nomGUIPolePush * math.sin(2 * baseAngle))
+            local finalAngle = warpedAngle - (math.pi / 2)
+        
+            local buttonX = cx + math.cos(finalAngle) * baseRadius
+            local buttonY = cy + math.sin(finalAngle) * (baseRadius * nomGUIVerticalStretch)
+        
+            -- Direction from button to centre
+            local dx = cx - buttonX
+            local dy = cy - buttonY
+        
+            local len = math.sqrt(dx * dx + dy * dy)
+            dx = dx / len
+            dy = dy / len
+        
+            -- Button dimensions
+            local bw = buttonWidth[i] or 100
+            local bh = size
+        
+            local hx = bw / 2
+            local hy = bh / 2
+        
+            -- Distance from button centre to edge in this direction
+            local edgeDist = 1 / math.sqrt((dx * dx) / (hx * hx) + (dy * dy) / (hy * hy))
+        
+            -- Icon centre distance from button centre
+            local offset = edgeDist + voteIconGap + (voteIconSize / 2)
+        
+            local iconX = buttonX + dx * offset
+            local iconY = buttonY + dy * offset
+        
+            voteIcon[i] = vgui.Create("DImage", nomGUI)
+            voteIcon[i]:SetSize(voteIconSize, voteIconSize)
+            voteIcon[i]:SetPos(iconX - voteIconSize / 2, iconY - voteIconSize / 2)
+            voteIcon[i].seatIndex = i
+            voteIcon[i]:SetImage("vgui/ttt/joelbotc/vote_icon.png")
+            voteIcon[i]:SetVisible(false)
         end
     end
 
