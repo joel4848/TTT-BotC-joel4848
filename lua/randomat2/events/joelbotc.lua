@@ -652,7 +652,7 @@ function EVENT:End(isActive)
     if isActive then
         local timerCount = #JoelBotC.players
 
-        for timerNumber 1, timerCount do
+        for timerNumber = 1, timerCount do
             local timerName = "rdmtJoelBotCMoveBigHand_" .. timerCount
              timer.Remove(timerName)
         end
