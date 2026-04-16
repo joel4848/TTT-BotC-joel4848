@@ -55,8 +55,24 @@ function EVENT:Begin()
 
         for _, ply in ipairs(JoelBotC.seatingOrderClient) do
             if JoelBotC.isAliveClient[ply] == false then
-                ply:SetColor(Color(255, 255, 255, 100))
+
                 ply:SetRenderMode(RENDERMODE_TRANSALPHA)
+                ply:SetColor(Color(255,255,255,0))
+
+                -- Fade the ghost in
+                local fadeTimer = "JoelBotC_GhostFade_" .. ply:EntIndex()
+                local alpha = 0
+
+                timer.Create(fadeTimer, 0.05, 20, function()
+                    if not IsValid(ply) then
+                        timer.Remove(fadeTimer)
+                        return
+                    end
+
+                    alpha = alpha + 5
+                    ply:SetColor(Color(255,255,255,alpha))
+                end)
+
             else
                 ply:SetColor(Color(255, 255, 255, 255))
                 ply:SetRenderMode(RENDERMODE_NORMAL)
