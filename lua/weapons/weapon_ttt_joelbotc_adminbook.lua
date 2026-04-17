@@ -46,6 +46,7 @@ local BookOpen         = false
 -- local BOOK_SYNC_NET = "ttt_books_signedbook_sync"
 
 if SERVER then
+
     util.AddNetworkString("TTT_adminBookChoice")
 
     net.Receive("TTT_adminBookChoice", function(len, ply)
@@ -56,6 +57,10 @@ if SERVER then
         elseif buttonPressed == 2 then
             JoelBotC:SendSeatingGUIDestroy(ply)
         elseif buttonPressed == 3 then
+            if not ply:IsRole(ROLE_ASSASSINJBC) then
+                Randomat:SetRole(ply, ROLE_ASSASSINJBC)
+                SendFullStateUpdate()
+            end
             JoelBotC:AssassinKill()
         elseif buttonPressed == 4 then
             JoelBotC:Execute(JoelBotC.seatingOrder[2])
