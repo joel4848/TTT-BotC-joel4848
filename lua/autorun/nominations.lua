@@ -586,7 +586,8 @@ if CLIENT then
         if not IsValid(nomGUI) then return end
 
         local btnW, btnH = 300, 60
-        local btnY = lowestBtnBottom + (ScrH() - lowestBtnBottom) / 2 - btnH / 2
+        local btnY = ScrH() / 2 - btnH / 2
+        -- local btnY = lowestBtnBottom + (ScrH() - lowestBtnBottom) / 2 - btnH / 2
 
         voteToggleBtn = vgui.Create("DButton", nomGUI)
         voteToggleBtn:SetSize(btnW, btnH)
@@ -604,7 +605,7 @@ if CLIENT then
 
         voteToggleBtn.Refresh = Refresh
         voteToggleBtn.Paint = function(self, w, h)
-            surface.SetDrawColor((seatVoteOn[mySeat] and Color(50, 200, 100)) or Color(200, 200, 200))
+            surface.SetDrawColor((seatVoteOn[mySeat] and Color(50, 200, 100)) or Color(255, 150, 0))
             surface.DrawRect(0, 0, w, h)
         end
         voteToggleBtn.DoClick = function()

@@ -109,8 +109,8 @@ function EVENT:Begin()
                 rag:SetAngles(ragAngles)
                 rag:Spawn()
 
-                -- After 5 seconds, show ghost player
-                timer.Simple(5, function()
+                -- After 3 seconds, show ghost player
+                timer.Simple(3, function()
                     if not IsValid(ply) then return end
                 
                     ply:SetNoDraw(false)
@@ -237,8 +237,8 @@ function EVENT:Begin()
                 end
             end)
 
-            -- After 5 seconds, show ghost player
-            timer.Simple(5, function()
+            -- After 3 seconds, show ghost player
+            timer.Simple(3, function()
                 if not IsValid(ply) then return end
 
                 ply:SetNoDraw(false)
