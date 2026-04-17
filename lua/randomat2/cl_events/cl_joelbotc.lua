@@ -16,6 +16,26 @@ function EVENT:Begin()
 
     JoelBotC.eventActiveClient = true
 
+    self:AddHook("TTTTargetIDPlayerRing", function(ent, client, ring_visible)
+        return false
+    end)
+
+    self:AddHook("TTTTargetIDPlayerText", function(ent, client, text, col)
+        return false
+    end)
+
+    self:AddHook("TTTTargetIDPlayerRoleIcon", function(v, client, role, noz, color_role)
+        return false
+    end)
+
+    self:AddHook("TTTTargetIDPlayerTargetIcon", function(v, client, showJester)
+        return false
+    end)
+
+    self:AddHook("TTTScoreboardPlayerRole", function(ply, client, color, roleText)
+        return false, false 
+    end)
+
     hook.Add("ScoreboardShow", "JoelBotC_BlockScoreboardShow", function()
         if JoelBotC.clientGUIOpen then
             return true
@@ -63,13 +83,13 @@ function EVENT:Begin()
                 local fadeTimer = "JoelBotC_GhostFade_" .. ply:EntIndex()
                 local alpha = 0
 
-                timer.Create(fadeTimer, 0.05, 20, function()
+                timer.Create(fadeTimer, 0.05, 100, function()
                     if not IsValid(ply) then
                         timer.Remove(fadeTimer)
                         return
                     end
 
-                    alpha = alpha + 5
+                    alpha = alpha + 1
                     ply:SetColor(Color(255,255,255,alpha))
                 end)
 
@@ -142,6 +162,7 @@ function EVENT:End()
     JoelBotC:BotCTitleDestroy()
 
     -- Remove hooks
+
     hook.Remove("ScoreboardShow", "JoelBotC_BlockScoreboardShow")
     hook.Remove("ScoreboardHide", "JoelBotC_BlockScoreboardHide")
     hook.Remove("PlayerButtonDown", "JoelBotC_EnableMouseInGUI")

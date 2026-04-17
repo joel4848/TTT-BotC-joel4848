@@ -55,7 +55,12 @@ local original_COLOR_MONSTER = {}
 JoelBotC.players = JoelBotC.players or {}
 JoelBotC.isAlive = JoelBotC.isAlive or {}
 
+local originalDetectiveCvar = nil
+
 function EVENT:Begin()
+
+    originalDetectiveCvar = GetConVar("ttt_detectives_hide_special_mode"):GetInt()
+    GetConVar("ttt_detectives_hide_special_mode"):SetInt(2)
 
     function JoelBotC:AliveDeadUpdate()
         net.Start("rdmtJoelBotCAliveDeadUpdate")
@@ -73,57 +78,67 @@ function EVENT:Begin()
         ply.BotCDead = true
         JoelBotC.isAlive[ply] = false
 
-        -- Play the falling death animation
         ply:DoAnimationEvent(ACT_GMOD_DEATH, 2028)
 
+        local ragModel = nil
+        local ragPos = nil
+        local ragAngles = nil
+
         -- Wait until the player hits the ground
-        timer.Create("JoelBotC_RagdollWait_" .. ply:EntIndex(), 0.05, 0, function()
+        timer.Create("JoelBotC_RagdollWait_" .. ply:EntIndex(), 0, 0, function()
 
             if not IsValid(ply) then
                 timer.Remove("JoelBotC_RagdollWait_" .. ply:EntIndex())
                 return
             end
 
-            if ply:OnGround() then
+            if not ply:IsPlayingGesture(2028) then
                 timer.Remove("JoelBotC_RagdollWait_" .. ply:EntIndex())
-
-                -- Create ragdoll at the exact pose the player landed in
-                local rag = ply:CreateRagdoll()
 
                 -- Hide the player and their weapons
                 ply:SetNoDraw(true)
-
                 local executeeWeapons = ply:GetWeapons() or {}
                 for _, wep in ipairs(executeeWeapons) do
                     wep:SetNoDraw(true)
                 end
 
-                -- After 3 seconds, show the ghost player
-                timer.Simple(3, function()
+                -- Create ragdoll at the player's position
+                local rag = ents.Create("prop_ragdoll")
+                rag:SetModel(ragModel)
+                rag:SetPos(ragPos)
+                rag:SetAngles(ragAngles)
+                rag:Spawn()
+
+                -- After 5 seconds, show ghost player
+                timer.Simple(5, function()
                     if not IsValid(ply) then return end
-
+                
                     ply:SetNoDraw(false)
+                
+                    ply:SelectWeapon("weapon_ttt_unarmed")
+                
                     for _, wep in ipairs(executeeWeapons) do
-                        wep:SetNoDraw(false)
+                        if IsValid(wep) then
+                            wep:SetNoDraw(false)
+                        end
                     end
-
-                    -- ghost appearance
+                
+                    -- Ghost appearance
                     ply:SetColor(Color(255,255,255,100))
                     ply:SetRenderMode(RENDERMODE_TRANSALPHA)
-
+                
                     JoelBotC:AliveDeadUpdate()
-
-                    -- remove ragdoll if desired
-                    -- if IsValid(rag) then
-                    --     rag:Remove()
-                    -- end
-
+                
+                    -- Remove ragdoll
+                    -- if IsValid(rag) then rag:Remove() end
                 end)
             end
 
-        end)
+            ragModel = ply:GetModel()
+            ragPos = ply:GetPos()
+            ragAngles = ply:GetAngles()
 
-        
+        end)
     end
 
     function JoelBotC:Revive(ply)
@@ -138,38 +153,118 @@ function EVENT:Begin()
 
         ply:Freeze(true)
         ply:SetCanWalk(false)
+
         ply:DoAnimationEvent(ACT_GMOD_GESTURE_WAVE)
 
         local anvil = ents.Create("prop_physics")
         if not IsValid(anvil) then return end
 
         anvil:SetModel("models/minecraft/anvil.mdl")
-        anvil:SetPos(ply:GetPos() + Vector(0, 0, 2000))
-        anvil:SetAngles(Angle(0, 0, 0))
+        anvil:SetPos(ply:GetPos() + Vector(0,0,2000))
+        anvil:SetAngles(Angle(0,0,0))
         anvil:SetOwner(ply)
-        anvil:SetModelScale(0.7, 0)
+        anvil:SetModelScale(0.7,0)
+
+        -- Make anvil still work even if the player is indoors
+        anvil:SetCollisionGroup(COLLISION_GROUP_IN_VEHICLE)
 
         anvil:Spawn()
 
         local phys = anvil:GetPhysicsObject()
         if IsValid(phys) then
             phys:Wake()
-            phys:ApplyForceCenter(Vector(0, 0, -6000))
+            phys:SetMass(4000)
+            phys:ApplyForceCenter(Vector(0,0,-6000))
         end
 
-        timer.Simple(2.4, function()
-            ply:EmitSound("anvil_land_loud.wav", 511, 100, 1)
+        -- Enable collision shortly before impact
+        -- Probably redundant because I'm going to apply force to the ragdoll, but meh
+        timer.Simple(1, function()
+            if IsValid(anvil) then
+                print("Changed anvil collision group")
+                anvil:SetCollisionGroup(COLLISION_GROUP_NONE)
+            end
         end)
 
+        -- Bonk sound
+        timer.Simple(2.4, function()
+            if IsValid(ply) then
+                ply:EmitSound("anvil_land_loud.wav", 511, 100, 1)
+            end
+        end)
+
+        -- Kill player and spawn ragdoll just before impact
         timer.Simple(2.6, function()
             if not IsValid(ply) then return end
 
-            JoelBotC:Kill(ply)
-            ply:DoAnimationEvent(ACT_GMOD_DEATH, 2028)
+            if not ply.BotCDead then
+                ply.hasGhostVote = true
+            end
+
+            ply.BotCDead = true
+            JoelBotC.isAlive[ply] = false
+
+            -- Save the player's collision group and disable collisions with props
+            local oldCollision = ply:GetCollisionGroup()
+            ply:SetCollisionGroup(COLLISION_GROUP_WORLD)
+
+            -- Hide the player and their weapons
+            ply:SetNoDraw(true)
+            local executeeWeapons = ply:GetWeapons() or {}
+            for _, wep in ipairs(executeeWeapons) do
+                wep:SetNoDraw(true)
+            end
+
+            -- Create ragdoll at the player's position
+            local rag = ents.Create("prop_ragdoll")
+            rag:SetModel(ply:GetModel())
+            rag:SetPos(ply:GetPos())
+            rag:SetAngles(ply:GetAngles())
+            rag:Spawn()
+
+            -- Bonk the ragdoll into the ground like it got squished
+            for i = 0, rag:GetPhysicsObjectCount() - 1 do
+                local phys = rag:GetPhysicsObjectNum(i)
+                if IsValid(phys) then
+                    phys:ApplyForceCenter(Vector(0, 0, -50000))
+                end
+            end
+
+            -- Restore collision after 1 second
+            timer.Simple(1, function()
+                if IsValid(ply) then
+                    ply:SetCollisionGroup(oldCollision)
+                end
+            end)
+
+            -- After 5 seconds, show ghost player
+            timer.Simple(5, function()
+                if not IsValid(ply) then return end
+
+                ply:SetNoDraw(false)
+
+                ply:SelectWeapon("weapon_ttt_unarmed")
+
+                for _, wep in ipairs(executeeWeapons) do
+                    if IsValid(wep) then
+                        wep:SetNoDraw(false)
+                    end
+                end
+
+                -- Ghost appearance
+                ply:SetColor(Color(255,255,255,100))
+                ply:SetRenderMode(RENDERMODE_TRANSALPHA)
+
+                JoelBotC:AliveDeadUpdate()
+
+                -- Remove ragdoll
+                -- if IsValid(rag) then rag:Remove() end
+            end)
 
             if ply:IsFrozen() then
                 ply:Freeze(false)
             end
+
             ply:SetCanWalk(true)
 
             if IsValid(anvil) then
@@ -758,6 +853,10 @@ function EVENT:End(isActive)
         end
     end
 
+    -- Revert convars
+    if isActive then
+        GetConVar("ttt_detectives_hide_special_mode"):SetInt(originalDetectiveCvar)
+    end
 
     --------------------------------------------------------------------------------
     -- Role function stuff
