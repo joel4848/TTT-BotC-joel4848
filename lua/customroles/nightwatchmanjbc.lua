@@ -6,6 +6,8 @@ ROLE.nameplural = "Nightwatchmans"
 ROLE.nameext = "the Nightwatchman"
 ROLE.nameshort = "jbcnwm"
 
+ROLE.blockspawnconvars = true
+
 ROLE.desc = [[]]
 
 ROLE.shortdesc = ""

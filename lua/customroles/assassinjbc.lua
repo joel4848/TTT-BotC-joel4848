@@ -6,6 +6,8 @@ ROLE.nameplural = "Assassins"
 ROLE.nameext = "the Assassin"
 ROLE.nameshort = "jbcasn"
 
+ROLE.blockspawnconvars = true
+
 ROLE.desc = [[]]
 
 ROLE.shortdesc = ""

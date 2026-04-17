@@ -6,6 +6,8 @@ ROLE.nameplural = "Empaths"
 ROLE.nameext = "the Empath"
 ROLE.nameshort = "jbcemp"
 
+ROLE.blockspawnconvars = true
+
 ROLE.desc = [[]]
 
 ROLE.shortdesc = ""

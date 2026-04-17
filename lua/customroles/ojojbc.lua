@@ -6,6 +6,8 @@ ROLE.nameplural = "Ojos"
 ROLE.nameext = "the Ojo"
 ROLE.nameshort = "jbcojo"
 
+ROLE.blockspawnconvars = true
+
 ROLE.desc = [[]]
 
 ROLE.shortdesc = ""

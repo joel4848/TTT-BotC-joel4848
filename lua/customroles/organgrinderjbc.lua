@@ -6,6 +6,8 @@ ROLE.nameplural = "Organ Grinders"
 ROLE.nameext = "the Organ Grinder"
 ROLE.nameshort = "jbcorg"
 
+ROLE.blockspawnconvars = true
+
 ROLE.desc = [[]]
 
 ROLE.shortdesc = ""
