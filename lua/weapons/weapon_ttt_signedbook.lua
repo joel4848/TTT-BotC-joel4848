@@ -126,7 +126,7 @@ if CLIENT then
 
     function SWEP:BuildPageLayout(pageData, maxWidth)
         local segments = {}
-        
+
         if istable(pageData) and istable(pageData.Segments) then
             segments = pageData.Segments
         else
@@ -134,79 +134,87 @@ if CLIENT then
                 { text = tostring((pageData and pageData.Text) or "") }
             }
         end
-    
-        local lines = {}
-        local currentAlign = "left"
-        local currentLine = { tokens = {}, width = 0, align = "left" }
+
+        local lines      = {}
         local lineHeight = 18
-    
+
+        local currentLine = { tokens = {}, width = 0, align = "left" }
+
         local function pushLine()
             lines[#lines + 1] = currentLine
-            currentLine = { tokens = {}, width = 0, align = currentAlign }
+            currentLine = { tokens = {}, width = 0, align = currentLine.align }
         end
-    
+
+        local function switchAlign(newAlign)
+            if currentLine.align ~= newAlign or #currentLine.tokens > 0 then
+                if #currentLine.tokens > 0 then
+                    lines[#lines + 1] = currentLine
+                end
+                currentLine = { tokens = {}, width = 0, align = newAlign }
+            end
+        end
+
         local function addToken(tokenText, fontName, tokenColor)
             if tokenText == "" then return end
-        
+
             surface.SetFont(fontName)
             local tokenW, tokenH = surface.GetTextSize(tokenText)
             lineHeight = math.max(lineHeight, tokenH + 3)
-        
+
             if currentLine.width > 0 and currentLine.width + tokenW > maxWidth then
                 pushLine()
             end
-        
+
             currentLine.tokens[#currentLine.tokens + 1] = {
                 text  = tokenText,
                 font  = fontName,
                 color = tokenColor,
             }
-        
             currentLine.width = currentLine.width + tokenW
         end
-    
+
         local function processText(rawText, fontName, tokenColor, align)
             rawText = tostring(rawText or "")
-            currentAlign = align or "left"
-            currentLine.align = currentAlign
-        
+            align   = align or "left"
+
+            if align ~= currentLine.align then
+                switchAlign(align)
+            end
+
             local paragraphs = string.Split(rawText, "\n")
-        
+
             for i, paragraph in ipairs(paragraphs) do
                 if i > 1 then
                     pushLine()
                 end
-            
+
                 if paragraph ~= "" then
                     local matched = false
-                
-                    for word, trailingSpaces in paragraph:gmatch("([^%s]+)(%s*)") do
+                    for word, trailing in paragraph:gmatch("([^%s]+)(%s*)") do
                         matched = true
-                        addToken(word .. trailingSpaces, fontName, tokenColor)
+                        addToken(word .. trailing, fontName, tokenColor)
                     end
-                
                     if not matched then
                         addToken(paragraph, fontName, tokenColor)
                     end
                 end
             end
         end
-    
+
         for _, seg in ipairs(segments) do
-            local fontName = BuildFormattedFont(seg.bold, seg.italic, seg.underline)
+            local fontName   = BuildFormattedFont(seg.bold, seg.italic, seg.underline)
             local tokenColor = NormalizeSegmentColor(seg.color)
-        
             processText(seg.text, fontName, tokenColor, seg.align)
         end
-    
+
         if #currentLine.tokens > 0 then
             lines[#lines + 1] = currentLine
         end
-        
+
         if #lines == 0 then
             lines[1] = { tokens = {}, width = 0, align = "left" }
         end
-    
+
         return lines, lineHeight
     end
 

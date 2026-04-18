@@ -17,6 +17,7 @@ local function SanitisePages(pages)
                     bold      = seg.bold and true or false,
                     italic    = seg.italic and true or false,
                     underline = seg.underline and true or false,
+                    align     = (seg.align == "center" or seg.align == "right") and seg.align or "left",
                 }
 
                 if istable(seg.color) then

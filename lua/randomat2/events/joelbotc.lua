@@ -932,10 +932,10 @@ function EVENT:Begin()
                     
             -- "SEATING" title
             table.insert(seatingSegments, {
-                text = "SEATING:\n\n",
+                text = "Seating:\n\n",
                 color = Color(100,0,200),
                 bold = true,
-                italic = true,
+                italic = false,
                 underline = true,
                 align = "center"
             })
@@ -969,12 +969,39 @@ function EVENT:Begin()
                 author = "The Storyteller",
                 pages  = {
                 
+                    {Segments = {
+                        {text = "\n\nContents:", bold = true, align = "center"},
+                        {text = "\n\n"},
+                        {text = "Page 1: ", bold = true},
+                        {text = "Wtf is going on?"},
+                        {text = "\n"},
+                        {text = "Page 2: ", bold = true},
+                        {text = "Seating order"},
+                        {text = "\n"},
+                        {text = "Page 3: ", bold = true},
+                        {text = "Information you've learned"}
+                    }},
+
+                    {Segments = {
+                        {text = "Wtf is going on?", bold = true, underline = true, align = "center"},
+                        {text = "\n\n"},
+                        {text = "Hello, and welcome to "},
+                        {text = "Joel4848's ", bold = true},
+                        {text = "BotC in, uh, TTT!"},
+                        {text = "\n\n"},
+                        {text = "Your role is "},
+                        {text = "<placeholder> "},
+                        {text = "and you'll find your ability in the \"Information you've learned\" section."},
+                        {text = "\n\n"},
+                        {text = "This is a fully-automated, barely-tested, completely non-guaranteed implementation of BotC. If you enjoyed my other randomats then... that's a surprise."}
+                    }},
+
                     { Segments = seatingSegments },
                 
                     -- Next page etc.
-                    { Segments = {
-                        { text = "Test", bold = true, align = "center" }
-                    }}
+                    --{Segments = {
+                    --    {text = "Test", bold = true, align = "center"}
+                    --}}
                 
                 }
             })
