@@ -119,7 +119,16 @@ if SERVER then
     end
 
     function JoelBotC:DemonInfo()
-
+        -- Tell the Demon their bluffs
+        for _, ply in ipairs(JoelBotC.players) do
+            if ply.demon then
+                self:SmallNotify(
+                    "Your bluffs are " .. ROLE_STRINGS[JoelBotC.demonBluffs[1]] .. ", " .. ROLE_STRINGS[JoelBotC.demonBluffs[2]] .. " and " .. ROLE_STRINGS[JoelBotC.demonBluffs[3]],
+                    5,
+                    ply
+                )
+            end
+        end
     end
 
     function JoelBotC:NextNightStep()
