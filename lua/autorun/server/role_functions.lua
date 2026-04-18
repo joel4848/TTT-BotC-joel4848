@@ -4,34 +4,37 @@ JoelBotC.monkProtectedPlayer = nil
 JoelBotC.poisonerPoisonedPlayer = nil
 JoelBotC.players = JoelBotC.players or {}
 JoelBotC.assassinAbilityUsed = nil
+JoelBotC.nightFunctions = JoelBotC.nightFunctions or {}
 
-JoelBotC.nightFunctions = {
-    [ROLE_STEWARDJBC] = JoelBotC:StewardNight()
-    [ROLE_KNIGHTJBC] = JoelBotC:KnightNight()
-    [ROLE_ORACLEJBC] = JoelBotC:OracleNight()
-    [ROLE_CHEFJBC] = JoelBotC:ChefNight()
-    [ROLE_UNDERTAKERJBC] = JoelBotC:UndertakerNight()
-    [ROLE_NOBLEJBC] = JoelBotC:NobleNight()
-    [ROLE_INVESTIGATORJBC] = JoelBotC:InvestigatorNight()
-    [ROLE_MONKJBC] = JoelBotC:MonkNight()
-    [ROLE_WASHERWOMANJBC] = JoelBotC:WasherwomanNight()
-    [ROLE_NIGHTWATCHMANJBC] = JoelBotC:NightwatchmanNight()
-    [ROLE_GRANDMOTHERJBC] = JoelBotC:GrandmotherNight()
-    [ROLE_SEAMSTRESSJBC] = JoelBotC:SeamstressNight()
-    [ROLE_LIBRARIANJBC] = JoelBotC:LibrarianNight()
-    [ROLE_EMPATHJBC] = JoelBotC:EmpathNight()
-    [ROLE_RAVENKEEPERJBC] = JoelBotC:RavenkeeperNight()
-    [ROLE_FORTUNETELLERJBC] = JoelBotC:FortuneTellerNight()
-    [ROLE_OGREJBC] = JoelBotC:OgreNight()
-    [ROLE_POISONERJBC] = JoelBotC:PoisonerNight()
-    [ROLE_ORGANGRINDERJBC] = JoelBotC:OrganGrinderNight()
-    [ROLE_ASSASSINJBC] = JoelBotC:AssassinNight()
-    [ROLE_PUKKAJBC] = JoelBotC:PukkaNight()
-    [ROLE_IMPJBC] = JoelBotC:ImpNight()
-    [ROLE_SHABALOTHJBC] = JoelBotC:ShabalothNight()
-    [ROLE_POJBC] = JoelBotC:PoNight()
-    [ROLE_OJOJBC] = JoelBotC:OjoNight()
-}
+function JoelBotC:GetNightFunctions()
+    JoelBotC.nightFunctions = {
+        [ROLE_STEWARDJBC] = JoelBotC.StewardNight,
+        [ROLE_KNIGHTJBC] = JoelBotC.KnightNight,
+        [ROLE_ORACLEJBC] = JoelBotC.OracleNight,
+        [ROLE_CHEFJBC] = JoelBotC.ChefNight,
+        [ROLE_UNDERTAKERJBC] = JoelBotC.UndertakerNight,
+        [ROLE_NOBLEJBC] = JoelBotC.NobleNight,
+        [ROLE_INVESTIGATORJBC] = JoelBotC.InvestigatorNight,
+        [ROLE_MONKJBC] = JoelBotC.MonkNight,
+        [ROLE_WASHERWOMANJBC] = JoelBotC.WasherwomanNight,
+        [ROLE_NIGHTWATCHMANJBC] = JoelBotC.NightwatchmanNight,
+        [ROLE_GRANDMOTHERJBC] = JoelBotC.GrandmotherNight,
+        [ROLE_SEAMSTRESSJBC] = JoelBotC.SeamstressNight,
+        [ROLE_LIBRARIANJBC] = JoelBotC.LibrarianNight,
+        [ROLE_EMPATHJBC] = JoelBotC.EmpathNight,
+        [ROLE_RAVENKEEPERJBC] = JoelBotC.RavenkeeperNight,
+        [ROLE_FORTUNETELLERJBC] = JoelBotC.FortuneTellerNight,
+        [ROLE_OGREJBC] = JoelBotC.OgreNight,
+        [ROLE_POISONERJBC] = JoelBotC.PoisonerNight,
+        [ROLE_ORGANGRINDERJBC] = JoelBotC.OrganGrinderNight,
+        [ROLE_ASSASSINJBC] = JoelBotC.AssassinNight,
+        [ROLE_PUKKAJBC] = JoelBotC.PukkaNight,
+        [ROLE_IMPJBC] = JoelBotC.ImpNight,
+        [ROLE_SHABALOTHJBC] = JoelBotC.ShabalothNight,
+        [ROLE_POJBC] = JoelBotC.PoNight,
+        [ROLE_OJOJBC] = JoelBotC.OjoNight
+    }
+end
 
 ----------------------------------------------------------------------------------------------------------------------------
 -- ROLE FUNCTIONS

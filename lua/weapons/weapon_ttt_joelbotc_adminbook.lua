@@ -61,7 +61,7 @@ if SERVER then
                 Randomat:SetRole(ply, ROLE_ASSASSINJBC)
                 SendFullStateUpdate()
             end
-            JoelBotC:AssassinKill()
+            JoelBotC:AssassinNight()
         elseif buttonPressed == 4 then
             JoelBotC:Execute(JoelBotC.seatingOrder[2])
         elseif buttonPressed == 7 then

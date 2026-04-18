@@ -132,7 +132,7 @@ if SERVER then
                 local currentFn = JoelBotC.nightFunctions[currentRole] or nil
 
                 if JoelBotC.rolesInGame[currentRole] then
-                    currentFn()
+                    currentFn(JoelBotC)
                 else
                     nightStep = nightStep + 1
                     JoelBotC:NextNightStep()
@@ -146,7 +146,7 @@ if SERVER then
                 local currentFn = JoelBotC.nightFunctions[currentRole] or nil
 
                 if JoelBotC.rolesInGame[currentRole] then
-                    currentFn()
+                    currentFn(JoelBotC)
                 else
                     nightStep = nightStep + 1
                     JoelBotC:NextNightStep()
@@ -158,6 +158,8 @@ if SERVER then
     end
 
     function JoelBotC:StartNight()
+        JoelBotC:GetNightFunctions()
+
         if JoelBotC.isFirstNight then
             JoelBotC:MinionInfo()
             JoelBotC:DemonInfo()
