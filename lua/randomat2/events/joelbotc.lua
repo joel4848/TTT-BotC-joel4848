@@ -54,6 +54,8 @@ local original_COLOR_MONSTER = {}
 
 JoelBotC.players = JoelBotC.players or {}
 JoelBotC.isAlive = JoelBotC.isAlive or {}
+JoelBotC.rolesInGame = JoelBotC.rolesInGame or {}
+JoelBotC.rolePool = JoelBotC.rolePool or {}
 
 local originalDetectiveCvar = nil
 
@@ -709,9 +711,9 @@ function EVENT:Begin()
 
     -- Make working copies of character type tables and shuffle (Can one shuffle too much?)
     local townsfolkPool = table.Copy(enabledTownsfolk)
-    local outsiderPool  = table.Copy(enabledOutsiders)
-    local minionPool    = table.Copy(JoelBotC.enabledMinions)
-    local demonPool     = table.Copy(enabledDemons)
+    local outsiderPool = table.Copy(enabledOutsiders)
+    local minionPool = table.Copy(JoelBotC.enabledMinions)
+    local demonPool = table.Copy(enabledDemons)
 
     table.Shuffle(townsfolkPool)
     table.Shuffle(outsiderPool)
@@ -719,21 +721,23 @@ function EVENT:Begin()
     table.Shuffle(demonPool)
 
     -- Fill the master role pool
-    local rolePool = {}
+    JoelBotC.rolePool = {}
 
     local function AddRoles(pool, amount, alignment)
         for i = 1, amount do
             local role = table.remove(pool)
             if role then
-                rolePool[#rolePool + 1] = {role = role, alignment = alignment}
+                JoelBotC.rolePool[#JoelBotC.rolePool + 1] = {role = role, alignment = alignment}
             end
         end
     end
 
     AddRoles(townsfolkPool, townsfolkAmount, "townsfolk")
-    AddRoles(outsiderPool,  outsidersAmount, "outsider")
-    AddRoles(minionPool,    minionsAmount,   "minion")
-    AddRoles(demonPool,     demonsAmount,    "demon")
+    AddRoles(outsiderPool, outsidersAmount, "outsider")
+    AddRoles(minionPool, minionsAmount, "minion")
+    AddRoles(demonPool, demonsAmount, "demon")
+
+    JoelBotC:DetermineRolesInGame()
 
     -- Create Demon's bluff pool (not-in-play good roles) -------------------------------------------------------
     JoelBotC.demonBluffsTownsfolkPool = {}
@@ -798,7 +802,7 @@ function EVENT:Begin()
         --     print(key, ROLE_STRINGS[value])
         -- end
 
-        for _, role in ipairs(rolePool) do
+        for _, role in ipairs(JoelBotC.rolePool) do
             if role == ROLE_EMPATHJBC or role == ROLE_FORTUNETELLERJBC then
                 table.RemoveByValue(empathFTPool, role)
             end
@@ -823,11 +827,11 @@ function EVENT:Begin()
     -- end
 
     -- More shufflage
-    table.Shuffle(rolePool)
+    table.Shuffle(JoelBotC.rolePool)
 
     -- Time to actually assign roles to players!
     for i, ply in ipairs(JoelBotC.players) do
-        local entry = rolePool[i]
+        local entry = JoelBotC.rolePool[i]
 
         -- Reset flags because I forgot this like an idiot and got VERY confused during testing
         ply.townsfolk = nil
@@ -979,6 +983,11 @@ function EVENT:Begin()
         end
     end)
 
+    ----------------------------------------------------------------------------------------------
+    -- Start actual BotC game!
+    ----------------------------------------------------------------------------------------------
+    JoelBotC.isFirstNight = true
+
 end
 
 function EVENT:End(isActive)
@@ -1027,6 +1036,11 @@ function EVENT:End(isActive)
     -- Revert convars
     if isActive then
         GetConVar("ttt_detectives_hide_special_mode"):SetInt(originalDetectiveCvar)
+    end
+
+    -- Clear active roles table (I think this is the right way to do it?)
+    for role, _ in ipairs(JoelBotC.rolesInGame) do
+        JoelBotC.rolesInGame[role] = true
     end
 
     --------------------------------------------------------------------------------

@@ -3,7 +3,7 @@ JoelBotC.seatingOrderClient = JoelBotC.seatingOrderClient or {}
 JoelBotC.clientGUIOpen = JoelBotC.clientGUIOpen or nil
 
 -----------------------------------------------------------------------------------------
--- SHARED (Convars accessible on both client and server via FCVAR_REPLICATED)
+-- SHARED
 -----------------------------------------------------------------------------------------
 
 local nominationTimeCvar = CreateConVar("randomat_joelbotc_nomination_time", 15, FCVAR_REPLICATED, "Time (seconds) to make each nomination", 5, 60)

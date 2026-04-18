@@ -5,6 +5,34 @@ JoelBotC.poisonerPoisonedPlayer = nil
 JoelBotC.players = JoelBotC.players or {}
 JoelBotC.assassinAbilityUsed = nil
 
+JoelBotC.nightFunctions = {
+    [ROLE_STEWARDJBC] = JoelBotC:StewardNight()
+    [ROLE_KNIGHTJBC] = JoelBotC:KnightNight()
+    [ROLE_ORACLEJBC] = JoelBotC:OracleNight()
+    [ROLE_CHEFJBC] = JoelBotC:ChefNight()
+    [ROLE_UNDERTAKERJBC] = JoelBotC:UndertakerNight()
+    [ROLE_NOBLEJBC] = JoelBotC:NobleNight()
+    [ROLE_INVESTIGATORJBC] = JoelBotC:InvestigatorNight()
+    [ROLE_MONKJBC] = JoelBotC:MonkNight()
+    [ROLE_WASHERWOMANJBC] = JoelBotC:WasherwomanNight()
+    [ROLE_NIGHTWATCHMANJBC] = JoelBotC:NightwatchmanNight()
+    [ROLE_GRANDMOTHERJBC] = JoelBotC:GrandmotherNight()
+    [ROLE_SEAMSTRESSJBC] = JoelBotC:SeamstressNight()
+    [ROLE_LIBRARIANJBC] = JoelBotC:LibrarianNight()
+    [ROLE_EMPATHJBC] = JoelBotC:EmpathNight()
+    [ROLE_RAVENKEEPERJBC] = JoelBotC:RavenkeeperNight()
+    [ROLE_FORTUNETELLERJBC] = JoelBotC:FortuneTellerNight()
+    [ROLE_OGREJBC] = JoelBotC:OgreNight()
+    [ROLE_POISONERJBC] = JoelBotC:PoisonerNight()
+    [ROLE_ORGANGRINDERJBC] = JoelBotC:OrganGrinderNight()
+    [ROLE_ASSASSINJBC] = JoelBotC:AssassinNight()
+    [ROLE_PUKKAJBC] = JoelBotC:PukkaNight()
+    [ROLE_IMPJBC] = JoelBotC:ImpNight()
+    [ROLE_SHABALOTHJBC] = JoelBotC:ShabalothNight()
+    [ROLE_POJBC] = JoelBotC:PoNight()
+    [ROLE_OJOJBC] = JoelBotC:OjoNight()
+}
+
 ----------------------------------------------------------------------------------------------------------------------------
 -- ROLE FUNCTIONS
 ----------------------------------------------------------------------------------------------------------------------------
@@ -16,7 +44,7 @@ function JoelBotC:IsDroisoned(ply)
 end
 
 -- steward
-function JoelBotC:StewardInfo()
+function JoelBotC:StewardNight()
     local stewardInfo = nil
     
     for _, ply in ipairs(JoelBotC.players) do
@@ -39,7 +67,7 @@ function JoelBotC:StewardInfo()
 end
 
 -- knight
-function JoelBotC:KnightInfo()
+function JoelBotC:KnightNight()
     local knightInfo1 = nil
     local knightInfo2 = nil
     local knightInfoPool = {}
@@ -71,7 +99,7 @@ function JoelBotC:KnightInfo()
 end
 
 -- oracle
-function JoelBotC:OracleInfo()
+function JoelBotC:OracleNight()
     for _, ply in ipairs (JoelBotC.players) do
         if ply:IsOracle() then
             local evilDead = 0
@@ -98,7 +126,7 @@ function JoelBotC:OracleInfo()
 end
 
 -- chef
-function JoelBotC:ChefInfo()
+function JoelBotC:ChefNight()
     for _, ply in ipairs(JoelBotC.players) do
         if ply:IsChef() then
             local evilPairs = 0
@@ -145,7 +173,7 @@ end
 
 
 -- noble
-function JoelBotC:NobleInfo()
+function JoelBotC:NobleNight()
     for _, ply in ipairs(JoelBotC.players) do
         if ply:IsNoble() then
             local nobleInfo1 = nil
@@ -197,7 +225,7 @@ function JoelBotC:NobleInfo()
 end
 
 -- investigator
-function JoelBotC:InvestigatorInfo()
+function JoelBotC:InvestigatorNight()
     for _, ply in ipairs(JoelBotC.players) do
         if ply:IsInvestigator() then
             local investigatorInfo1 = nil
@@ -247,7 +275,7 @@ function JoelBotC:InvestigatorInfo()
 end
 
 -- monk
-function JoelBotC:MonkProtect()
+function JoelBotC:MonkNight()
     for _, ply in ipairs(JoelBotC.players) do
         if ply:IsMonk() and not ply.BotCDead then
             JoelBotC:SendSeatingGUICreate(ply)
@@ -302,7 +330,7 @@ function JoelBotC:MonkProtect()
 end
 
 -- washerwoman
-function JoelBotC:WasherwomanInfo()
+function JoelBotC:WasherwomanNight()
     for _, ply in ipairs(JoelBotC.players) do
         if ply:IsWasherwoman() then
             local washerwomanInfo1 = nil
@@ -342,7 +370,7 @@ function JoelBotC:WasherwomanInfo()
 end
 
 -- nightwatchman
-function JoelBotC:NightwatchmanInform()
+function JoelBotC:NightwatchmanNight()
     for _, ply in ipairs(JoelBotC.players) do
         if ply:IsNightwatchman() and not ply.BotCDead and not JoelBotC.nightwatchmanAbilityUsed then
             JoelBotC:SendSeatingGUICreate(ply)
@@ -398,7 +426,7 @@ end
 
 
 -- grandmother
-function JoelBotC:GrandmotherInfo()
+function JoelBotC:GrandmotherNight()
     for _, ply in ipairs(JoelBotC.players) do
         if ply:IsGrandmother() then
 
@@ -455,7 +483,7 @@ end
 
 
 -- librarian
-function JoelBotC:LibrarianInfo()
+function JoelBotC:LibrarianNight()
     for _, ply in ipairs(JoelBotC.players) do
         if ply:IsLibrarian() then
             local librarianInfo1 = nil
@@ -507,7 +535,7 @@ end
 
 
 -- empath
-function JoelBotC:EmpathInfo()
+function JoelBotC:EmpathNight()
     for _, ply in ipairs(JoelBotC.players) do
         if ply:IsEmpath() and ply:Alive() then
             local previousEmpathInfo = empathInfo or nil
@@ -649,7 +677,7 @@ end
 
 
 -- poisoner
-function JoelBotC:PoisonerPoison()
+function JoelBotC:PoisonerNight()
     for _, ply in ipairs(JoelBotC.players) do
         if ply:IsRole(ROLE_POSIONERJBC) and not ply.BotCDead then
             JoelBotC:SendSeatingGUICreate(ply)
@@ -714,7 +742,7 @@ end
 
 
 -- assassin
-function JoelBotC:AssassinKill()
+function JoelBotC:AssassinNight()
     for _, ply in ipairs(JoelBotC.players) do
         if ply:IsRole(ROLE_ASSASSINJBC) and not ply.BotCDead and not JoelBotC.assassinAbilityUsed then
             JoelBotC:SendSeatingGUICreate(ply)
