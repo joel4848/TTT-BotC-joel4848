@@ -123,6 +123,8 @@ if SERVER then
     -------------------------------------------------------------------------------------
 
     function JoelBotC:StartNominations()
+        JoelBotC.recentExecutee = nil
+        
         JoelBotC:SendNominationGUICreate()
 
         JoelBotC.nominationsOpen = true

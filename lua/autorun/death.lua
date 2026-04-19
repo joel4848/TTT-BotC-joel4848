@@ -2,6 +2,8 @@ JoelBotC = JoelBotC or {}
 
 JoelBotC.players = JoelBotC.players or {}
 JoelBotC.isAlive = JoelBotC.isAlive or {}
+JoelBotC.recentExecutee = JoelBotC.recentExecutee or nil
+JoelBotC.deadPlayers = JoelBotC.deadPlayers or {}
 
 if SERVER then
     
@@ -267,6 +269,8 @@ if SERVER then
     -- Execution kill (anvil go bonk)
     function JoelBotC:Execute(ply)
         if not IsValid(ply) or not ply:Alive() then return end
+
+        JoelBotC.recentExecutee = ply
 
         ply:Freeze(true)
         ply:SetCanWalk(false)

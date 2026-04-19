@@ -19,14 +19,12 @@ JoelBotC.players = JoelBotC.players or {}
 JoelBotC.isAlive = JoelBotC.isAlive or {}
 JoelBotC.rolesInGame = JoelBotC.rolesInGame or {}
 JoelBotC.rolePool = JoelBotC.rolePool or {}
+JoelBotC.recentExecutee = JoelBotC.recentExecutee or nil
+JoelBotC.deadPlayers = JoelBotC.deadPlayers or {}
 
 local originalDetectiveCvar = nil
 
 function EVENT:Begin()
-
-    -- Maybe redundant now, but better to be safe than sorry
-    originalDetectiveCvar = GetConVar("ttt_detectives_hide_special_mode"):GetInt()
-    GetConVar("ttt_detectives_hide_special_mode"):SetInt(2)
 
     JoelBotC:ChangeRoleColours()
 
@@ -40,9 +38,13 @@ function EVENT:Begin()
 
     JoelBotC:DetermineRolesInGame()
 
+    -- ~~~~~~~~~~~~~~ Add bag-changing function ~~~~~~~~~~~~~~
+
     JoelBotC:SelectDemonBluffs()
 
     JoelBotC:AssignRolesAndSeats()
+
+    JoelBotC.FortuneTellerRedHerring()
 
     JoelBotC.isFirstNight = true
 
@@ -95,15 +97,18 @@ function EVENT:End(isActive)
         end
     end
 
-    -- Revert convars
-    if isActive then
-        GetConVar("ttt_detectives_hide_special_mode"):SetInt(originalDetectiveCvar)
-    end
-
     -- Clear active roles table (I think this is the right way to do it?)
     for role, _ in ipairs(JoelBotC.rolesInGame) do
-        JoelBotC.rolesInGame[role] = true
+        JoelBotC.rolesInGame[role] = false
     end
+
+    -- Misc stuff
+    JoelBotC.rolePool = {}
+    JoelBotC.deadPlayers = JoelBotC.deadPlayers or {}
+    JoelBotC.unusedTownsfolk = {}
+    JoelBotC.unusedOutsiders = {}
+    JoelBotC.unusedMinions = {}
+    JoelBotC.unusedDemons = {}
 
     --------------------------------------------------------------------------------
     -- Role function stuff

@@ -48,13 +48,18 @@ if SERVER then
     JoelBotC.isAlive = JoelBotC.isAlive or {}
     JoelBotC.rolesInGame = JoelBotC.rolesInGame or {}
     JoelBotC.rolePool = JoelBotC.rolePool or {}
+    JoelBotC.deadPlayers = JoelBotC.deadPlayers or {}
+    JoelBotC.unusedTownsfolk = JoelBotC.unusedTownsfolk or {}
+    JoelBotC.unusedOutsiders = JoelBotC.unusedOutsiders or {}
+    JoelBotC.unusedMinions = JoelBotC.unusedMinions or {}
+    JoelBotC.unusedDemons = JoelBotC.unusedDemons or {}
 
     local townsfolkAmount = nil
     local outsidersAmount = nil
     local minionsAmount = nil
     local demonsAmount = nil
-    local enabledTownsfolk = {}
-    local enabledOutsiders = {}
+    JoelBotC.enabledTownsfolk = {}
+    JoelBotC.enabledOutsiders = {}
     JoelBotC.enabledMinions = {}
     local enabledDemons = {}
     JoelBotC.townsfolkPlayers = {}
@@ -67,6 +72,10 @@ if SERVER then
     JoelBotC.demonBluffsPool = {}
     JoelBotC.demonBluffs = {}
     JoelBotC.players = {}
+    JoelBotC.townsfolkInBag = {}
+    JoelBotC.outsidersInBag = {}
+    JoelBotC.minionsInBag = {}
+    JoelBotC.demonsInBag = {}
 
     function JoelBotC:ChangeRoleColours()
         -- Custom role colours
@@ -112,77 +121,81 @@ if SERVER then
 
     function JoelBotC:BuildGameScript()
         -- Determine roles on the 'script'
+        JoelBotC.enabledTownsfolk = {}
+        JoelBotC.enabledOutsiders = {}
+        JoelBotC.enabledMinions = {}
+        enabledDemons = {}
         if stewardEnabled then
-            table.insert(enabledTownsfolk, ROLE_STEWARDJBC)
+            table.insert(JoelBotC.enabledTownsfolk, ROLE_STEWARDJBC)
         end
         if knightEnabled then
-            table.insert(enabledTownsfolk, ROLE_KNIGHTJBC)
+            table.insert(JoelBotC.enabledTownsfolk, ROLE_KNIGHTJBC)
         end
         if oracleEnabled then
-            table.insert(enabledTownsfolk, ROLE_ORACLEJBC)
+            table.insert(JoelBotC.enabledTownsfolk, ROLE_ORACLEJBC)
         end
         if chefEnabled then
-            table.insert(enabledTownsfolk, ROLE_CHEFJBC)
+            table.insert(JoelBotC.enabledTownsfolk, ROLE_CHEFJBC)
         end
         if undertakerEnabled then
-            table.insert(enabledTownsfolk, ROLE_UNDERTAKERJBC)
+            table.insert(JoelBotC.enabledTownsfolk, ROLE_UNDERTAKERJBC)
         end
         if nobleEnabled then
-            table.insert(enabledTownsfolk, ROLE_NOBLEJBC)
+            table.insert(JoelBotC.enabledTownsfolk, ROLE_NOBLEJBC)
         end
         if investigatorEnabled then
-            table.insert(enabledTownsfolk, ROLE_INVESTIGATORJBC)
+            table.insert(JoelBotC.enabledTownsfolk, ROLE_INVESTIGATORJBC)
         end
         if monkEnabled then
-            table.insert(enabledTownsfolk, ROLE_MONKJBC)
+            table.insert(JoelBotC.enabledTownsfolk, ROLE_MONKJBC)
         end
         if washerwomanEnabled then
-            table.insert(enabledTownsfolk, ROLE_WASHERWOMANJBC)
+            table.insert(JoelBotC.enabledTownsfolk, ROLE_WASHERWOMANJBC)
         end
         if nightwatchmanEnabled then
-            table.insert(enabledTownsfolk, ROLE_NIGHTWATCHMANJBC)
+            table.insert(JoelBotC.enabledTownsfolk, ROLE_NIGHTWATCHMANJBC)
         end
         if grandmotherEnabled then
-            table.insert(enabledTownsfolk, ROLE_GRANDMOTHERJBC)
+            table.insert(JoelBotC.enabledTownsfolk, ROLE_GRANDMOTHERJBC)
         end
         if seamstressEnabled then
-            table.insert(enabledTownsfolk, ROLE_SEAMSTRESSJBC)
+            table.insert(JoelBotC.enabledTownsfolk, ROLE_SEAMSTRESSJBC)
         end
         if librarianEnabled then
-            table.insert(enabledTownsfolk, ROLE_LIBRARIANJBC)
+            table.insert(JoelBotC.enabledTownsfolk, ROLE_LIBRARIANJBC)
         end
         if slayerEnabled then
-            table.insert(enabledTownsfolk, ROLE_SLAYERJBC)
+            table.insert(JoelBotC.enabledTownsfolk, ROLE_SLAYERJBC)
         end
         if empathEnabled then
-            table.insert(enabledTownsfolk, ROLE_EMPATHJBC)
+            table.insert(JoelBotC.enabledTownsfolk, ROLE_EMPATHJBC)
         end
         if soldierEnabled then
-            table.insert(enabledTownsfolk, ROLE_SOLDIERJBC)
+            table.insert(JoelBotC.enabledTownsfolk, ROLE_SOLDIERJBC)
         end
         if ravenkeeperEnabled then
-            table.insert(enabledTownsfolk, ROLE_RAVENKEEPERJBC)
+            table.insert(JoelBotC.enabledTownsfolk, ROLE_RAVENKEEPERJBC)
         end
         if fortunetellerEnabled then
-            table.insert(enabledTownsfolk, ROLE_FORTUNETELLERJBC)
+            table.insert(JoelBotC.enabledTownsfolk, ROLE_FORTUNETELLERJBC)
         end
         if virginEnabled then
-            table.insert(enabledTownsfolk, ROLE_VIRGINJBC)
+            table.insert(JoelBotC.enabledTownsfolk, ROLE_VIRGINJBC)
         end
         if ogreEnabled then
-            table.insert(enabledOutsiders, ROLE_OGREJBC)
+            table.insert(JoelBotC.enabledOutsiders, ROLE_OGREJBC)
         end
         if moonchildEnabled then
-            table.insert(enabledOutsiders, ROLE_MOONCHILDJBC)
+            table.insert(JoelBotC.enabledOutsiders, ROLE_MOONCHILDJBC)
         end
         if saintEnabled then
-            table.insert(enabledOutsiders, ROLE_SAINTJBC)
+            table.insert(JoelBotC.enabledOutsiders, ROLE_SAINTJBC)
         end
         if drunkEnabled then
-            table.insert(enabledOutsiders, ROLE_DRUNKJBC)
+            table.insert(JoelBotC.enabledOutsiders, ROLE_DRUNKJBC)
         end
         if recluseEnabled then
-            table.insert(enabledOutsiders, ROLE_RECLUSEJBC)
+            table.insert(JoelBotC.enabledOutsiders, ROLE_RECLUSEJBC)
         end
         if poisonerEnabled then
             table.insert(JoelBotC.enabledMinions, ROLE_POISONERJBC)
@@ -219,6 +232,7 @@ if SERVER then
 
     function JoelBotC:BuildGameBag()
         -- Get a table of (tabulate?) living players
+        JoelBotC.players = {}
         for _, ply in player.Iterator() do
             if IsValid(ply) and not ply:IsSpec() then
                 table.insert(JoelBotC.players, ply)
@@ -233,6 +247,8 @@ if SERVER then
                 ply:Give("weapon_zm_carry")
             end
         end
+
+        JoelBotC.deadPlayers = {}
 
         -- Determine character type amounts
         if #JoelBotC.players == 15 then
@@ -304,14 +320,12 @@ if SERVER then
             demonsAmount = 0
         end
 
-        -- Assign character types to players
-
         -- Shuffle players
         table.Shuffle(JoelBotC.players)
 
         -- Make working copies of character type tables and shuffle (Can one shuffle too much?)
-        local townsfolkPool = table.Copy(enabledTownsfolk)
-        local outsiderPool = table.Copy(enabledOutsiders)
+        local townsfolkPool = table.Copy(JoelBotC.enabledTownsfolk)
+        local outsiderPool = table.Copy(JoelBotC.enabledOutsiders)
         local minionPool = table.Copy(JoelBotC.enabledMinions)
         local demonPool = table.Copy(enabledDemons)
 
@@ -336,6 +350,11 @@ if SERVER then
         AddRoles(outsiderPool, outsidersAmount, "outsider")
         AddRoles(minionPool, minionsAmount, "minion")
         AddRoles(demonPool, demonsAmount, "demon")
+
+        JoelBotC.unusedTownsfolk = table.Copy(townsfolkPool)
+        JoelBotC.unusedOutsiders = table.Copy(outsiderPool)
+        JoelBotC.unusedMinions = table.Copy(minionPool)
+        JoelBotC.unusedDemons = table.Copy(demonPool)
     end
 
     function JoelBotC:SelectDemonBluffs()
@@ -430,6 +449,7 @@ if SERVER then
     function JoelBotC:AssignRolesAndSeats()
         -- More shufflage
         table.Shuffle(JoelBotC.rolePool)
+        PrintTable(JoelBotC.rolePool)
 
         -- Time to actually assign roles to players!
         for i, ply in ipairs(JoelBotC.players) do
@@ -446,15 +466,19 @@ if SERVER then
             if entry.alignment == "townsfolk" then
                 ply.townsfolk = true
                 ply.goodTeam = true
+                table.Insert(JoelBotC.townsfolkInBag, entry.role)
             elseif entry.alignment == "outsider" then
                 ply.outsider = true
                 ply.goodTeam = true
+                table.Insert(JoelBotC.outsidersInBag, entry.role)
             elseif entry.alignment == "minion" then
                 ply.minion = true
                 ply.evilTeam = true
+                table.Insert(JoelBotC.minionsInBag, entry.role)
             elseif entry.alignment == "demon" then
                 ply.demon = true
                 ply.evilTeam = true
+                table.Insert(JoelBotC.demonsInBag, entry.role)
             end
 
             ply.botc_role = entry.role
