@@ -33,7 +33,6 @@ JoelBotC.otherNightOrderMaster = {
     ROLE_PUKKAJBC,
     ROLE_SHABALOTHJBC,
     ROLE_POJBC,
-    ROLE_OJOJBC,
     ROLE_ASSASSINJBC,
     ROLE_SWEETHEARTJBC,
     ROLE_GRANDMOTHERJBC,
@@ -86,7 +85,6 @@ if SERVER then
             [ROLE_IMPJBC] = false,
             [ROLE_SHABALOTHJBC] = false,
             [ROLE_POJBC] = false,
-            [ROLE_OJOJBC] = false
         }
 
         for _, entry in ipairs(JoelBotC.rolePool) do

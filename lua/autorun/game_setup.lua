@@ -36,7 +36,6 @@ if SERVER then
     local impEnabled = CreateConVar("randomat_joelbotc_imp_enabled", 1, FCVAR_NONE, "Whether the Imp is on the script", 0, 1):GetBool()
     local shabalothEnabled = CreateConVar("randomat_joelbotc_shabaloth_enabled", 1, FCVAR_NONE, "Whether the Shabaloth is on the script", 0, 1):GetBool()
     local poEnabled = CreateConVar("randomat_joelbotc_po_enabled", 1, FCVAR_NONE, "Whether the Po is on the script", 0, 1):GetBool()
-    local ojoEnabled = CreateConVar("randomat_joelbotc_ojo_enabled", 1, FCVAR_NONE, "Whether the Ojo is on the script", 0, 1):GetBool()
     -- /'Script' ----------------------------------------------------------------------------------------------------------------
 
     JoelBotC.original_COLOR_DETECTIVE = JoelBotC.original_COLOR_DETECTIVE or {}
@@ -224,9 +223,6 @@ if SERVER then
         end
         if poEnabled then
             table.insert(enabledDemons, ROLE_POJBC)
-        end
-        if ojoEnabled then
-            table.insert(enabledDemons, ROLE_OJOJBC)
         end
     end
 

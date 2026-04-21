@@ -47,7 +47,6 @@ function JoelBotC:GetNightFunctions()
         [ROLE_IMPJBC] = JoelBotC.ImpNight,
         [ROLE_SHABALOTHJBC] = JoelBotC.ShabalothNight,
         [ROLE_POJBC] = JoelBotC.PoNight,
-        [ROLE_OJOJBC] = JoelBotC.OjoNight
     }
 end
 
@@ -1258,4 +1257,3 @@ end
 
 
 
--- ojo
