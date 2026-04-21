@@ -23,7 +23,7 @@ if SERVER then
     local fortunetellerEnabled = CreateConVar("randomat_joelbotc_fortuneteller_enabled", 1, FCVAR_NONE, "Whether the Fortune Teller is on the script", 0, 1):GetBool()
     local virginEnabled = CreateConVar("randomat_joelbotc_virgin_enabled", 1, FCVAR_NONE, "Whether the Virgin is on the script", 0, 1):GetBool()
     local ogreEnabled = CreateConVar("randomat_joelbotc_ogre_enabled", 1, FCVAR_NONE, "Whether the Ogre is on the script", 0, 1):GetBool()
-    local moonchildEnabled = CreateConVar("randomat_joelbotc_moonchild_enabled", 1, FCVAR_NONE, "Whether the Moonchild is on the script", 0, 1):GetBool()
+    local sweetheartEnabled = CreateConVar("randomat_joelbotc_sweetheart_enabled", 1, FCVAR_NONE, "Whether the Sweetheart is on the script", 0, 1):GetBool()
     local saintEnabled = CreateConVar("randomat_joelbotc_saint_enabled", 1, FCVAR_NONE, "Whether the Saint is on the script", 0, 1):GetBool()
     local drunkEnabled = CreateConVar("randomat_joelbotc_drunk_enabled", 1, FCVAR_NONE, "Whether the Drunk is on the script", 0, 1):GetBool()
     local recluseEnabled = CreateConVar("randomat_joelbotc_recluse_enabled", 1, FCVAR_NONE, "Whether the Recluse is on the script", 0, 1):GetBool()
@@ -185,7 +185,7 @@ if SERVER then
         if ogreEnabled then
             table.insert(JoelBotC.enabledOutsiders, ROLE_OGREJBC)
         end
-        if moonchildEnabled then
+        if sweetheartEnabled then
             table.insert(JoelBotC.enabledOutsiders, ROLE_MOONCHILDJBC)
         end
         if saintEnabled then
@@ -466,19 +466,19 @@ if SERVER then
             if entry.alignment == "townsfolk" then
                 ply.townsfolk = true
                 ply.goodTeam = true
-                table.Insert(JoelBotC.townsfolkInBag, entry.role)
+                table.insert(JoelBotC.townsfolkInBag, entry.role)
             elseif entry.alignment == "outsider" then
                 ply.outsider = true
                 ply.goodTeam = true
-                table.Insert(JoelBotC.outsidersInBag, entry.role)
+                table.insert(JoelBotC.outsidersInBag, entry.role)
             elseif entry.alignment == "minion" then
                 ply.minion = true
                 ply.evilTeam = true
-                table.Insert(JoelBotC.minionsInBag, entry.role)
+                table.insert(JoelBotC.minionsInBag, entry.role)
             elseif entry.alignment == "demon" then
                 ply.demon = true
                 ply.evilTeam = true
-                table.Insert(JoelBotC.demonsInBag, entry.role)
+                table.insert(JoelBotC.demonsInBag, entry.role)
             end
 
             ply.botc_role = entry.role

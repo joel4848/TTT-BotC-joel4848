@@ -1,10 +1,10 @@
 local ROLE = {}
 
-ROLE.nameraw = "moonchildjbc"
-ROLE.name = "Moonchild"
-ROLE.nameplural = "Moonchilds"
-ROLE.nameext = "the Moonchild"
-ROLE.nameshort = "jbcmch"
+ROLE.nameraw = "sweetheartjbc"
+ROLE.name = "Sweetheart"
+ROLE.nameplural = "Sweethearts"
+ROLE.nameext = "the Sweetheart"
+ROLE.nameshort = "jbcswh"
 
 ROLE.blockspawnconvars = true
 

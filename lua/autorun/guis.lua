@@ -11,6 +11,7 @@ if SERVER then
     util.AddNetworkString("rdmtJoelBotCSeatingGUIOpen")
     util.AddNetworkString("rdmtJoelBotCSeatingGUIClose")
     util.AddNetworkString("rdmtJoelBotCSeatingGUIChoice")
+    util.AddNetworkString("rdmtJoelBotCOrganGrinderGUI")
 
     JoelBotC.seatingGUIButtonPressed = nil
     JoelBotC.seatingGUIPressingPlayer = nil
@@ -193,10 +194,122 @@ if CLIENT then
         end
     end
 
+    function JoelBotC:OgGUICreate()
+        ogGUI = vgui.Create("DPanel")
+        ogGUI:SetSize(ScrW(), ScrH())
+        ogGUI:SetPos(0, 0)
+        ogGUI:SetMouseInputEnabled(true)
+
+        timer.Create("rdmtJoelBotCOGChoice", 15, 1, function()
+            net.Start("rdmtJoelBotCOrganGrinderGUI")
+                net.WriteBool(false)
+            net.SendToServer()
+        
+            JoelBotC:OgGUIDestroy()
+        end)
+
+        ogGUI.Paint = function(self, w, h)
+            surface.SetDrawColor(255, 255, 255, 255)
+            draw.NoTexture()
+
+            local cx, cy = ScrW() / 2, ScrH() / 2
+
+            local timeLeft = math.ceil(timer.TimeLeft("rdmtJoelBotCOGChoice"))
+
+            draw.SimpleText(timeLeft .. " seconds: Do you want to be drunk or sober tomorrow?", "Minecraft40", cx + 2, cy +177, Color(0, 0, 0, 200), TEXT_ALIGN_CENTER, TEXT_ALIGN_CENTER)
+            draw.SimpleTextOutlined(timeLeft .. " seconds: Do you want to be drunk or sober tomorrow?", "Minecraft40", cx, cy + 175, Color(255, 255, 255, 255), TEXT_ALIGN_CENTER, TEXT_ALIGN_CENTER, 1, Color(0, 0, 0, 255))
+        end
+
+        local height = ScrH() / 10
+        local width = 2 * height
+        local Dx = ScrW()/2 - width / 2 - 200
+        local Sx = ScrW()/2 - width / 2 + 200
+        local y = ScrH()/2 - height / 2 + 300
+
+        local drunk = vgui.Create("DButton", ogGUI)
+        drunk:SetSize(width, height)
+        drunk:SetPos(Dx, y)
+        drunk:SetText("Drunk")
+        drunk:SetFont("Minecraft30")
+        drunk:SetTextColor(Color(0, 0, 0))
+        drunk.isPressed = false
+
+        drunk.Paint = function(self, w, h)
+            if self.isPressed and self:IsHovered() then
+                surface.SetDrawColor(0, 120, 255)
+            else
+                surface.SetDrawColor(255, 100, 0)
+            end
+            surface.DrawRect(0, 0, w, h)
+        end
+
+        drunk.OnMousePressed = function(self)
+            self.isPressed = true
+        end
+        drunk.OnMouseReleased = function(self)
+            if self.isPressed == true then
+                self.isPressed = false
+
+                net.Start("rdmtJoelBotCOrganGrinderGUI")
+                    net.WriteBool(true)
+                net.SendToServer()
+
+                timer.Remove("rdmtJoelBotCOGChoice")
+
+                JoelBotC:OgGUIDestroy()
+            end
+        end
+
+        local sober = vgui.Create("DButton", ogGUI)
+        sober:SetSize(width, height)
+        sober:SetPos(Sx, y)
+        sober:SetText("Sober")
+        sober:SetFont("Minecraft30")
+        sober:SetTextColor(Color(0, 0, 0))
+        sober.isPressed = false
+
+        sober.Paint = function(self, w, h)
+            if self.isPressed and self:IsHovered() then
+                surface.SetDrawColor(0, 120, 255)
+            else
+                surface.SetDrawColor(0, 255, 0)
+            end
+            surface.DrawRect(0, 0, w, h)
+        end
+
+        sober.OnMousePressed = function(self)
+            self.isPressed = true
+        end
+        sober.OnMouseReleased = function(self)
+            if self.isPressed == true then
+                self.isPressed = false
+
+                net.Start("rdmtJoelBotCOrganGrinderGUI")
+                    net.WriteBool(false)
+                net.SendToServer()
+
+                timer.Remove("rdmtJoelBotCOGChoice")
+
+                JoelBotC:OgGUIDestroy()
+            end
+        end
+    end
+
+    function JoelBotC:OgGUIDestroy()
+        if IsValid(ogGUI) then
+            ogGUI:Remove()
+            ogGUI = nil
+        end
+    end
+
     net.Receive("rdmtJoelBotCSeatingGUIOpen", function()
         JoelBotC:SeatingGUICreate()
     end)
     net.Receive("rdmtJoelBotCSeatingGUIClose", function()
         JoelBotC:SeatingGUIDestroy()
+    end)
+
+    net.Receive("rdmtJoelBotCOrganGrinderGUI", function()
+        JoelBotC:OgGUICreate()
     end)
 end

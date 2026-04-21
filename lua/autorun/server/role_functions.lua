@@ -39,6 +39,7 @@ function JoelBotC:GetNightFunctions()
         [ROLE_RAVENKEEPERJBC] = JoelBotC.RavenkeeperNight,
         [ROLE_FORTUNETELLERJBC] = JoelBotC.FortuneTellerNight,
         [ROLE_OGREJBC] = JoelBotC.OgreNight,
+        [ROLE_MOONCHILDJBC] = JoelBotC.MoonchildNight,
         [ROLE_POISONERJBC] = JoelBotC.PoisonerNight,
         [ROLE_ORGANGRINDERJBC] = JoelBotC.OrganGrinderNight,
         [ROLE_ASSASSINJBC] = JoelBotC.AssassinNight,
@@ -217,8 +218,39 @@ function JoelBotC:ChefNight()
 end
 
 -- undertaker
+function JoelBotC:UndertakerNight()
+    for _, ply in ipairs(JoelBotC.players) do
+        if ply:IsUndertaker() and not ply.BotCDead then
+            if JoelBotC.recentExecutee then
+                local undertakerInfoPlayer = nil
+                local undertakerInfoRole = nil
 
+                undertakerInfoPlayer = JoelBotC.recentExecutee
+                undertakerInfoRole = ROLE_STRINGS[JoelBotC.recentExecutee.botc_role]
 
+                if JoelBotC:IsDroisoned(ply) then
+                    local undertakerDroisonedRole = nil
+                    local undertakerDroisonedRolePool = {}
+                    local undertakerDroisonedAlreadyShownRolePool = undertakerDroisonedAlreadyShownRolePool or {}
+                    if JoelBotC:RegistersEvil(undertakerInfoPlayer) then
+                        undertakerDroisonedRolePool = table.Copy(JoelBotC.demonBluffs)
+                    else
+                        undertakerDroisonedRolePool = table.Copy(JoelBotC.enabledMinions)
+                    end
+
+                    table.Shuffle(undertakerDroisonedRolePool)
+                    undertakerInfoRole = ROLE_STRINGS[undertakerDroisonedRolePool[1]]
+                end
+
+                Randomat:SmallNotify(
+                    "You learn that " .. undertakerInfoPlayer .. " was the " .. undertakerInfoRole,
+                    5,
+                    ply
+                )
+            end
+        end
+    end
+end
 
 -- noble
 function JoelBotC:NobleNight()
@@ -521,7 +553,6 @@ function JoelBotC:NightwatchmanNight()
     end
 end
 
-
 -- grandmother
 function JoelBotC:GrandmotherNight()
     for _, ply in ipairs(JoelBotC.players) do
@@ -671,8 +702,6 @@ function JoelBotC:SeamstressNight()
         end
     end
 end
-
-
 
 -- librarian
 function JoelBotC:LibrarianNight()
@@ -843,8 +872,6 @@ function JoelBotC:EmpathNight()
     end
 end
 
-
-
 -- soldier
 -- No active role ability
 
@@ -928,12 +955,11 @@ function JoelBotC:RavenkeeperNight()
     end
 end
 
-
 -- fortuneteller
 function JoelBotC.FortuneTellerRedHerring()
     for _, ply in ipairs(JoelBotC.players) do
         if ply:IsFortuneTeller() then
-            if JoelBotC.redHerring = nil then
+            if JoelBotC.redHerring == nil then
                 local table fortunetellerRedHerringPool = table.Copy(JoelBotC.townsfolkPlayers)
 
                 table.Shuffle(fortunetellerRedHerringPool)
@@ -1058,7 +1084,7 @@ end
 
 
 
--- moonchild
+-- sweetheart
 
 
 
@@ -1136,8 +1162,25 @@ end
 
 
 -- organgrinder
+function JoelBotC:OrganGrinderNight()
+    for _, ply in ipairs(JoelBotC.players) do
+        if ply:IsOrganGrinder() and not ply.BotCDead then
+            net.Start("rdmtJoelBotCOrganGrinderGUI")
+            net.Send(ply)
+        end
+    end
+end
 
+net.Receive("rdmtJoelBotCOrganGrinderGUI", function(len, ply)
+    local response = net.ReadBool()
+    
+    for _, ply in ipairs(JoelBotC.players) do
+        if ply:IsOrganGrinder() then
+            ply.organgrinderDrunk = response
 
+        end
+    end
+end)
 
 -- assassin
 function JoelBotC:AssassinNight()
