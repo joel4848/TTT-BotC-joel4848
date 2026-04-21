@@ -57,12 +57,12 @@ if SERVER then
         elseif buttonPressed == 2 then
             JoelBotC:SendSeatingGUIDestroy(ply)
         elseif buttonPressed == 3 then
-            if not ply:IsRole(ROLE_ORGANGRINDERJBC) then
-                Randomat:SetRole(ply, ROLE_ORGANGRINDERJBC)
+            if not ply:IsRole(ROLE_IMPJBC) then
+                Randomat:SetRole(ply, ROLE_IMPJBC)
                 SendFullStateUpdate()
             end
             JoelBotC.ravenkeeperKilledByDemon = true
-            JoelBotC:OrganGrinderNight()
+            JoelBotC:ImpNight()
         elseif buttonPressed == 4 then
             JoelBotC:Execute(JoelBotC.seatingOrder[2])
         elseif buttonPressed == 7 then
@@ -213,7 +213,7 @@ if CLIENT then
         local buttonFunctions = {
             "Open Seat GUI",
             "Close Seat GUI",
-            "Open Organ Grinder GUI",
+            "Open Imp GUI",
             "Execute seat 2",
             "Open Nomination GUI",
             "Close Nomination GUI",

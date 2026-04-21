@@ -231,6 +231,7 @@ if SERVER then
                 ply.hasRole = nil
                 ply.currentRole = ply:GetRole() or nil
                 ply.BotCDead = false
+                ply.hasGhostVote = true
                 JoelBotC.isAlive[ply] = true
 
                 ply:StripWeapons()

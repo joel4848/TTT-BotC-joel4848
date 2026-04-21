@@ -25,10 +25,6 @@ if SERVER then
     function JoelBotC:Kill(ply)
         if not IsValid(ply) then return end
 
-        if not ply.BotCDead then
-            ply.hasGhostVote = true
-        end
-
         ply.BotCDead = true
         JoelBotC.isAlive[ply] = false
 
@@ -317,10 +313,6 @@ if SERVER then
         -- Kill player and spawn ragdoll just before impact
         timer.Simple(2.6, function()
             if not IsValid(ply) then return end
-
-            if not ply.BotCDead then
-                ply.hasGhostVote = true
-            end
 
             ply.BotCDead = true
             JoelBotC.isAlive[ply] = false

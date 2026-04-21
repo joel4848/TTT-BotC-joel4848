@@ -1184,6 +1184,8 @@ end)
 function JoelBotC:AssassinNight()
     for _, ply in ipairs(JoelBotC.players) do
         if ply:IsRole(ROLE_ASSASSINJBC) and not ply.BotCDead and not JoelBotC.assassinAbilityUsed then
+            
+            JoelBotC.assassinTargetTonight = nil
             JoelBotC:SendSeatingGUICreate(ply)
             
             Randomat:SmallNotify("15 Seconds: Use your ability tonight?\nChoose a player to kill", 5, ply)
@@ -1216,9 +1218,10 @@ function JoelBotC:AssassinNight()
             hook.Add("Think", "rdmtJoelBotcAssassinKill", function()
                 if JoelBotC.seatingGUIPressingPlayer == ply and JoelBotC.seatingGUIButtonPressed ~= nil then
                     if not JoelBotC:IsDroisoned(ply) then
-                        JoelBotC:Kill(JoelBotC.players[JoelBotC.seatingGUIButtonPressed])
+                        JoelBotC.assassinTargetTonight = JoelBotC.players[JoelBotC.seatingGUIButtonPressed]
+                        JoelBotC.assassinTargetTonight.BotCDead = true
                     end
-                    -- JoelBotC.assassinAbilityUsed = true
+                    JoelBotC.assassinAbilityUsed = true
                     JoelBotC:SendSeatingGUIDestroy(ply)
 
                     timer.Remove("rdmtJoelBotCAssassin10")
@@ -1241,11 +1244,155 @@ end
 
 
 -- pukka
+function JoelBotC:PukkaNight()
+    for _, ply in ipairs(JoelBotC.players) do
+        if ply:IsPukka() and not ply.BotCDead then
 
+            JoelBotC.pukkaPoisonedPlayer = JoelBotC.pukkaPoisonedPlayer or nil
+            JoelBotC.pukkaTonightPoisoned = nil
+            JoelBotC.pukkaTonightKilled = nil
+
+            JoelBotC:SendSeatingGUICreate(ply)
+
+            Randomat:SmallNotify("15 Seconds: Choose a player to poison tonight and kill tomorrow night", 5, ply)
+
+            timer.Create("rdmtJoelBotCPukka10", 5, 1, function()
+                Randomat:SmallNotify("10 seconds to choose", 5, ply)
+            end)
+            timer.Create("rdmtJoelBotCPukka5", 10, 1, function()
+                Randomat:SmallNotify("5 seconds to choose", 1, ply)
+            end)
+            timer.Create("rdmtJoelBotCPukka4", 11, 1, function()
+                Randomat:SmallNotify("4 seconds to choose", 1, ply)
+            end)
+            timer.Create("rdmtJoelBotCPukka3", 12, 1, function()
+                Randomat:SmallNotify("3 seconds to choose", 1, ply)
+            end)
+            timer.Create("rdmtJoelBotCPukka2", 13, 1, function()
+                Randomat:SmallNotify("2 seconds to choose", 1, ply)
+            end)
+            timer.Create("rdmtJoelBotCPukka1", 14, 1, function()
+                Randomat:SmallNotify("1 second to choose", 1, ply)
+            end)
+            timer.Create("rdmtJoelBotCPukka0", 15, 1, function()
+                hook.Remove("Think", "rdmtJoelBotcPukkaPoison")
+                JoelBotC:SendSeatingGUIDestroy(ply)
+            end)
+
+            JoelBotC.seatingGUIButtonPressed = nil
+            JoelBotC.seatingGUIPressingPlayer = nil
+
+            hook.Add("Think", "rdmtJoelBotcPukkaPoison", function()
+                if JoelBotC.seatingGUIPressingPlayer == ply and JoelBotC.seatingGUIButtonPressed ~= nil then
+                    if not JoelBotC:IsDroisoned(ply) then
+                        JoelBotC.pukkaTonightPoisoned = JoelBotC.players[JoelBotC.seatingGUIButtonPressed]
+                    end
+                    JoelBotC:SendSeatingGUIDestroy(ply)
+
+                    timer.Remove("rdmtJoelBotCPukka10")
+                    timer.Remove("rdmtJoelBotCPukka5")
+                    timer.Remove("rdmtJoelBotCPukka4")
+                    timer.Remove("rdmtJoelBotCPukka3")
+                    timer.Remove("rdmtJoelBotCPukka2")
+                    timer.Remove("rdmtJoelBotCPukka1")
+                    timer.Remove("rdmtJoelBotCPukka0")
+
+                    hook.Remove("Think", "rdmtJoelBotcPukkaPoison")
+                end
+            end)
+
+            if JoelBotC.pukkaPoisonedPlayer then
+                JoelBotC.pukkaTonightKilled = JoelBotC.pukkaPoisonedPlayer
+                JoelBotC.pukkaTonightKilled.BotCDead = true
+            end
+
+            JoelBotC.pukkaPoisonedPlayer = JoelBotC.pukkaTonightPoisoned
+        end
+    end
+end
 
 
 -- imp
+function JoelBotC:ImpNight()
+    for _, ply in ipairs(JoelBotC.players) do
+        if ply:IsImp() and not ply.BotCDead then
 
+            JoelBotC:SendSeatingGUICreate(ply)
+
+            Randomat:SmallNotify("15 Seconds: Choose a player to kill tonight", 5, ply)
+
+            timer.Create("rdmtJoelBotCImp10", 5, 1, function()
+                Randomat:SmallNotify("10 seconds to choose", 5, ply)
+            end)
+            timer.Create("rdmtJoelBotCImp5", 10, 1, function()
+                Randomat:SmallNotify("5 seconds to choose", 1, ply)
+            end)
+            timer.Create("rdmtJoelBotCImp4", 11, 1, function()
+                Randomat:SmallNotify("4 seconds to choose", 1, ply)
+            end)
+            timer.Create("rdmtJoelBotCImp3", 12, 1, function()
+                Randomat:SmallNotify("3 seconds to choose", 1, ply)
+            end)
+            timer.Create("rdmtJoelBotCImp2", 13, 1, function()
+                Randomat:SmallNotify("2 seconds to choose", 1, ply)
+            end)
+            timer.Create("rdmtJoelBotCImp1", 14, 1, function()
+                Randomat:SmallNotify("1 second to choose", 1, ply)
+            end)
+            timer.Create("rdmtJoelBotCImp0", 15, 1, function()
+                hook.Remove("Think", "rdmtJoelBotcImpKill")
+                JoelBotC:SendSeatingGUIDestroy(ply)
+            end)
+
+            JoelBotC.seatingGUIButtonPressed = nil
+            JoelBotC.seatingGUIPressingPlayer = nil
+            JoelBotC.impTargetedPlayer = nil
+            hook.Add("Think", "rdmtJoelBotcImpKill", function()
+                if JoelBotC.seatingGUIPressingPlayer == ply and JoelBotC.seatingGUIButtonPressed ~= nil then
+                    if not JoelBotC:IsDroisoned(ply) then
+                        JoelBotC.impTargetedPlayer = JoelBotC.players[JoelBotC.seatingGUIButtonPressed]
+                    end
+                    JoelBotC:SendSeatingGUIDestroy(ply)
+
+                    timer.Remove("rdmtJoelBotCImp10")
+                    timer.Remove("rdmtJoelBotCImp5")
+                    timer.Remove("rdmtJoelBotCImp4")
+                    timer.Remove("rdmtJoelBotCImp3")
+                    timer.Remove("rdmtJoelBotCImp2")
+                    timer.Remove("rdmtJoelBotCImp1")
+                    timer.Remove("rdmtJoelBotCImp0")
+
+                    if JoelBotC.impTargetedPlayer == ply then
+                        local aliveMinions = {}
+                        print("Alive minions:")
+                        PrintTable(aliveMinions)
+                        local newImp = nil
+                        for _, min in ipairs(JoelBotC.minionPlayers) do
+                            if min:IsScarletWoman() and not min.BotCDead then
+                                newImp = min
+                            elseif not min.BotCDead then
+                                table.insert(aliveMinions, min)
+                            end
+                        end
+
+                        if not newImp and #aliveMinions > 0 then
+                            table.Shuffle(aliveMinions)
+                            newImp = aliveMinions[1]
+                        end
+
+                        if newImp then
+                            Randomat:SetRole(newImp, ROLE_IMPJBC)
+                        end
+                    end
+
+                    JoelBotC.impTargetedPlayer.BotCDead = true
+
+                    hook.Remove("Think", "rdmtJoelBotcImpKill")
+                end
+            end)
+        end
+    end
+end
 
 
 -- po
