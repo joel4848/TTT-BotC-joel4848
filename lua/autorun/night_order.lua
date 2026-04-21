@@ -31,7 +31,6 @@ JoelBotC.otherNightOrderMaster = {
     ROLE_SCARLETWOMANJBC,
     ROLE_IMPJBC,
     ROLE_PUKKAJBC,
-    ROLE_SHABALOTHJBC,
     ROLE_POJBC,
     ROLE_ASSASSINJBC,
     ROLE_SWEETHEARTJBC,
@@ -83,7 +82,6 @@ if SERVER then
             [ROLE_BARONJBC] = false,
             [ROLE_PUKKAJBC] = false,
             [ROLE_IMPJBC] = false,
-            [ROLE_SHABALOTHJBC] = false,
             [ROLE_POJBC] = false,
         }
 

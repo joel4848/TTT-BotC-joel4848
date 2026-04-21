@@ -45,7 +45,6 @@ function JoelBotC:GetNightFunctions()
         [ROLE_ASSASSINJBC] = JoelBotC.AssassinNight,
         [ROLE_PUKKAJBC] = JoelBotC.PukkaNight,
         [ROLE_IMPJBC] = JoelBotC.ImpNight,
-        [ROLE_SHABALOTHJBC] = JoelBotC.ShabalothNight,
         [ROLE_POJBC] = JoelBotC.PoNight,
     }
 end
@@ -1249,11 +1248,6 @@ end
 
 
 
--- shabaloth
-
-
-
 -- po
-
 
 

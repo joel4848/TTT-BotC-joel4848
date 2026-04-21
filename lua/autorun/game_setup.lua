@@ -34,7 +34,6 @@ if SERVER then
     local baronEnabled = CreateConVar("randomat_joelbotc_baron_enabled", 1, FCVAR_NONE, "Whether the Baron is on the script", 0, 1):GetBool()
     local pukkaEnabled = CreateConVar("randomat_joelbotc_pukka_enabled", 1, FCVAR_NONE, "Whether the Pukka is on the script", 0, 1):GetBool()
     local impEnabled = CreateConVar("randomat_joelbotc_imp_enabled", 1, FCVAR_NONE, "Whether the Imp is on the script", 0, 1):GetBool()
-    local shabalothEnabled = CreateConVar("randomat_joelbotc_shabaloth_enabled", 1, FCVAR_NONE, "Whether the Shabaloth is on the script", 0, 1):GetBool()
     local poEnabled = CreateConVar("randomat_joelbotc_po_enabled", 1, FCVAR_NONE, "Whether the Po is on the script", 0, 1):GetBool()
     -- /'Script' ----------------------------------------------------------------------------------------------------------------
 
@@ -217,9 +216,6 @@ if SERVER then
         end
         if impEnabled then
             table.insert(enabledDemons, ROLE_IMPJBC)
-        end
-        if shabalothEnabled then
-            table.insert(enabledDemons, ROLE_SHABALOTHJBC)
         end
         if poEnabled then
             table.insert(enabledDemons, ROLE_POJBC)
