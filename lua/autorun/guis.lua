@@ -93,7 +93,7 @@ if CLIENT then
 
             -- Have to draw something apparently but then make it alpha 0
             botcTitleParent.Paint = function(self,w,h)
-                draw.RoundedBox(0,4,4,w-8,h-8,Color(0, 0, 0))
+                draw.RoundedBox(0,4,4,w-8,h-8,Color(0, 0, 0, 0))
             end
 
             -- Joel BotC title image
