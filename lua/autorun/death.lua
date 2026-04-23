@@ -4,6 +4,7 @@ JoelBotC.players = JoelBotC.players or {}
 JoelBotC.isAlive = JoelBotC.isAlive or {}
 JoelBotC.recentExecutee = JoelBotC.recentExecutee or nil
 JoelBotC.deadPlayers = JoelBotC.deadPlayers or {}
+JoelBotC.morningDeaths = JoelBotC.morningDeaths or {}
 
 if SERVER then
     
@@ -19,6 +20,57 @@ if SERVER then
         net.Start("rdmtJoelBotCAliveDeadUpdate")
             net.WriteTable(JoelBotC.isAlive)
         net.Broadcast()
+    end
+
+    -- 'Kill' during the night (disable their ability but don't run the kill animation yet)
+    function JoelBotC:NightPreKill(target, killer)
+        if not killer:IsRole(ROLE_ASSASSINJBC) then
+            if JoelBotC.monkProtectedPlayer == target and JoelBotC:IsRoleBotCAlive(ROLE_MONKJBC) then
+                return
+            end
+            if target:IsSoldier() then
+                return
+            end
+        end
+
+        target.BotCDead = true
+        table.insert(JoelBotC.morningDeaths, target)
+        
+        if target == JoelBotC.grandchild and not JoelBotC.grandmother.BotCDead then
+            JoelBotC.grandmother.BotCDead = true 
+            table.insert(JoelBotC.morningDeaths, JoelBotC.grandmother)
+        end
+    end
+
+    function JoelBotC:MorningDeaths()
+        
+        -- Announce who died in the night
+        local names = {}
+        for _, ply in ipairs(JoelBotC.morningDeaths) do
+            table.insert(names, ply:Nick())
+        end
+
+        -- Over-complicate things because I don't like the Oxford comma
+        local count = #names
+        local announcementMessage = ""
+
+        if count == 0 then
+            fullMessage = "No one died in the night"
+        elseif count == 1 then
+            fullMessage = "Last night, " .. names[1] .. " died"
+        elseif count == 2 then
+            fullMessage = "Last night, " .. names[1] .. " and " .. names[2] .. " died"
+        else
+            local namesPart = table.concat(names, ", ", 1, count - 1)
+            fullMessage = "Last night, " .. namesPart .. " and " .. names[count] .. " died"
+        end
+
+        Randomat:SmallNotify(announcementMessage, 5)
+
+        -- Now kill them!
+        for _, ply in ipairs(JoelBotC.morningDeaths) do
+            JoelBotC:Kill(ply)
+        end
     end
 
     -- Non-execution kill (WIP)
