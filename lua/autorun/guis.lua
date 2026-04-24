@@ -75,7 +75,7 @@ if CLIENT then
         if IsValid(client) and not client:IsSpec() then
             local scrW, scrH = ScrW(), ScrH()
 
-            local imgW, imgH = 2096, 538
+            local imgW, imgH = 2090, 860
             local maxScale = math.min(scrW / imgW, scrH / imgH)
             local finalScale = maxScale * 0.87 * titleFrameScale
             local width  = imgW * finalScale
