@@ -16,12 +16,24 @@ if SERVER then
     JoelBotC.seatingGUIButtonPressed = nil
     JoelBotC.seatingGUIPressingPlayer = nil
 
-    function JoelBotC:SendSeatingGUICreate(ply)
-        if ply then
-            net.Start("rdmtJoelBotCSeatingGUIOpen")
+    function JoelBotC:SendSeatingGUICreate(ply, btntxt)
+        if isstring(ply) then
+            btntxt = ply
+            ply = nil
+        end
+
+        net.Start("rdmtJoelBotCSeatingGUIOpen")
+
+        if btntxt then
+            net.WriteBool(true)
+            net.WriteString(btntxt)
+        else
+            net.WriteBool(false)
+        end
+
+        if IsValid(ply) and ply:IsPlayer() then
             net.Send(ply)
         else
-            net.Start("rdmtJoelBotCSeatingGUIOpen")
             net.Broadcast()
         end
     end
@@ -117,7 +129,7 @@ if CLIENT then
     local seatingGUIButtonSize = 60
     local seatingGUIScale = 1.0
 
-    function JoelBotC:SeatingGUICreate()
+    function JoelBotC:SeatingGUICreate(btntxt)
         if IsValid(seatingGUI) then return end
 
         JoelBotC.clientGUIOpen = true
@@ -126,11 +138,9 @@ if CLIENT then
         local count = #JoelBotC.seatingOrderClient
         if count <= 0 then return end
 
-
         local ratio = 4 
         local seatingGUIVerticalStretch = 0.6
         local seatingGUIPolePush = 0.1 
-
 
         seatingGUI = vgui.Create("DPanel")
         seatingGUI:SetSize(ScrW(), ScrH())
@@ -183,6 +193,73 @@ if CLIENT then
                 SeatingGUIButtonPressed(i)
             end
             btn.OnMouseReleased = function(self) self.isPressed = false end
+        end
+
+        if btntxt then
+            surface.SetFont("Minecraft25_bold")
+
+            local paddingX = 12
+            local paddingY = 12
+
+            local lines = string.Explode("\n", btntxt)
+
+            local maxW = 0
+            local totalH = 0
+
+            for _, line in ipairs(lines) do
+                local w, h = surface.GetTextSize(line)
+                maxW = math.max(maxW, w)
+                totalH = totalH + h
+            end
+
+            local btnW = maxW + paddingX * 2
+            local btnH = totalH + paddingY * 2
+
+            local cbx = cx - (btnW / 2)
+            local cby = cy - (btnH / 2)
+
+            local centerBtn = vgui.Create("DButton", seatingGUI)
+            centerBtn:SetSize(btnW, btnH)
+            centerBtn:SetPos(cbx, cby)
+            centerBtn:SetText("")
+            centerBtn.isPressed = false
+
+            centerBtn.Paint = function(self, w, h)
+
+                -- fill
+                surface.SetDrawColor(255, 220, 0)
+                surface.DrawRect(0, 0, w, h)
+
+                -- border
+                surface.SetDrawColor(0, 0, 0)
+                surface.DrawOutlinedRect(0, 0, w, h, 5)
+
+                -- draw text lines centered
+                surface.SetFont("Minecraft25_bold")
+
+                local y = (h - totalH) / 2
+
+                for _, line in ipairs(lines) do
+                    local tw, th = surface.GetTextSize(line)
+                    surface.SetTextColor(0, 0, 0)
+                    surface.SetTextPos((w - tw) / 2, y)
+                    surface.DrawText(line)
+                    y = y + th
+                end
+            end
+
+            centerBtn.OnMousePressed = function(self)
+                self.isPressed = true
+            end
+            centerBtn.OnMouseReleased = function(self)
+                if self.isPressed == true then
+                    self.isPressed = false
+
+                    SeatingGUIButtonPressed(-1)
+
+                    JoelBotC:SeatingGUIDestroy()
+                end
+            end
         end
     end
 
@@ -303,7 +380,14 @@ if CLIENT then
     end
 
     net.Receive("rdmtJoelBotCSeatingGUIOpen", function()
-        JoelBotC:SeatingGUICreate()
+        local hasButton = net.ReadBool()
+        local btntxt
+
+        if hasButton then
+            btntxt = net.ReadString()
+        end
+
+        JoelBotC:SeatingGUICreate(btntxt)
     end)
     net.Receive("rdmtJoelBotCSeatingGUIClose", function()
         JoelBotC:SeatingGUIDestroy()
