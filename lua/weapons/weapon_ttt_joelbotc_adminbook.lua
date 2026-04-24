@@ -53,16 +53,15 @@ if SERVER then
         local buttonPressed = net.ReadInt(8)
 
         if buttonPressed == 1 then
-            JoelBotC:SendSeatingGUICreate(ply)
+            JoelBotC:SendSeatingGUICreate("Not tonight\n(Close GUI)")
         elseif buttonPressed == 2 then
             JoelBotC:SendSeatingGUIDestroy(ply)
         elseif buttonPressed == 3 then
-            if not ply:IsRole(ROLE_IMPJBC) then
-                Randomat:SetRole(ply, ROLE_IMPJBC)
+            if not ply:IsRole(ROLE_POJBC) then
+                Randomat:SetRole(ply, ROLE_POJBC)
                 SendFullStateUpdate()
             end
-            JoelBotC.ravenkeeperKilledByDemon = true
-            JoelBotC:ImpNight()
+            JoelBotC:PoNight()
         elseif buttonPressed == 4 then
             JoelBotC:Execute(JoelBotC.seatingOrder[2])
         elseif buttonPressed == 7 then
@@ -71,6 +70,11 @@ if SERVER then
             JoelBotC:SendNominationGUICreate(ply)
         elseif buttonPressed == 6 then
             JoelBotC:SendNominationGUIDestroy(ply)
+        elseif buttonPressed == 8 then
+            print("Ran book button 8")
+            print("Is there a " .. ROLE_STRINGS[ply:GetRole()] .. " alive? = " .. tostring(JoelBotC:IsRoleBotCAlive(ply:GetRole())))
+        elseif buttonPressed == 9 then
+            JoelBotC:MorningDeaths()
         elseif buttonPressed == 11 then
             JoelBotC:StartNominations()
         end
@@ -110,6 +114,15 @@ if CLIENT then
         font = "Minecraft",
         size = 20,
         weight = 500,
+        additive = false,
+        antialias = true
+    })
+
+    resource.AddFile("resource/fonts/Minecraft.ttf")
+    surface.CreateFont("Minecraft25_bold", {
+        font = "Minecraft",
+        size = 25,
+        weight = 5000,
         additive = false,
         antialias = true
     })
@@ -213,13 +226,13 @@ if CLIENT then
         local buttonFunctions = {
             "Open Seat GUI",
             "Close Seat GUI",
-            "Open Imp GUI",
+            "Open Po GUI",
             "Execute seat 2",
             "Open Nomination GUI",
             "Close Nomination GUI",
             "Revive seat 2",
-            "Placeholder",
-            "Placeholder",
+            "Is Role Alive?",
+            "Morning deaths",
             "Placeholder",
             "Start Nominations",
             "Placeholder"

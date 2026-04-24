@@ -71,6 +71,8 @@ if SERVER then
         for _, ply in ipairs(JoelBotC.morningDeaths) do
             JoelBotC:Kill(ply)
         end
+
+        JoelBotC.morningDeaths = {}
     end
 
     -- Non-execution kill (WIP)
@@ -90,10 +92,6 @@ if SERVER then
                 -- Create ragdoll at player position/pose etc.
                 ply:CreateRagdoll()
                 local rag = ply:GetRagdollEntity()
-                print("rag pos = " .. tostring(rag:GetPos() or nil))
-                print("rag angles = " .. tostring(rag:GetAngles() or nil))
-                print("ply pos = " .. tostring(ply:GetPos() or nil))
-                print("ply angles = " .. tostring(ply:GetAngles() or nil))
                 
                 timer.Simple(0.2, function()
                     if not IsValid(rag) then return end
@@ -350,7 +348,6 @@ if SERVER then
         -- Probably redundant because I'm going to apply force to the ragdoll, but meh
         timer.Simple(1, function()
             if IsValid(anvil) then
-                print("Changed anvil collision group")
                 anvil:SetCollisionGroup(COLLISION_GROUP_NONE)
             end
         end)

@@ -143,7 +143,7 @@ function UpdateSignedBook(ply, newBookData)
 end
 
 ---------------------------------------------------------------
---  USAGE EXAMPLES
+--  How to use
 ---------------------------------------------------------------
 --[[
 GiveBookQuill(ply)

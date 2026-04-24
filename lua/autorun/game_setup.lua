@@ -442,7 +442,6 @@ if SERVER then
     function JoelBotC:AssignRolesAndSeats()
         -- More shufflage
         table.Shuffle(JoelBotC.rolePool)
-        PrintTable(JoelBotC.rolePool)
 
         -- Time to actually assign roles to players!
         for i, ply in ipairs(JoelBotC.players) do
@@ -582,16 +581,16 @@ if SERVER then
 
                     {Segments = {
                         {text = "Wtf is going on?", bold = true, underline = true, align = "center"},
-                        {text = "\n\n"},
+                        {text = "\n"},
                         {text = "Hello, and welcome to "},
                         {text = "Joel4848's ", bold = true},
                         {text = "BotC in, uh, TTT!"},
                         {text = "\n\n"},
                         {text = "Your role is "},
-                        {text = "<placeholder> "},
-                        {text = "and you'll find your ability in the \"Information you've learned\" section."},
+                        {text = ROLE_STRINGS_EXT[ply:GetRole()] .. "! "},
+                        {text = "You'll find your ability in the \"Information you've learned\" section."},
                         {text = "\n\n"},
-                        {text = "This is a fully-automated, barely-tested, completely non-guaranteed implementation of BotC. If you enjoyed my other randomats then... that's a surprise."}
+                        {text = "This is a fully-automated, barely-tested, completely non-guaranteed implementation of BotC. If you enjoyed my other randomats so far then... that's a surprise. Good luck!"}
                     }},
 
                     { Segments = seatingSegments },
