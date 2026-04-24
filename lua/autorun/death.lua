@@ -55,14 +55,14 @@ if SERVER then
         local announcementMessage = ""
 
         if count == 0 then
-            fullMessage = "No one died in the night"
+            announcementMessage = "No one died in the night"
         elseif count == 1 then
-            fullMessage = "Last night, " .. names[1] .. " died"
+            announcementMessage = "Last night, " .. names[1] .. " died"
         elseif count == 2 then
-            fullMessage = "Last night, " .. names[1] .. " and " .. names[2] .. " died"
+            announcementMessage = "Last night, " .. names[1] .. " and " .. names[2] .. " died"
         else
             local namesPart = table.concat(names, ", ", 1, count - 1)
-            fullMessage = "Last night, " .. namesPart .. " and " .. names[count] .. " died"
+            announcementMessage = "Last night, " .. namesPart .. " and " .. names[count] .. " died"
         end
 
         Randomat:SmallNotify(announcementMessage, 5)
