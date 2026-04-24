@@ -3,7 +3,7 @@ local EVENT = {}
 JoelBotC = JoelBotC or {}
 
 EVENT.Title = "JoelBotC"
-EVENT.Description = "You know how this works!"
+EVENT.Description = ""
 EVENT.id = "joelbotc"
 EVENT.Categories = {"gamemode", "largeimpact", "rolechange"}
 
@@ -121,7 +121,7 @@ function EVENT:End(isActive)
     timer.Remove("rdmtJoelBotCMonk2")
     timer.Remove("rdmtJoelBotCMonk1")
     timer.Remove("rdmtJoelBotCMonk0")
-    hook.Remove("Think", "rdmtJoelBotcMonkProtect")
+    hook.Remove("Think", "rdmtJoelBotCMonkProtect")
 
     -- Assassin
     timer.Remove("rdmtJoelBotCAssassin10")
@@ -131,7 +131,7 @@ function EVENT:End(isActive)
     timer.Remove("rdmtJoelBotCAssassin2")
     timer.Remove("rdmtJoelBotCAssassin1")
     timer.Remove("rdmtJoelBotCAssassin0")
-    hook.Remove("Think", "rdmtJoelBotcAssassinKill")
+    hook.Remove("Think", "rdmtJoelBotCAssassinKill")
 
 end
 
