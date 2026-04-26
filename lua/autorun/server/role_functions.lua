@@ -1115,9 +1115,6 @@ end
 
 
 
--- recluse
-
-
 
 -- poisoner
 function JoelBotC:PoisonerNight()
@@ -1181,6 +1178,19 @@ end
 
 
 -- organgrinder
+function JoelBotC:IsOGSober()
+    local organgrinderSober = nil
+    
+    for _, ply in ipairs(JoelBotC.players) do
+        if ply:IsOrganGrinder() and not ply.BotCDead and not JoelBotC:IsDroisoned(ply) then
+            organgrinderSober = true
+        end
+    end
+
+    return organgrinderSober
+
+end
+
 function JoelBotC:OrganGrinderNight()
     for _, ply in ipairs(JoelBotC.players) do
         if ply:IsOrganGrinder() and not ply.BotCDead then
@@ -1190,13 +1200,12 @@ function JoelBotC:OrganGrinderNight()
     end
 end
 
-net.Receive("rdmtJoelBotCOrganGrinderGUI", function(len, ply)
+net.Receive("rdmtJoelBotCOrganGrinderGUI", function(_, ply)
     local response = net.ReadBool()
     
     for _, ply in ipairs(JoelBotC.players) do
         if ply:IsOrganGrinder() then
             ply.organgrinderDrunk = response
-
         end
     end
 end)
