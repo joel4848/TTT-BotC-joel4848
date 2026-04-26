@@ -40,6 +40,10 @@ if SERVER then
             JoelBotC.grandmother.BotCDead = true 
             table.insert(JoelBotC.morningDeaths, JoelBotC.grandmother)
         end
+
+        if target:IsSweetheart() and target.BotCDead then
+            JoelBotC:SweetheartDeath(target)
+        end
     end
 
     function JoelBotC:MorningDeaths()

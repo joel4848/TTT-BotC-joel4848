@@ -783,9 +783,6 @@ function JoelBotC:LibrarianNight()
     end
 end
 
--- slayer
-
-
 
 -- empath
 function JoelBotC:EmpathNight()
@@ -884,9 +881,6 @@ function JoelBotC:EmpathNight()
         end
     end
 end
-
--- soldier
--- No active role ability
 
 
 -- ravenkeeper
@@ -1096,7 +1090,21 @@ end
 
 
 -- sweetheart
+function JoelBotC:SweetheartDeath(sweetheart)
+    local sweetheartPoisonPool = {}
+    local sweetheartPoisonedPlayer = nil
+    
+    if math.random(0, 4) == 4 then
+        sweetheartPoisonPool = table.Copy(JoelBotC.outsiderPlayers)
+    else
+        sweetheartPoisonPool = table.Copy(JoelBotC.townsfolkPlayers)
+    end
 
+    repeat
+        table.Shuffle(sweetheartPoisonPool)
+        sweetheartPoisonedPlayer = sweetheartPoisonPool[1]
+    until not (sweetheartPoisonedPlayer == sweetheart or sweetheartPoisonedPlayer.BotCDead)
+end
 
 
 -- saint

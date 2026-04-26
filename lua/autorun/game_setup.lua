@@ -16,7 +16,6 @@ if SERVER then
     local grandmotherEnabled = CreateConVar("randomat_joelbotc_grandmother_enabled", 1, FCVAR_NONE, "Whether the Grandmother is on the script", 0, 1):GetBool()
     local seamstressEnabled = CreateConVar("randomat_joelbotc_seamstress_enabled", 1, FCVAR_NONE, "Whether the Seamstress is on the script", 0, 1):GetBool()
     local librarianEnabled = CreateConVar("randomat_joelbotc_librarian_enabled", 1, FCVAR_NONE, "Whether the Librarian is on the script", 0, 1):GetBool()
-    local slayerEnabled = CreateConVar("randomat_joelbotc_slayer_enabled", 1, FCVAR_NONE, "Whether the Slayer is on the script", 0, 1):GetBool()
     local empathEnabled = CreateConVar("randomat_joelbotc_empath_enabled", 1, FCVAR_NONE, "Whether the Empath is on the script", 0, 1):GetBool()
     local soldierEnabled = CreateConVar("randomat_joelbotc_soldier_enabled", 1, FCVAR_NONE, "Whether the Soldier is on the script", 0, 1):GetBool()
     local ravenkeeperEnabled = CreateConVar("randomat_joelbotc_ravenkeeper_enabled", 1, FCVAR_NONE, "Whether the Ravenkeeper is on the script", 0, 1):GetBool()
@@ -161,9 +160,6 @@ if SERVER then
         end
         if librarianEnabled then
             table.insert(JoelBotC.enabledTownsfolk, ROLE_LIBRARIANJBC)
-        end
-        if slayerEnabled then
-            table.insert(JoelBotC.enabledTownsfolk, ROLE_SLAYERJBC)
         end
         if empathEnabled then
             table.insert(JoelBotC.enabledTownsfolk, ROLE_EMPATHJBC)

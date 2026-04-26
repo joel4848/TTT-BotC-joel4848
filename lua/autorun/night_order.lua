@@ -64,7 +64,6 @@ if SERVER then
             [ROLE_GRANDMOTHERJBC] = false,
             [ROLE_SEAMSTRESSJBC] = false,
             [ROLE_LIBRARIANJBC] = false,
-            [ROLE_SLAYERJBC] = false,
             [ROLE_EMPATHJBC] = false,
             [ROLE_SOLDIERJBC] = false,
             [ROLE_RAVENKEEPERJBC] = false,
