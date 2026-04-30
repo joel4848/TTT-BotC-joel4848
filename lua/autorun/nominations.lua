@@ -33,6 +33,7 @@ if SERVER then
     util.AddNetworkString("rdmtJoelBotCVoteToggle")             -- tells server and players that someone toggled their vote on/off
     util.AddNetworkString("rdmtJoelBotCVoteLockIn")             -- for big hand movement & vote counting
     util.AddNetworkString("rdmtJoelBotCNomMessage")             -- sends various messages to one or all clients
+    util.AddNetworkString("rdmtJoelBotCMiddleMessage")          -- sends nomination 'error' messages
     util.AddNetworkString("rdmtJoelBotCBottomMessage")          -- sends who (if anyone) is on the block, and minimum required votes
     util.AddNetworkString("rdmtJoelBotCEndSpeech")              -- nominator/nominee ending prosecution/defence early
     util.AddNetworkString("rdmtJoelBotCOGActive")               -- whether there is an active OG affecting nominations/voting
@@ -53,8 +54,8 @@ if SERVER then
 
     function JoelBotC:DetermineRequiredVotes()
         voteThreshold = math.ceil(JoelBotC:AlivePlayerCount() / 2)
-        currentMaxVotes = JoelBotC.markedVotes
-        requiredVotes = math.max(voteThreshold, currentMaxVotes)
+        toBeatCurrentMax = JoelBotC.markedVotes + 1
+        requiredVotes = math.max(voteThreshold, toBeatCurrentMax)
         return requiredVotes
     end
 
@@ -84,11 +85,11 @@ if SERVER then
 
         if not JoelBotC:IsOGSober() then
             if nominatedNick and markedNick then
-                finalMessage = "Nominated: " .. nominatedNick .. " | Marked: " .. markedNick .. " | Votes required: " .. requiredVotes
+                finalMessage = "Nominated: " .. nominatedNick .. " | Marked: " .. markedNick .. " | Votes required: " .. requiredVotes .. " (" .. (requiredVotes - 1) .. " to tie)"
             elseif nominatedNick then
                 finalMessage = "Nominated: " .. nominatedNick .. " | Votes required: " .. requiredVotes
             elseif markedNick then
-                finalMessage = "Marked: " .. markedNick .. " | Votes required: " .. requiredVotes
+                finalMessage = "Marked: " .. markedNick .. " | Votes required: " .. requiredVotes .. " (" .. (requiredVotes - 1) .. " to tie)"
             end
         else
             if nominatedNick then
@@ -255,7 +256,7 @@ if SERVER then
             else
                 msg = nomineePly:Nick() .. " has already been nominated today!"
             end
-            net.Start("rdmtJoelBotCNomMessage")
+            net.Start("rdmtJoelBotCMiddleMessage")
                 net.WriteString(msg)
             net.Send(nominatorPly)
             return
@@ -700,7 +701,7 @@ if CLIENT then
         local btnW, btnH = 300, 50
         endSpeechBtn = vgui.Create("DButton", nomGUI)
         endSpeechBtn:SetSize(btnW, btnH)
-        endSpeechBtn:SetPos(ScrW() / 2 - btnW / 2, lowestBtnBottom + (ScrH() - lowestBtnBottom) / 2 - btnH / 2)
+        endSpeechBtn:SetPos(ScrW() / 2 - btnW / 2, lowestBtnBottom + (ScrH() - lowestBtnBottom) / 3 - btnH / 2)
         endSpeechBtn:SetText(label)
         endSpeechBtn:SetFont("Minecraft20")
         endSpeechBtn:SetTextColor(Color(255, 255, 255))
@@ -717,14 +718,14 @@ if CLIENT then
         DestroyVoteToggleButton()
         if not IsValid(nomGUI) then return end
 
-        local btnW, btnH = 300, 60
+        local btnW, btnH = 260, 60
         local btnY = ScrH() / 2 - btnH / 2
         -- local btnY = lowestBtnBottom + (ScrH() - lowestBtnBottom) / 2 - btnH / 2
 
         voteToggleBtn = vgui.Create("DButton", nomGUI)
         voteToggleBtn:SetSize(btnW, btnH)
         voteToggleBtn:SetPos(ScrW() / 2 - btnW / 2, btnY)
-        voteToggleBtn:SetFont("Minecraft20")
+        voteToggleBtn:SetFont("Minecraft25_bold")
         voteToggleBtn:SetTextColor(Color(0, 0, 0))
 
         local mySeat = LocalPlayer().seatNumber
@@ -816,7 +817,6 @@ if CLIENT then
     -------------------------------------------------------------------------------------
 
     net.Receive("rdmtJoelBotCOGActive", function()
-        print("Received organ grinder status")
         JoelBotC.organgrinderActive = net.ReadBool() 
     end)
 
@@ -862,8 +862,6 @@ if CLIENT then
                     voteIcon:SetVisible(false)
                 end
             end
-
-            print("JoelBotC.organgrinderActive = " .. tostring(JoelBotC.organgrinderActive))
 
         elseif phase == "prosecution" then
             overlayTimer = data.prosecutionTime or prosecutionTime
@@ -936,9 +934,9 @@ if CLIENT then
         end
     end)
 
-    net.Receive("rdmtJoelBotCNomMessage", function()
+    net.Receive("rdmtJoelBotCMiddleMessage", function()
         middleMessage = net.ReadString()
-        middleExpiry = CurTime() + 5
+        middleExpiry = CurTime() + 3
     end)
 
     net.Receive("rdmtJoelBotCBottomMessage", function()
@@ -998,38 +996,6 @@ if CLIENT then
 
             surface.DrawTexturedRectRotatedPoint(cx, cy, bigHandThick, bigHandLength, bigCurrentAngle, 0, -bigHandLength / 2)
             surface.DrawTexturedRectRotatedPoint(cx, cy, smallHandThick, smallHandLength, smallCurrentAngle, 0, -smallHandLength / 2)
-
-            -- Overlay text - top middle of screen
-            local lines = GetOverlayLines()
-            if #lines > 0 then
-                surface.SetFont("Minecraft40")
-                local lineH = 48
-                local totalH = lineH * #lines
-                local startY = topBtnTop / 2 - totalH / 2
-
-                for idx, line in ipairs(lines) do
-                    local lineY = startY + (idx - 1) * lineH
-                    draw.SimpleText(line, "Minecraft40", cx + 2, lineY + 2, Color(0, 0, 0, 200), TEXT_ALIGN_CENTER)
-                    draw.SimpleText(line, "Minecraft40", cx, lineY, Color(255, 255, 255, 255), TEXT_ALIGN_CENTER)
-                end
-            end
-
-            -- Middle of screen
-            if middleMessage ~= "" and CurTime() < middleExpiry then
-                local alpha = 255
-                local timeLeft = middleExpiry - CurTime()
-                if timeLeft < 1 then alpha = math.floor(timeLeft * 255) end
-                local middleY = ScrH() / 2
-                draw.SimpleText(middleMessage, "Minecraft40", cx + 1, middleY + 1, Color(0, 0, 0, alpha), TEXT_ALIGN_CENTER)
-                draw.SimpleText(middleMessage, "Minecraft40", cx, middleY, Color(255, 100, 0, alpha), TEXT_ALIGN_CENTER)
-            end
-
-            -- Bottom middle of screen
-            if bottomMessage ~= "" then
-                local bottomY = lowestBtnBottom + (ScrH() - lowestBtnBottom) / 2
-                draw.SimpleText(bottomMessage, "Minecraft40", cx + 1, bottomY + 1, Color(0, 0, 0, 255), TEXT_ALIGN_CENTER)
-                draw.SimpleText(bottomMessage, "Minecraft40", cx, bottomY, Color(150, 0, 255), TEXT_ALIGN_CENTER)
-            end
         end
 
         -- Build seat buttons
@@ -1171,6 +1137,55 @@ if CLIENT then
             ghostIcon[i].seatIndex = i
             ghostIcon[i]:SetImage("vgui/ttt/joelbotc/ghost_white_icon.png")
             ghostIcon[i]:SetVisible(true)
+        end
+
+        -- Text overlay
+        local overlay = vgui.Create("DPanel", nomGUI)
+        overlay:SetSize(ScrW(), ScrH())
+        overlay:SetPos(0,0)
+        overlay:SetZPos(1000)
+        overlay:SetMouseInputEnabled(false)
+        overlay:SetKeyboardInputEnabled(false)
+
+        overlay.Paint = function(self, w, h)
+
+            -- Top message
+            local lines = GetOverlayLines()
+            if #lines > 0 then
+                surface.SetFont("Minecraft40")
+                local lineH = 48
+                local totalH = lineH * #lines
+                local startY = topBtnTop / 2 - totalH / 2
+
+                for idx, line in ipairs(lines) do
+                    local lineY = startY + (idx - 1) * lineH
+                    -- draw.SimpleText(line, "Minecraft40", cx + 2, lineY + 2, Color(0,0,0,200), TEXT_ALIGN_CENTER)
+                    -- draw.SimpleText(line, "Minecraft40", cx, lineY, Color(255,255,255,255), TEXT_ALIGN_CENTER)
+                    draw.SimpleTextOutlined(line, "Minecraft40", cx, lineY, Color(255, 255, 255, 255), TEXT_ALIGN_CENTER, TEXT_ALIGN_CENTER, 1, Color(0, 0, 0, 200))
+                end
+            end
+
+            -- Middle message
+            if middleMessage ~= "" and CurTime() < middleExpiry then
+                -- draw.SimpleText(middleMessage, "Minecraft40", cx + 2, middleY + 2, Color(0, 0, 0, 255), TEXT_ALIGN_CENTER)
+                draw.SimpleTextOutlined(middleMessage, "Minecraft40", cx, ScrH() / 2, Color(255, 170, 0, 255), TEXT_ALIGN_CENTER, TEXT_ALIGN_CENTER, 1, Color(0, 0, 0, 200))
+            end
+
+            -- Bottom message
+            if bottomMessage ~= "" then
+
+                surface.SetFont("Minecraft30")
+                local textW, textH = surface.GetTextSize(bottomMessage)
+                local bottomY = lowestBtnBottom + (ScrH() - lowestBtnBottom) * 2/3
+                local padding = 10
+
+                -- Background box
+                surface.SetDrawColor(0, 0, 0, 150)
+                surface.DrawRect( cx - textW / 2 - padding, bottomY - textH / 2 - padding, textW + padding * 2, textH + padding * 2)
+
+                -- draw.SimpleText(bottomMessage, "Minecraft30", cx + 2, bottomY + 2, Color(0, 0, 0, 255), TEXT_ALIGN_CENTER)
+                draw.SimpleTextOutlined(bottomMessage, "Minecraft30", cx, bottomY, Color(230, 200, 250), TEXT_ALIGN_CENTER, TEXT_ALIGN_CENTER, 1, Color(0, 0, 0, 200))
+            end
         end
     end
 
