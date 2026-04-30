@@ -1,6 +1,7 @@
 JoelBotC = JoelBotC or {}
 JoelBotC.seatingOrderClient = JoelBotC.seatingOrderClient or {}
 JoelBotC.clientGUIOpen = JoelBotC.clientGUIOpen or nil
+JoelBotC.ghostVotes = JoelBotC.ghostVotes or {}
 
 -----------------------------------------------------------------------------------------
 -- SHARED
@@ -9,7 +10,7 @@ JoelBotC.clientGUIOpen = JoelBotC.clientGUIOpen or nil
 local nominationTimeCvar = CreateConVar("randomat_joelbotc_nomination_time", 15, FCVAR_REPLICATED, "Time (seconds) to make each nomination", 5, 60)
 local prosecutionTimeCvar = CreateConVar("randomat_joelbotc_prosecution_time", 30, FCVAR_REPLICATED, "Prosecution speech time (seconds)", 5, 60)
 local defenceTimeCvar = CreateConVar("randomat_joelbotc_defence_time", 30, FCVAR_REPLICATED, "Defence speech time (seconds)", 5, 60)
-local voteIntervalCvar = CreateConVar("randomat_joelbotc_vote_interval", 1.5, FCVAR_REPLICATED, "Time between each vote being locked in (seconds)", 1, 5)
+local voteIntervalCvar = CreateConVar("randomat_joelbotc_vote_interval", 1.5, FCVAR_REPLICATED, "Time between each vote being locked in (seconds)", 0.1, 5)
 
 local nominationTime = nominationTimeCvar:GetInt()
 local prosecutionTime = prosecutionTimeCvar:GetInt()
@@ -32,7 +33,9 @@ if SERVER then
     util.AddNetworkString("rdmtJoelBotCVoteToggle")             -- tells server and players that someone toggled their vote on/off
     util.AddNetworkString("rdmtJoelBotCVoteLockIn")             -- for big hand movement & vote counting
     util.AddNetworkString("rdmtJoelBotCNomMessage")             -- sends various messages to one or all clients
+    util.AddNetworkString("rdmtJoelBotCBottomMessage")          -- sends who (if anyone) is on the block, and minimum required votes
     util.AddNetworkString("rdmtJoelBotCEndSpeech")              -- nominator/nominee ending prosecution/defence early
+    util.AddNetworkString("rdmtJoelBotCOGActive")               -- whether there is an active OG affecting nominations/voting
 
     -- State
     JoelBotC.nominationsOpen  = false   -- can players click to nominate
@@ -48,12 +51,77 @@ if SERVER then
     -- Helper bois
     -------------------------------------------------------------------------------------
 
+    function JoelBotC:DetermineRequiredVotes()
+        voteThreshold = math.ceil(JoelBotC:AlivePlayerCount() / 2)
+        currentMaxVotes = JoelBotC.markedVotes
+        requiredVotes = math.max(voteThreshold, currentMaxVotes)
+        return requiredVotes
+    end
+
+    function JoelBotC:DetermineGhostVotes()
+        JoelBotC.ghostVotes = {}
+        for _, ply in ipairs(JoelBotC.players) do
+            if ply.BotCDead then
+                if ply.hasGhostVote then
+                    JoelBotC.ghostVotes[ply] = true
+                else
+                    JoelBotC.ghostVotes[ply] = false
+                end
+            end
+        end
+
+        net.Start("rdmtJoelBotCGhostVoteUpdate")
+            net.WriteTable(JoelBotC.ghostVotes)
+        net.Broadcast()
+    end
+
+    function JoelBotC:UpdateBottomMessage(clear, nominated, marked)
+        local clearMessage = clear ~= false
+        local requiredVotes = JoelBotC:DetermineRequiredVotes()
+        local nominatedNick = nominated and nominated:Nick() or nil
+        local markedNick = marked and marked:Nick() or nil
+        local finalMessage = ""
+
+        if not JoelBotC:IsOGSober() then
+            if nominatedNick and markedNick then
+                finalMessage = "Nominated: " .. nominatedNick .. " | Marked: " .. markedNick .. " | Votes required: " .. requiredVotes
+            elseif nominatedNick then
+                finalMessage = "Nominated: " .. nominatedNick .. " | Votes required: " .. requiredVotes
+            elseif markedNick then
+                finalMessage = "Marked: " .. markedNick .. " | Votes required: " .. requiredVotes
+            end
+        else
+            if nominatedNick then
+                finalMessage = "Nominated: " .. nominatedNick .. " | Marked: ? | Votes required: ?"
+            else
+                finalMessage = "Marked: ? | Votes required: ?"
+            end
+        end
+
+        if clearMessage then
+            finalMessage = ""
+        end
+
+        net.Start("rdmtJoelBotCBottomMessage")
+            net.WriteString(finalMessage)
+        net.Broadcast()
+    end
+
+    function JoelBotC:UpdateOGActive()
+        net.Start("rdmtJoelBotCOGActive")
+            net.WriteBool(JoelBotC:IsOGSober())
+        net.Broadcast()
+    end
+
     -- Broadcast nomination phase and associated bits and bobs
     local function BroadcastPhase(phase, data)
         net.Start("rdmtJoelBotCNomPhase")
             net.WriteString(phase)
             net.WriteTable(data or {})
         net.Broadcast()
+
+        JoelBotC:UpdateOGActive()
+        JoelBotC:DetermineGhostVotes()
     end
 
     -- Broadcast the various countdown timers
@@ -80,14 +148,27 @@ if SERVER then
 
     -- Send open nomination GUI
     function JoelBotC:SendNominationGUICreate(ply)
+        JoelBotC:UpdateOGActive()
+        JoelBotC:DetermineGhostVotes()
+        JoelBotC:AliveDeadUpdate()
+
         net.Start("rdmtJoelBotCNominationGUIOpen")
-        if ply then net.Send(ply) else net.Broadcast() end
+        if ply then
+            net.Send(ply)
+        else
+            net.Broadcast()
+        end
     end
 
     -- Send close nomination GUI
     function JoelBotC:SendNominationGUIDestroy(ply)
+        JoelBotC:UpdateBottomMessage(true)
         net.Start("rdmtJoelBotCNominationGUIClose")
-        if ply then net.Send(ply) else net.Broadcast() end
+        if ply then
+            net.Send(ply)
+        else
+            net.Broadcast()
+        end
     end
 
     -------------------------------------------------------------------------------------
@@ -123,6 +204,9 @@ if SERVER then
     -------------------------------------------------------------------------------------
 
     function JoelBotC:StartNominations()
+        JoelBotC:UpdateOGActive()
+        JoelBotC:DetermineGhostVotes()
+
         JoelBotC.recentExecutee = nil
         
         JoelBotC:SendNominationGUICreate()
@@ -148,17 +232,24 @@ if SERVER then
     -------------------------------------------------------------------------------------
 
     function JoelBotC:PlayerNominated(nominatorSeat, nomineeSeat)
+        JoelBotC:UpdateOGActive()
+        JoelBotC:DetermineGhostVotes()
+
         local nominatorPly = JoelBotC.seatingOrder[nominatorSeat]
         local nomineePly = JoelBotC.seatingOrder[nomineeSeat]
         if not IsValid(nominatorPly) or not IsValid(nomineePly) then return end
 
         local alreadyNominated = (nominatorPly.nominated == true)
         local alreadyBeenNominated = (nomineePly.hasBeenNominated == true)
+        local nominatorDead = (nominatorPly.BotCDead == true)
 
-        if alreadyNominated or alreadyBeenNominated then
+        if alreadyNominated or alreadyBeenNominated or nominatorDead then
             local msg
-            if alreadyNominated and alreadyBeenNominated then
-                msg = "You have already nominated today! " .. nomineePly:Nick() .. " has already been nominated today!"
+            if nominatorDead then
+                msg = "You are dead and cannot nominate!"
+            -- Temporarily removing this as it doesn't accept line breaks and I have other things to do right now
+            -- elseif alreadyNominated and alreadyBeenNominated then
+            --     msg = "You have already nominated today!\n" .. nomineePly:Nick() .. "\n has already been nominated today!"
             elseif alreadyNominated then
                 msg = "You have already nominated today!"
             else
@@ -176,6 +267,8 @@ if SERVER then
         JoelBotC.nominationsOpen = false
         JoelBotC.votingOpen = true
         timer.Remove("rdmtJoelBotCNominationCountdown")
+
+        JoelBotC:UpdateBottomMessage(false, nomineePly, JoelBotC.marked)
 
         JoelBotC.currentNominator = nominatorSeat
         JoelBotC.currentNominee = nomineeSeat
@@ -211,6 +304,9 @@ if SERVER then
 
     -- Start defence
     function JoelBotC:StartDefence(nominatorSeat, nomineeSeat, nomineeNick, defenceTime)
+        JoelBotC:UpdateOGActive()
+        JoelBotC:DetermineGhostVotes()
+
         JoelBotC._prosecutionEndCallback = nil
 
         BroadcastPhase("defence", {
@@ -233,6 +329,9 @@ if SERVER then
 
     -- 3 second countdown before starting vote
     function JoelBotC:StartVoteCountdown(nomineeSeat)
+        JoelBotC:UpdateOGActive()
+        JoelBotC:DetermineGhostVotes()
+
         JoelBotC._defenceEndCallback = nil
 
         BroadcastPhase("votecountdown", { nomineeSeat = nomineeSeat })
@@ -270,6 +369,8 @@ if SERVER then
     -------------------------------------------------------------------------------------
 
     function JoelBotC:StartVote()
+        JoelBotC:UpdateOGActive()
+        JoelBotC:DetermineGhostVotes()
 
         local count = #JoelBotC.seatingOrder
         local nomineeSeat = JoelBotC.currentNominee
@@ -315,8 +416,12 @@ if SERVER then
                 local ply = JoelBotC.seatingOrder[seat]
                 if IsValid(ply) and JoelBotC.playerVotes[ply] then
                     votesReceived = votesReceived + 1
-                    PrintMessage(HUD_PRINTTALK, ply:Nick() .. " voted - " .. votesReceived .. " vote" .. (votesReceived == 1 and "" or "s") .. " received")
-                    if ply.BotCDead then
+
+                    if not JoelBotC:IsOGSober() then
+                        PrintMessage(HUD_PRINTTALK, ply:Nick() .. " voted - " .. votesReceived .. " vote" .. (votesReceived == 1 and "" or "s") .. " received")
+                    end
+                    
+                        if ply.BotCDead then
                         ply.hasGhostVote = false
                     end
                 end
@@ -336,33 +441,46 @@ if SERVER then
     -------------------------------------------------------------------------------------
 
     function JoelBotC:VoteComplete(nomineeSeat, votes)
+        JoelBotC:UpdateOGActive()
+        JoelBotC:DetermineGhostVotes()
+
         local count = #JoelBotC.seatingOrder
-        local threshold = math.ceil(count / 2)
+        local threshold = math.ceil(JoelBotC:AlivePlayerCount() / 2)
         local nomineeNick = JoelBotC.seatingOrder[nomineeSeat]:Nick()
         local vStr = votes .. " vote" .. (votes == 1 and "" or "s")
 
         -- Decide whether the new player is marked and the message to display
         local resultMsg
-        if votes < threshold then
-            resultMsg = vStr .. " is not enough to mark " .. nomineeNick .. " for execution"
-        elseif JoelBotC.marked == nil then
-            JoelBotC.marked = JoelBotC.seatingOrder[nomineeSeat]
-            JoelBotC.markedVotes = votes
-            resultMsg = vStr .. " is enough - " .. nomineeNick .. " is marked for execution!"
-        elseif votes > JoelBotC.markedVotes then
-            JoelBotC.marked = JoelBotC.seatingOrder[nomineeSeat]
-            JoelBotC.markedVotes = votes
-            resultMsg = vStr .. " is enough - " .. nomineeNick .. " is marked for execution!"
-        elseif votes == JoelBotC.markedVotes then
-            JoelBotC.marked = nil
-            JoelBotC.markedVotes = votes
-            resultMsg = vStr .. " is a tie! No one is marked for execution"
+
+        if not JoelBotC:IsOGSober() then
+            if votes < threshold then
+                resultMsg = vStr .. " is not enough to mark " .. nomineeNick .. " for execution"
+            elseif JoelBotC.marked == nil then
+                JoelBotC.marked = JoelBotC.seatingOrder[nomineeSeat]
+                JoelBotC.markedVotes = votes
+                resultMsg = vStr .. " is enough - " .. nomineeNick .. " is marked for execution!"
+            elseif votes > JoelBotC.markedVotes then
+                JoelBotC.marked = JoelBotC.seatingOrder[nomineeSeat]
+                JoelBotC.markedVotes = votes
+                resultMsg = vStr .. " is enough - " .. nomineeNick .. " is marked for execution!"
+            elseif votes == JoelBotC.markedVotes then
+                JoelBotC.marked = nil
+                JoelBotC.markedVotes = votes
+                resultMsg = vStr .. " is a tie! No one is marked for execution"
+            else
+                resultMsg = vStr .. " is not enough to mark " .. nomineeNick .. " for execution"
+            end
         else
-            resultMsg = vStr .. " is not enough to mark " .. nomineeNick .. " for execution"
+            resultMsg = "The Organ Grinder obscures the result..."
         end
 
-        -- Display the message
-        PrintMessage(HUD_PRINTTALK, resultMsg)
+        if not JoelBotC:IsOGSober() then
+            PrintMessage(HUD_PRINTTALK, resultMsg)
+        else
+            PrintMessage(HUD_PRINTTALK, "The Organ Grinder obscures the result...")
+        end
+
+        JoelBotC:UpdateBottomMessage(false, nil, JoelBotC.marked)
 
         net.Start("rdmtJoelBotCNomMessage")
             net.WriteString(resultMsg)
@@ -394,8 +512,11 @@ if SERVER then
     -------------------------------------------------------------------------------------
 
     function JoelBotC:NominationsOver()
+        JoelBotC:UpdateOGActive()
+        JoelBotC:DetermineGhostVotes()
+
         JoelBotC.nominationsOpen = false
-        JoelBotC.votingOpen      = false
+        JoelBotC.votingOpen = false
 
         timer.Remove("rdmtJoelBotCNominationCountdown")
         timer.Remove("rdmtJoelBotCProsecution")
@@ -423,20 +544,19 @@ if SERVER then
         -- Reset nominations state
         for _, ply in ipairs(JoelBotC.seatingOrder) do
             if IsValid(ply) then
-                ply.nominated        = false
+                ply.nominated = false
                 ply.hasBeenNominated = false
             end
         end
-        JoelBotC.playerVotes             = {}
-        JoelBotC.lockedInSeats           = {}
-        JoelBotC.marked                  = nil
-        JoelBotC.markedVotes             = 0
-        JoelBotC.currentNominee          = nil
-        JoelBotC.currentNominator        = nil
+        JoelBotC.playerVotes = {}
+        JoelBotC.lockedInSeats = {}
+        JoelBotC.marked = nil
+        JoelBotC.markedVotes = 0
+        JoelBotC.currentNominee = nil
+        JoelBotC.currentNominator = nil
         JoelBotC._prosecutionEndCallback = nil
-        JoelBotC._defenceEndCallback     = nil
+        JoelBotC._defenceEndCallback = nil
     end
-
 end
 
 -----------------------------------------------------------------------------------------
@@ -444,6 +564,9 @@ end
 -----------------------------------------------------------------------------------------
 
 if CLIENT then
+
+    JoelBotC.organgrinderActive = JoelBotC.organgrinderActive or false
+    JoelBotC.ghostVotesClient = JoelBotC.ghostVotesClient or {}
 
     local nominationTime = nominationTimeCvar:GetInt()
     local prosecutionTime = prosecutionTimeCvar:GetInt()
@@ -542,17 +665,24 @@ if CLIENT then
     local endSpeechBtn = nil
     local voteToggleBtn = nil
 
-    -- Bottom message (errors, vote results etc.)
+    -- Middle message (Errors, vote results etc.)
+    local middleMessage = ""
+    local middleExpiry  = 0
+
+    -- Bottom message (Who (if anyone) is on the block, and votes required)
     local bottomMessage = ""
     local bottomExpiry  = 0
 
     local topBtnTop = 0
     local lowestBtnBottom = 0
 
+    local buttonXCoord = {}
+    local buttonYCoord = {}
     local voteIcon = {}
+    local ghostIcon = {}
 
     -------------------------------------------------------------------------------------
-    -- Functions for the extra buttons
+    -- Functions for the extra buttons and icons
     -------------------------------------------------------------------------------------
 
     local function DestroyEndSpeechButton()
@@ -615,6 +745,41 @@ if CLIENT then
         end
     end
 
+    function JoelBotC:UpdateGhostVoteIcons()
+        -- print("**************************************************************************")
+        -- print("Running JoelBotC:UpdateGhostVoteIcons()")
+
+        for i, ghostIcon in ipairs(ghostIcon) do
+            -- print("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~")
+            -- print("Step 1 for icon " .. i)
+            if IsValid(ghostIcon) then
+                -- print("Step 2 for icon " .. i)
+                local ply = JoelBotC.seatingOrderClient[i]
+                -- print("ply = " .. ply:Nick())
+                ghostIcon:SetVisible(false)
+                -- print("Visible = " .. tostring(ghostIcon:IsVisible()))
+                -- print("JoelBotC.isAliveClient[ply] = " .. tostring(JoelBotC.isAliveClient[ply]))
+                -- print("JoelBotC.organgrinderActive = " .. tostring(JoelBotC.organgrinderActive))
+                -- print("ply.hasGhostVote = " .. tostring(ply.hasGhostVote))
+                if JoelBotC.isAliveClient[ply] then
+                    ghostIcon:SetImage("vgui/ttt/joelbotc/ghost_white_icon.png")
+                elseif JoelBotC.organgrinderActive then
+                    ghostIcon:SetVisible(true)
+                    ghostIcon:SetImage("vgui/ttt/joelbotc/ghost_hidden_icon.png")
+                elseif ply.hasGhostVote then
+                    ghostIcon:SetVisible(true)
+                    ghostIcon:SetImage("vgui/ttt/joelbotc/ghost_white_icon.png")
+                elseif not ply.hasGhostVote then
+                    ghostIcon:SetVisible(true)
+                    ghostIcon:SetImage("vgui/ttt/joelbotc/ghost_black_icon.png")
+                end
+            end
+        end
+
+        -- print("Finished running JoelBotC:UpdateGhostVoteIcons()")
+        -- print("**************************************************************************")
+    end
+
     -------------------------------------------------------------------------------------
     -- Announcement messages for each phase
     -------------------------------------------------------------------------------------
@@ -650,6 +815,25 @@ if CLIENT then
     -- Network receivers
     -------------------------------------------------------------------------------------
 
+    net.Receive("rdmtJoelBotCOGActive", function()
+        print("Received organ grinder status")
+        JoelBotC.organgrinderActive = net.ReadBool() 
+    end)
+
+    net.Receive("rdmtJoelBotCGhostVoteUpdate", function()
+        JoelBotC.ghostVotesClient = {}
+        JoelBotC.ghostVotesClient = net.ReadTable()
+
+        for _, ply in ipairs(JoelBotC.seatingOrderClient) do
+            ply.hasGhostVote = nil
+        end
+        
+        for ply, hasVote in pairs(JoelBotC.ghostVotesClient) do
+            ply.hasGhostVote = hasVote
+        end
+        JoelBotC:UpdateGhostVoteIcons()
+    end)
+
     net.Receive("rdmtJoelBotCNomPhase", function()
         local phase = net.ReadString()
         local data = net.ReadTable()
@@ -671,7 +855,15 @@ if CLIENT then
                 smallStartAngle = 0
                 smallTargetAngle = 0
             end
+
             seatVoteOn = {}
+            for _, voteIcon in ipairs(voteIcon) do
+                if IsValid(voteIcon) then
+                    voteIcon:SetVisible(false)
+                end
+            end
+
+            print("JoelBotC.organgrinderActive = " .. tostring(JoelBotC.organgrinderActive))
 
         elseif phase == "prosecution" then
             overlayTimer = data.prosecutionTime or prosecutionTime
@@ -722,7 +914,7 @@ if CLIENT then
         if IsValid(voteToggleBtn) and voteToggleBtn.Refresh then
             voteToggleBtn:Refresh()
         end
-        if IsValid(voteIcon[seat]) then
+        if IsValid(voteIcon[seat]) and not JoelBotC.organgrinderActive then
             voteIcon[seat]:SetVisible(voteOn)
         end
     end)
@@ -745,8 +937,12 @@ if CLIENT then
     end)
 
     net.Receive("rdmtJoelBotCNomMessage", function()
+        middleMessage = net.ReadString()
+        middleExpiry = CurTime() + 5
+    end)
+
+    net.Receive("rdmtJoelBotCBottomMessage", function()
         bottomMessage = net.ReadString()
-        bottomExpiry = CurTime() + 5
     end)
 
     -------------------------------------------------------------------------------------
@@ -755,6 +951,8 @@ if CLIENT then
 
     function JoelBotC:NominationGUICreate()
         if IsValid(nomGUI) then return end
+
+        JoelBotC:UpdateGhostVoteIcons()
 
         JoelBotC.clientGUIOpen = true
 
@@ -801,7 +999,7 @@ if CLIENT then
             surface.DrawTexturedRectRotatedPoint(cx, cy, bigHandThick, bigHandLength, bigCurrentAngle, 0, -bigHandLength / 2)
             surface.DrawTexturedRectRotatedPoint(cx, cy, smallHandThick, smallHandLength, smallCurrentAngle, 0, -smallHandLength / 2)
 
-            -- Overlay text: top middle of screen
+            -- Overlay text - top middle of screen
             local lines = GetOverlayLines()
             if #lines > 0 then
                 surface.SetFont("Minecraft40")
@@ -816,14 +1014,21 @@ if CLIENT then
                 end
             end
 
-            -- Bottom middle of screen
-            if bottomMessage ~= "" and CurTime() < bottomExpiry then
+            -- Middle of screen
+            if middleMessage ~= "" and CurTime() < middleExpiry then
                 local alpha = 255
-                local timeLeft = bottomExpiry - CurTime()
+                local timeLeft = middleExpiry - CurTime()
                 if timeLeft < 1 then alpha = math.floor(timeLeft * 255) end
+                local middleY = ScrH() / 2
+                draw.SimpleText(middleMessage, "Minecraft40", cx + 1, middleY + 1, Color(0, 0, 0, alpha), TEXT_ALIGN_CENTER)
+                draw.SimpleText(middleMessage, "Minecraft40", cx, middleY, Color(255, 100, 0, alpha), TEXT_ALIGN_CENTER)
+            end
+
+            -- Bottom middle of screen
+            if bottomMessage ~= "" then
                 local bottomY = lowestBtnBottom + (ScrH() - lowestBtnBottom) / 2
-                draw.SimpleText(bottomMessage, "Minecraft20", cx + 1, bottomY + 1, Color(0, 0, 0, alpha), TEXT_ALIGN_CENTER)
-                draw.SimpleText(bottomMessage, "Minecraft20", cx, bottomY, Color(255, 220, 80,  alpha), TEXT_ALIGN_CENTER)
+                draw.SimpleText(bottomMessage, "Minecraft40", cx + 1, bottomY + 1, Color(0, 0, 0, 255), TEXT_ALIGN_CENTER)
+                draw.SimpleText(bottomMessage, "Minecraft40", cx, bottomY, Color(150, 0, 255), TEXT_ALIGN_CENTER)
             end
         end
 
@@ -847,7 +1052,6 @@ if CLIENT then
             local finalWidth = math.max(size * ratio, textW + 30)
             local finalX = x - (finalWidth / 2)
             local finalY = y - (size / 2)
-            buttonWidth[i] = finalWidth
 
             -- Track top/bottom button extents for overlay/bottom/button placement
             if finalY < topBtnTop then
@@ -866,6 +1070,10 @@ if CLIENT then
             btn.isPressed = false
             btn.seatIndex = i
 
+            buttonXCoord[i] = finalX
+            buttonYCoord[i] = finalY
+            buttonWidth[i] = finalWidth
+
             btn.Paint = function(self, w, h)
                 -- if seatVoteOn[self.seatIndex] then
                 --     surface.SetDrawColor(50, 200, 100)
@@ -882,7 +1090,6 @@ if CLIENT then
             btn.OnMouseReleased = function(self)
                 self.isPressed = false
                 SendButtonPress(self.seatIndex)
-                print("overlayPhase = " .. overlayPhase)
             end
         end
 
@@ -928,6 +1135,42 @@ if CLIENT then
             voteIcon[i].seatIndex = i
             voteIcon[i]:SetImage("vgui/ttt/joelbotc/vote_icon.png")
             voteIcon[i]:SetVisible(false)
+        end
+
+        -- Ghost vote icons
+        for i = 1, count do
+            local ghostIconSize = size * 1.2
+            local ghostIconGap = 25 + 15/count
+
+            -- Corresponding button dimensions
+            local bw = buttonWidth[i] or 100
+            local bh = size
+            local bx = buttonXCoord[i] + bw / 2
+            local by = buttonYCoord[i] + bh / 2
+
+            local iconX = 0
+            local iconY = 0
+
+            if i == 1 then
+                iconX = bx
+                iconY = by - (bh / 2) - (ghostIconSize / 3)
+            elseif (count % 2) == 0 and i == (count / 2) + 1 then
+                iconX = bx
+                iconY = by + (bh / 2) + (ghostIconSize / 3)
+            elseif i > math.ceil((count / 2)) then
+                iconX = bx - (bw / 2) - (ghostIconSize / 3)
+                iconY = by
+            elseif i <= math.ceil((count / 2)) then
+                iconX = bx + (bw / 2) + (ghostIconSize / 3)
+                iconY = by
+            end
+
+            ghostIcon[i] = vgui.Create("DImage", nomGUI)
+            ghostIcon[i]:SetSize(ghostIconSize, ghostIconSize)
+            ghostIcon[i]:SetPos(iconX - ghostIconSize / 2, iconY - ghostIconSize / 2)
+            ghostIcon[i].seatIndex = i
+            ghostIcon[i]:SetImage("vgui/ttt/joelbotc/ghost_white_icon.png")
+            ghostIcon[i]:SetVisible(true)
         end
     end
 

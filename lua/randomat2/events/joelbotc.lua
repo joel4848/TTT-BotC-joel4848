@@ -8,7 +8,6 @@ EVENT.id = "joelbotc"
 EVENT.Categories = {"gamemode", "largeimpact", "rolechange"}
 
 util.AddNetworkString("rdmtJoelBotCSeatingOrder")
-util.AddNetworkString("rdmtJoelBotCAliveDeadUpdate")
 
 JoelBotC.original_COLOR_DETECTIVE = JoelBotC.original_COLOR_DETECTIVE or {}
 JoelBotC.original_COLOR_SPECIAL_INNOCENT = JoelBotC.original_COLOR_SPECIAL_INNOCENT or {}

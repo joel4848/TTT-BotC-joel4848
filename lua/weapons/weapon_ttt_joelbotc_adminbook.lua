@@ -75,6 +75,8 @@ if SERVER then
             print("Is there a " .. ROLE_STRINGS[ply:GetRole()] .. " alive? = " .. tostring(JoelBotC:IsRoleBotCAlive(ply:GetRole())))
         elseif buttonPressed == 9 then
             JoelBotC:MorningDeaths()
+        elseif buttonPressed == 10 then
+            JoelBotC:DetermineGhostVotes()
         elseif buttonPressed == 11 then
             JoelBotC:StartNominations()
         end
@@ -233,7 +235,7 @@ if CLIENT then
             "Revive seat 2",
             "Is Role Alive?",
             "Morning deaths",
-            "Placeholder",
+            "Ghost Votes",
             "Start Nominations",
             "Placeholder"
         }

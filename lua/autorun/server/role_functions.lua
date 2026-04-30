@@ -1179,7 +1179,7 @@ end
 
 -- organgrinder
 function JoelBotC:IsOGSober()
-    local organgrinderSober = nil
+    local organgrinderSober = false
     
     for _, ply in ipairs(JoelBotC.players) do
         if ply:IsOrganGrinder() and not ply.BotCDead and not JoelBotC:IsDroisoned(ply) then
@@ -1188,7 +1188,6 @@ function JoelBotC:IsOGSober()
     end
 
     return organgrinderSober
-
 end
 
 function JoelBotC:OrganGrinderNight()

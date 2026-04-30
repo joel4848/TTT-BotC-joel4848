@@ -5,21 +5,37 @@ JoelBotC.isAlive = JoelBotC.isAlive or {}
 JoelBotC.recentExecutee = JoelBotC.recentExecutee or nil
 JoelBotC.deadPlayers = JoelBotC.deadPlayers or {}
 JoelBotC.morningDeaths = JoelBotC.morningDeaths or {}
+JoelBotC.ghostVotes = JoelBotC.ghostVotes or {}
 
 if SERVER then
+    util.AddNetworkString("rdmtJoelBotCAliveDeadUpdate")
+    util.AddNetworkString("rdmtJoelBotCGhostVoteUpdate")
     
+    function JoelBotC:AlivePlayerCount()
+        local alivePlayerCount = 0
+        for _, ply in ipairs(JoelBotC.players) do
+            if not ply.BotCDead then
+                alivePlayerCount = alivePlayerCount + 1
+            end
+        end
+
+        return alivePlayerCount
+    end
+    
+    -- Tell clients who's dead and who's alive
+    function JoelBotC:AliveDeadUpdate()
+        JoelBotC:DetermineGhostVotes()
+
+        net.Start("rdmtJoelBotCAliveDeadUpdate")
+            net.WriteTable(JoelBotC.isAlive)
+        net.Broadcast()
+    end
+
     function JoelBotC:Revive(ply)
         ply.BotCDead = false
         JoelBotC.isAlive[ply] = true
 
         JoelBotC:AliveDeadUpdate()
-    end
-    
-    -- Tell clients who's dead and who's alive
-    function JoelBotC:AliveDeadUpdate()
-        net.Start("rdmtJoelBotCAliveDeadUpdate")
-            net.WriteTable(JoelBotC.isAlive)
-        net.Broadcast()
     end
 
     -- 'Kill' during the night (disable their ability but don't run the kill animation yet)
