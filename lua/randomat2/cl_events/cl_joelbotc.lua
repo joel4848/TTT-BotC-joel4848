@@ -70,6 +70,39 @@ function EVENT:Begin()
         ply.originalRenderMode = ply:GetRenderMode()
     end
 
+    net.Receive("rdmtJoelBotCNightStarts", function()
+        hook.Add("RenderScreenspaceEffects", "JoelBOTC_NightEffect", function()
+            local tab = {}
+            tab["$pp_colour_brightness"] = -0.25
+            tab["$pp_colour_contrast"] = 0.8
+            tab["$pp_colour_colour"] = 0.5
+
+            DrawColorModify(tab)
+        end)
+
+        hook.Add("SetupWorldFog", "NightFog", function()
+
+            render.FogMode(MATERIAL_FOG_LINEAR)
+            render.FogStart(1)
+            render.FogEnd(1)
+            render.FogMaxDensity(0.8)
+
+            render.FogColor(30, 30, 40)
+
+            return true
+        end)
+
+        hook.Add("PostDrawSkyBox", "DarkSky", function()
+            render.Clear(20,20,60,50,true,true)
+        end)
+    end)
+
+    net.Receive("rdmtJoelBotCNightEnds", function()
+        hook.Remove("RenderScreenspaceEffects", "JoelBOTC_NightEffect")
+        hook.Remove("SetupWorldFog", "NightFog")
+        hook.Remove("PostDrawSkyBox", "DarkSky")
+    end)
+
     net.Receive("rdmtJoelBotCAliveDeadUpdate", function()
         JoelBotC.isAliveClient = net.ReadTable()
 
@@ -167,6 +200,10 @@ function EVENT:End()
     hook.Remove("ScoreboardHide", "JoelBotC_BlockScoreboardHide")
     hook.Remove("PlayerButtonDown", "JoelBotC_EnableMouseInGUI")
     hook.Remove("PlayerButtonUp", "JoelBotC_DisableMouseInGUI")
+
+    hook.Remove("RenderScreenspaceEffects", "JoelBOTC_NightEffect")
+    hook.Remove("SetupWorldFog", "NightFog")
+    hook.Remove("PostDrawSkyBox", "DarkSky")
 
     -- Remove timers
     timer.Remove("rdmtJoelBotCMoveBigHand")
