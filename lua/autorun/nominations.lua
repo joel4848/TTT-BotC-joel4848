@@ -839,6 +839,7 @@ if CLIENT then
         local data = net.ReadTable()
         overlayPhase = phase
         overlayData = data
+        local hiddenVoteIconsShowing = nil
 
         DestroyEndSpeechButton()
         DestroyVoteToggleButton()
@@ -893,8 +894,28 @@ if CLIENT then
 
             CreateVoteToggleButton()
 
+            if JoelBotC.organgrinderActive then
+                for i, voteIcon in ipairs(voteIcon) do
+                    if i ~= LocalPlayer().seatNumber then
+                        voteIcon:SetImage("vgui/ttt/joelbotc/vote_icon_hidden.png")
+                        voteIcon:SetVisible(true)
+                        hiddenVoteIconsShowing = true
+                    end
+                end
+            end
+
         elseif phase == "result" then
             overlayTimer = 0
+
+            if hiddenVoteIconsShowing then
+                for i, voteIcon in ipairs(voteIcon) do
+                    if i ~= LocalPlayer().seatNumber then
+                        voteIcon:SetVisible(false)
+                        voteIcon:SetImage("vgui/ttt/joelbotc/vote_icon.png")
+                        hiddenVoteIconsShowing = false
+                    end
+                end
+            end
 
         elseif phase == "close" then
             overlayPhase = "none"
@@ -912,7 +933,9 @@ if CLIENT then
         if IsValid(voteToggleBtn) and voteToggleBtn.Refresh then
             voteToggleBtn:Refresh()
         end
-        if IsValid(voteIcon[seat]) and not JoelBotC.organgrinderActive then
+        if seat == LocalPlayer().seatNumber then
+            voteIcon[seat]:SetVisible(voteOn)
+        elseif IsValid(voteIcon[seat]) and not JoelBotC.organgrinderActive then
             voteIcon[seat]:SetVisible(voteOn)
         end
     end)
