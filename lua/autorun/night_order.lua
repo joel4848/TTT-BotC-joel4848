@@ -1,48 +1,9 @@
 JoelBotC = JoelBotC or {}
 JoelBotC.rolesInGame = JoelBotC.rolesInGame or {}
-JoelBotC.firstNightOrder = JoelBotC.firstNightOrder or {}
 JoelBotC.otherNightOrder = JoelBotC.otherNightOrder or {}
 JoelBotC.nightFunctions = JoelBotC.nightFunctions or {}
+JoelBotC.firstNightOrderMaster = JoelBotC.firstNightOrderMaster or {}
 JoelBotC.isFirstNight = JoelBotC.isFirstNight or nil
-
-JoelBotC.firstNightOrderMaster = {
-    ROLE_POISONERJBC,
-    ROLE_ORGANGRINDERJBC,
-    ROLE_PUKKAJBC,
-    ROLE_WASHERWOMANJBC,
-    ROLE_LIBRARIANJBC,
-    ROLE_INVESTIGATORJBC,
-    ROLE_CHEFJBC,
-    ROLE_EMPATHJBC,
-    ROLE_FORTUNETELLERJBC,
-    ROLE_GRANDMOTHERJBC,
-    ROLE_SEAMSTRESSJBC,
-    ROLE_STEWARDJBC,
-    ROLE_KNIGHTJBC,
-    ROLE_NOBLEJBC,
-    ROLE_NIGHTWATCHMANJBC,
-    ROLE_OGREJBC
-}
-
-JoelBotC.otherNightOrderMaster = {
-    ROLE_POISONERJBC,
-    ROLE_MONKJBC,
-    ROLE_ORGANGRINDERJBC,
-    ROLE_SCARLETWOMANJBC,
-    ROLE_IMPJBC,
-    ROLE_PUKKAJBC,
-    ROLE_POJBC,
-    ROLE_ASSASSINJBC,
-    ROLE_SWEETHEARTJBC,
-    ROLE_GRANDMOTHERJBC,
-    ROLE_RAVENKEEPERJBC,
-    ROLE_EMPATHJBC,
-    ROLE_FORTUNETELLERJBC,
-    ROLE_UNDERTAKERJBC,
-    ROLE_ORACLEJBC,
-    ROLE_SEAMSTRESSJBC,
-    ROLE_NIGHTWATCHMANJBC
-}
 
 if SERVER then
 
@@ -52,6 +13,10 @@ if SERVER then
     local nightStep = nil
     
     function JoelBotC:DetermineRolesInGame()
+
+        -- Reset some role stuff
+        JoelBotC.nightwatchmanAbilityUsed = nil
+
         -- Get roles in the game
         JoelBotC.rolesInGame = {
             [ROLE_STEWARDJBC] = false,
@@ -93,6 +58,43 @@ if SERVER then
             JoelBotC.rolesInGame[roleID] = true
         end
 
+        -- Build night order master tables
+        JoelBotC.firstNightOrderMaster = {
+            ROLE_POISONERJBC,
+            ROLE_ORGANGRINDERJBC,
+            ROLE_PUKKAJBC,
+            ROLE_WASHERWOMANJBC,
+            ROLE_LIBRARIANJBC,
+            ROLE_INVESTIGATORJBC,
+            ROLE_CHEFJBC,
+            ROLE_EMPATHJBC,
+            ROLE_FORTUNETELLERJBC,
+            ROLE_GRANDMOTHERJBC,
+            ROLE_SEAMSTRESSJBC,
+            ROLE_STEWARDJBC,
+            ROLE_KNIGHTJBC,
+            ROLE_NOBLEJBC,
+            ROLE_NIGHTWATCHMANJBC,
+            ROLE_OGREJBC
+        }
+
+        JoelBotC.otherNightOrderMaster = {
+            ROLE_POISONERJBC,
+            ROLE_MONKJBC,
+            ROLE_ORGANGRINDERJBC,
+            ROLE_IMPJBC,
+            ROLE_PUKKAJBC,
+            ROLE_POJBC,
+            ROLE_ASSASSINJBC,
+            ROLE_RAVENKEEPERJBC,
+            ROLE_EMPATHJBC,
+            ROLE_FORTUNETELLERJBC,
+            ROLE_UNDERTAKERJBC,
+            ROLE_ORACLEJBC,
+            ROLE_SEAMSTRESSJBC,
+            ROLE_NIGHTWATCHMANJBC
+        }
+
         -- Build first night order table
         JoelBotC.firstNightOrder = {}
 
@@ -116,9 +118,17 @@ if SERVER then
         -- No info in a Teensyville game
         if #JoelBotC.players > 6 then
             -- Tell the Minions who the Demon and their fellow Minions are
-            local dmn = JoelBotC.demonPlayers[1]
-            local mns = table.Copy(JoelBotC.minionPlayers)
+            local dmn = nil
+            local mns = {}
             local minionMessage = nil
+
+            dmn = JoelBotC.demonPlayers[1]
+            mns = table.Copy(JoelBotC.minionPlayers)
+
+            print("Running Minion Info")
+            print("Demon = " .. tostring(dmn) .. " i.e. " .. dmn:Nick())
+            print("Minion table:")
+            PrintTable(mns)
 
             for _, ply in ipairs(JoelBotC.players) do
                 if ply.minion then
@@ -140,14 +150,14 @@ if SERVER then
                         end
                     end
 
-                    self:SmallNotify(
+                    Randomat:SmallNotify(
                         "Your Demon is " .. dmn:Nick(),
                         5,
                         ply
                     )
 
                     timer.Simple(5, function()
-                        self:SmallNotify(
+                        Randomat:SmallNotify(
                             minionMessage,
                             5,
                             ply
@@ -164,13 +174,13 @@ if SERVER then
             -- Tell the Demon their bluffs
             for _, ply in ipairs(JoelBotC.players) do
                 if ply.demon then
-                    self:SmallNotify(
-                        "Your bluffs are " .. ROLE_STRINGS[JoelBotC.demonBluffs[1]] .. ", " .. ROLE_STRINGS[JoelBotC.demonBluffs[2]] .. " and " .. ROLE_STRINGS[JoelBotC.demonBluffs[3]],
+                    Randomat:SmallNotify("Your bluffs are " .. ROLE_STRINGS[JoelBotC.demonBluffs[1]] .. ", " .. ROLE_STRINGS[JoelBotC.demonBluffs[2]] .. " and " .. ROLE_STRINGS[JoelBotC.demonBluffs[3]],
                         5,
                         ply
                     )
 
-                    local mns = table.Copy(JoelBotC.minionPlayers)
+                    local mns = {}
+                    mns = table.Copy(JoelBotC.minionPlayers)
                     local minionMessage = nil
 
                     if #mns == 1 then
@@ -178,11 +188,11 @@ if SERVER then
                     elseif #mns == 2 then
                         minionMessage = "Your Minions are " .. mns[1]:Nick() .. " and " .. mns[2]:Nick()
                     elseif #mns == 3 then
-                        minionMessage = "Your Minions are " .. mns[1]:Nick() .. ", " .. mns[2]:Nick() " and " .. mns[3]:Nick()
+                        minionMessage = "Your Minions are " .. mns[1]:Nick() .. ", " .. mns[2]:Nick() .. " and " .. mns[3]:Nick()
                     end
 
                     timer.Simple(5, function()
-                        self:SmallNotify(
+                        Randomat:SmallNotify(
                             minionMessage,
                             5,
                             ply
@@ -199,38 +209,65 @@ if SERVER then
     end
 
     function JoelBotC:NextNightStep()
-        if JoelBotC.isFirstNight then
-            if nightStep > #JoelBotC.firstNightOrder then
-                JoelBotC.isFirstNight = false
-                JoelBotC:StartDay()
-            else
-                local currentRole = JoelBotC.firstNightOrder[nightStep]
-                local currentFn = JoelBotC.nightFunctions[currentRole] or nil
+        timer.Simple(1, function()
+            if JoelBotC.isFirstNight then
 
-                if JoelBotC.rolesInGame[currentRole] then
-                    currentFn(JoelBotC)
+                print("---------------------------------------------------------------------")
+                print("-----------                  NIGHT 1                     ------------")
+                print("---------------------------------------------------------------------")
+                print("Time: " .. math.floor(SysTime()))
+                print("Ran Next Night Step")
+                print("nightStep = " .. nightStep)
+                print("#JoelBotC.firstNightOrderMaster = " .. #JoelBotC.firstNightOrderMaster)
+
+                if nightStep > #JoelBotC.firstNightOrderMaster then
+                    JoelBotC.isFirstNight = false
+                    nightStep = 1
+                    JoelBotC:StartDay()
                 else
-                    nightStep = nightStep + 1
-                    JoelBotC:NextNightStep()
+                    local currentRole = JoelBotC.firstNightOrderMaster[nightStep]
+                    local roleData = JoelBotC.nightFunctions[currentRole]
+                    local currentFn = JoelBotC.nightFunctions[currentRole] or nil
+
+                    if JoelBotC.rolesInGame[currentRole] then
+                        print("Running function: " .. roleData.name)
+                        nightStep = nightStep + 1
+                        roleData.fn(JoelBotC)
+                    else
+                        print("Role not in game - " .. roleData.name)
+                        nightStep = nightStep + 1
+                        JoelBotC:NextNightStep()
+                    end
+                end
+            else
+                print("---------------------------------------------------------------------")
+                print("-----------                OTHER NIGHT                   ------------")
+                print("---------------------------------------------------------------------")
+                print("Time: " .. math.floor(SysTime()))
+                print("Ran Next Night Step")
+                print("nightStep = " .. nightStep)
+                print("#JoelBotC.otherNightOrderMaster = " .. #JoelBotC.otherNightOrderMaster)
+
+                if nightStep > #JoelBotC.otherNightOrderMaster then
+                    nightStep = 1
+                    JoelBotC:StartDay()
+                else
+                    local currentRole = JoelBotC.otherNightOrderMaster[nightStep]
+                    local roleData = JoelBotC.nightFunctions[currentRole]
+                    local currentFn = JoelBotC.nightFunctions[currentRole] or nil
+
+                    if JoelBotC.rolesInGame[currentRole] then
+                        print("Running function: " .. roleData.name)
+                        nightStep = nightStep + 1
+                        roleData.fn(JoelBotC)
+                    else
+                        print("Role not in game - " .. roleData.name)
+                        nightStep = nightStep + 1
+                        JoelBotC:NextNightStep()
+                    end
                 end
             end
-        else
-            if nightStep > #JoelBotC.otherNightOrder then
-                JoelBotC:StartDay()
-            else
-                local currentRole = JoelBotC.otherNightOrder[nightStep]
-                local currentFn = JoelBotC.nightFunctions[currentRole] or nil
-
-                if JoelBotC.rolesInGame[currentRole] then
-                    currentFn(JoelBotC)
-                else
-                    nightStep = nightStep + 1
-                    JoelBotC:NextNightStep()
-                end
-            end
-        end
-
-        nightStep = nightStep + 1
+        end)
     end
 
     function JoelBotC:StartNight()
@@ -244,7 +281,7 @@ if SERVER then
         if JoelBotC.isFirstNight then
             JoelBotC:MinionInfo()
 
-            timer.Simple(10, function()
+            timer.Simple(3, function()
                 JoelBotC:DemonInfo()
 
                 timer.Simple(10, function()

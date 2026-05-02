@@ -45,12 +45,23 @@ function EVENT:Begin()
 
     JoelBotC.FortuneTellerRedHerring()
 
-    JoelBotC.isFirstNight = true
-
-    timer.Simple(1, function()
+    timer.Create("rdmtJoelBotC_gamestart_1", 1, 1, function()
         JoelBotC:GiveStartingBooks()
     end)
 
+    timer.Create("rdmtJoelBotC_gamestart_2", 2, 1, function()
+        Randomat:SmallNotify("Check your inventory for your notebook and information book!", 5)
+    end)
+
+    timer.Create("rdmtJoelBotC_gamestart_3", 3, 1, function()
+        Randomat:SmallNotify("Night 1 will start in 2 seconds...", 5)
+    end)
+
+    timer.Create("rdmtJoelBotC_gamestart_4", 5, 1, function()
+        print("Ran Start Night")
+        JoelBotC.isFirstNight = true
+        JoelBotC:StartNight()
+    end)
 end
 
 function EVENT:End(isActive)
@@ -95,6 +106,12 @@ function EVENT:End(isActive)
                 timer.Remove(timerName)
         end
     end
+
+    timer.Remove("rdmtJoelBotC_gamestart_1")
+    timer.Remove("rdmtJoelBotC_gamestart_2")
+    timer.Remove("rdmtJoelBotC_gamestart_3")
+    timer.Remove("rdmtJoelBotC_gamestart_4")
+
 
     -- Clear active roles table (I think this is the right way to do it?)
     for role, _ in ipairs(JoelBotC.rolesInGame) do

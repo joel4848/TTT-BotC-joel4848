@@ -277,6 +277,8 @@ if CLIENT then
         ogGUI:SetPos(0, 0)
         ogGUI:SetMouseInputEnabled(true)
 
+        timer.Remove("rdmtJoelBotCOGChoice")
+
         timer.Create("rdmtJoelBotCOGChoice", 15, 1, function()
             net.Start("rdmtJoelBotCOrganGrinderGUI")
                 net.WriteBool(false)

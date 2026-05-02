@@ -19,33 +19,33 @@ JoelBotC.townsfolkInBag = JoelBotC.townsfolkInBag or {}
 JoelBotC.outsidersInBag = JoelBotC.outsidersInBag or {}
 JoelBotC.minionsInBag = JoelBotC.minionsInBag or {}
 JoelBotC.demonsInBag = JoelBotC.demonsInBag or {}
+JoelBotC.ogreIsEvil = JoelBotC.ogreIsEvil or nil
 
 function JoelBotC:GetNightFunctions()
     JoelBotC.nightFunctions = {
-        [ROLE_STEWARDJBC] = JoelBotC.StewardNight,
-        [ROLE_KNIGHTJBC] = JoelBotC.KnightNight,
-        [ROLE_ORACLEJBC] = JoelBotC.OracleNight,
-        [ROLE_CHEFJBC] = JoelBotC.ChefNight,
-        [ROLE_UNDERTAKERJBC] = JoelBotC.UndertakerNight,
-        [ROLE_NOBLEJBC] = JoelBotC.NobleNight,
-        [ROLE_INVESTIGATORJBC] = JoelBotC.InvestigatorNight,
-        [ROLE_MONKJBC] = JoelBotC.MonkNight,
-        [ROLE_WASHERWOMANJBC] = JoelBotC.WasherwomanNight,
-        [ROLE_NIGHTWATCHMANJBC] = JoelBotC.NightwatchmanNight,
-        [ROLE_GRANDMOTHERJBC] = JoelBotC.GrandmotherNight,
-        [ROLE_SEAMSTRESSJBC] = JoelBotC.SeamstressNight,
-        [ROLE_LIBRARIANJBC] = JoelBotC.LibrarianNight,
-        [ROLE_EMPATHJBC] = JoelBotC.EmpathNight,
-        [ROLE_RAVENKEEPERJBC] = JoelBotC.RavenkeeperNight,
-        [ROLE_FORTUNETELLERJBC] = JoelBotC.FortuneTellerNight,
-        [ROLE_OGREJBC] = JoelBotC.OgreNight,
-        [ROLE_MOONCHILDJBC] = JoelBotC.MoonchildNight,
-        [ROLE_POISONERJBC] = JoelBotC.PoisonerNight,
-        [ROLE_ORGANGRINDERJBC] = JoelBotC.OrganGrinderNight,
-        [ROLE_ASSASSINJBC] = JoelBotC.AssassinNight,
-        [ROLE_PUKKAJBC] = JoelBotC.PukkaNight,
-        [ROLE_IMPJBC] = JoelBotC.ImpNight,
-        [ROLE_POJBC] = JoelBotC.PoNight,
+        [ROLE_STEWARDJBC] = {fn = JoelBotC.StewardNight, name = "StewardNight"},
+        [ROLE_KNIGHTJBC] = {fn = JoelBotC.KnightNight, name = "KnightNight"},
+        [ROLE_ORACLEJBC] = {fn = JoelBotC.OracleNight, name = "OracleNight"},
+        [ROLE_CHEFJBC] = {fn = JoelBotC.ChefNight, name = "ChefNight"},
+        [ROLE_UNDERTAKERJBC] = {fn = JoelBotC.UndertakerNight, name = "UndertakerNight"},
+        [ROLE_NOBLEJBC] = {fn = JoelBotC.NobleNight, name = "NobleNight"},
+        [ROLE_INVESTIGATORJBC] = {fn = JoelBotC.InvestigatorNight, name = "InvestigatorNight"},
+        [ROLE_MONKJBC] = {fn = JoelBotC.MonkNight, name = "MonkNight"},
+        [ROLE_WASHERWOMANJBC] = {fn = JoelBotC.WasherwomanNight, name = "WasherwomanNight"},
+        [ROLE_NIGHTWATCHMANJBC] = {fn = JoelBotC.NightwatchmanNight, name = "NightwatchmanNight"},
+        [ROLE_GRANDMOTHERJBC] = {fn = JoelBotC.GrandmotherNight, name = "GrandmotherNight"},
+        [ROLE_SEAMSTRESSJBC] = {fn = JoelBotC.SeamstressNight, name = "SeamstressNight"},
+        [ROLE_LIBRARIANJBC] = {fn = JoelBotC.LibrarianNight, name = "LibrarianNight"},
+        [ROLE_EMPATHJBC] = {fn = JoelBotC.EmpathNight, name = "EmpathNight"},
+        [ROLE_RAVENKEEPERJBC] = {fn = JoelBotC.RavenkeeperNight, name = "RavenkeeperNight"},
+        [ROLE_FORTUNETELLERJBC] = {fn = JoelBotC.FortuneTellerNight, name = "FortuneTellerNight"},
+        [ROLE_OGREJBC] = {fn = JoelBotC.OgreNight, name = "OgreNight"},
+        [ROLE_POISONERJBC] = {fn = JoelBotC.PoisonerNight, name = "PoisonerNight"},
+        [ROLE_ORGANGRINDERJBC] = {fn = JoelBotC.OrganGrinderNight, name = "OrganGrinderNight"},
+        [ROLE_ASSASSINJBC] = {fn = JoelBotC.AssassinNight, name = "AssassinNight"},
+        [ROLE_PUKKAJBC] = {fn = JoelBotC.PukkaNight, name = "PukkaNight"},
+        [ROLE_IMPJBC] = {fn = JoelBotC.ImpNight, name = "ImpNight"},
+        [ROLE_POJBC] = {fn = JoelBotC.PoNight, name = "PoNight"}
     }
 end
 
@@ -88,12 +88,14 @@ function JoelBotC:StewardNight()
                 repeat
                     table.Shuffle(JoelBotC.goodPlayers)
                     stewardInfo = JoelBotC.goodPlayers[1]
-                until not stewardInfo == ply
+                until not (stewardInfo == ply)
             end
 
             Randomat:SmallNotify("Your starting information: " .. stewardInfo:Nick() .. " is good", 5, ply)
         end
     end
+
+    JoelBotC:NextNightStep()
 end
 
 -- knight
@@ -126,6 +128,8 @@ function JoelBotC:KnightNight()
             Randomat:SmallNotify("Your starting information: Neither " .. knightInfo1:Nick() .. " nor " .. knightInfo2:Nick() .. " is the Demon", 5, ply)
         end
     end
+
+    JoelBotC:NextNightStep()
 end
 
 -- oracle
@@ -179,6 +183,8 @@ function JoelBotC:OracleNight()
             previousDeadPlayerAmount = deadPlayerAmount
         end
     end
+
+    JoelBotC:NextNightStep()
 end
 
 -- chef
@@ -221,6 +227,8 @@ function JoelBotC:ChefNight()
             )
         end
     end
+
+    JoelBotC:NextNightStep()
 end
 
 -- undertaker
@@ -256,6 +264,8 @@ function JoelBotC:UndertakerNight()
             end
         end
     end
+
+    JoelBotC:NextNightStep()
 end
 
 -- noble
@@ -316,6 +326,8 @@ function JoelBotC:NobleNight()
             )
         end
     end
+
+    JoelBotC:NextNightStep()
 end
 
 -- investigator
@@ -388,6 +400,8 @@ function JoelBotC:InvestigatorNight()
             )
         end
     end
+
+    JoelBotC:NextNightStep()
 end
 
 -- monk
@@ -419,6 +433,7 @@ function JoelBotC:MonkNight()
             timer.Create("rdmtJoelBotCMonk0", 15, 1, function()
                 hook.Remove("Think", "rdmtJoelBotCMonkProtect")
                 JoelBotC:SendSeatingGUIDestroy(ply)
+                JoelBotC:NextNightStep()
             end)
 
             JoelBotC.seatingGUIButtonPressed = nil
@@ -430,6 +445,7 @@ function JoelBotC:MonkNight()
                         JoelBotC.monkProtectedPlayer = JoelBotC.players[JoelBotC.seatingGUIButtonPressed]
                     end
                     JoelBotC:SendSeatingGUIDestroy(ply)
+                    JoelBotC:NextNightStep()
 
                     timer.Remove("rdmtJoelBotCMonk10")
                     timer.Remove("rdmtJoelBotCMonk5")
@@ -502,6 +518,8 @@ function JoelBotC:WasherwomanNight()
             )
         end
     end
+
+    JoelBotC:NextNightStep()
 end
 
 -- nightwatchman
@@ -533,6 +551,7 @@ function JoelBotC:NightwatchmanNight()
             timer.Create("rdmtJoelBotCNightwatchman0", 15, 1, function()
                 hook.Remove("Think", "rdmtJoelBotCNightwatchmanInform")
                 JoelBotC:SendSeatingGUIDestroy(ply)
+                JoelBotC:NextNightStep()
             end)
 
             JoelBotC.seatingGUIButtonPressed = nil
@@ -544,6 +563,7 @@ function JoelBotC:NightwatchmanNight()
                     end
                     JoelBotC.nightwatchmanAbilityUsed = true
                     JoelBotC:SendSeatingGUIDestroy(ply)
+                    JoelBotC:NextNightStep()
 
                     timer.Remove("rdmtJoelBotCNightwatchman10")
                     timer.Remove("rdmtJoelBotCNightwatchman5")
@@ -616,6 +636,8 @@ function JoelBotC:GrandmotherNight()
             )
         end
     end
+
+    JoelBotC:NextNightStep()
 end
 
 -- seamstress
@@ -648,6 +670,7 @@ function JoelBotC:SeamstressNight()
                 hook.Remove("Think", "rdmtJoelBotCSeamstressChoose1")
                 hook.Remove("Think", "rdmtJoelBotCSeamstressChoose2")
                 JoelBotC:SendSeatingGUIDestroy(ply)
+                JoelBotC:NextNightStep()
             end)
 
             JoelBotC.seatingGUIButtonPressed = nil
@@ -697,6 +720,9 @@ function JoelBotC:SeamstressNight()
                                     )
                                 end
                             end
+
+                            JoelBotC:SendSeatingGUIDestroy(ply)
+                            JoelBotC:NextNightStep()
 
                             timer.Remove("rdmtJoelBotCSeamstress10")
                             timer.Remove("rdmtJoelBotCSeamstress5")
@@ -780,6 +806,8 @@ function JoelBotC:LibrarianNight()
                 )
             end
         end
+
+        JoelBotC:NextNightStep()
     end
 end
 
@@ -810,7 +838,7 @@ function JoelBotC:EmpathNight()
                 if not JoelBotC.seatingOrder[leftIndex].BotCDead then
                     deadNeighbours = deadNeighbours + 1
                 end
-            until JoelBotC.seatingOrder[leftIndex].BotCDead
+            until not (JoelBotC.seatingOrder[leftIndex].BotCDead)
 
             local leftNeighbour = JoelBotC.seatingOrder[leftIndex]
 
@@ -821,7 +849,7 @@ function JoelBotC:EmpathNight()
                 if not JoelBotC.seatingOrder[rightIndex].BotCDead then
                     deadNeighbours = deadNeighbours + 1
                 end
-            until JoelBotC.seatingOrder[rightIndex].BotCDead
+            until not (JoelBotC.seatingOrder[rightIndex].BotCDead)
 
             local rightNeighbour = JoelBotC.seatingOrder[rightIndex]
 
@@ -880,6 +908,8 @@ function JoelBotC:EmpathNight()
             end
         end
     end
+
+    JoelBotC:NextNightStep()
 end
 
 
@@ -912,6 +942,7 @@ function JoelBotC:RavenkeeperNight()
             timer.Create("rdmtJoelBotCRavenkeeper0", 15, 1, function()
                 hook.Remove("Think", "rdmtJoelBotCRavenkeeperChoose")
                 JoelBotC:SendSeatingGUIDestroy(ply)
+                JoelBotC:NextNightStep()
             end)
 
             JoelBotC.seatingGUIButtonPressed = nil
@@ -938,6 +969,7 @@ function JoelBotC:RavenkeeperNight()
                         end
                     end
                     JoelBotC:SendSeatingGUIDestroy(ply)
+                    JoelBotC:NextNightStep()
 
                     Randomat:SmallNotify(
                         chosenPlayer:Nick() .. " is the " .. chosenPlayerRole,
@@ -1010,6 +1042,7 @@ function JoelBotC:FortuneTellerNight()
             timer.Create("rdmtJoelBotCFortuneTeller0", 15, 1, function()
                 hook.Remove("Think", "rdmtJoelBotCFortuneTellerChoose")
                 JoelBotC:SendSeatingGUIDestroy(ply)
+                JoelBotC:NextNightStep()
             end)
 
             JoelBotC.seatingGUIButtonPressed = nil
@@ -1062,6 +1095,9 @@ function JoelBotC:FortuneTellerNight()
                                 )
                             end
 
+                            JoelBotC:SendSeatingGUIDestroy(ply)
+                            JoelBotC:NextNightStep()
+
                             timer.Remove("rdmtJoelBotCFortuneTeller10")
                             timer.Remove("rdmtJoelBotCFortuneTeller5")
                             timer.Remove("rdmtJoelBotCFortuneTeller4")
@@ -1086,6 +1122,76 @@ end
 
 
 -- ogre
+function JoelBotC:OgreNight()
+    for _, ply in ipairs(JoelBotC.players) do
+        if ply:IsOgre() then
+            JoelBotC:SendSeatingGUICreate(ply)
+
+            Randomat:SmallNotify("15 Seconds: Pick a player and join their team.\n             (You don't learn which team)", 5, ply)
+
+            timer.Create("rdmtJoelBotCOgre10", 5, 1, function()
+                Randomat:SmallNotify("10 seconds to choose", 5, ply)
+            end)
+            timer.Create("rdmtJoelBotCOgre5", 10, 1, function()
+                Randomat:SmallNotify("5 seconds to choose", 1, ply)
+            end)
+            timer.Create("rdmtJoelBotCOgre4", 11, 1, function()
+                Randomat:SmallNotify("4 seconds to choose", 1, ply)
+            end)
+            timer.Create("rdmtJoelBotCOgre3", 12, 1, function()
+                Randomat:SmallNotify("3 seconds to choose", 1, ply)
+            end)
+            timer.Create("rdmtJoelBotCOgre2", 13, 1, function()
+                Randomat:SmallNotify("2 seconds to choose", 1, ply)
+            end)
+            timer.Create("rdmtJoelBotCOgre1", 14, 1, function()
+                Randomat:SmallNotify("1 second to choose", 1, ply)
+            end)
+            timer.Create("rdmtJoelBotCOgre0", 15, 1, function()
+                hook.Remove("Think", "rdmtJoelBotCOgreChoose")
+                JoelBotC:SendSeatingGUIDestroy(ply)
+                JoelBotC:NextNightStep()
+            end)
+
+            JoelBotC.seatingGUIButtonPressed = nil
+            JoelBotC.seatingGUIPressingPlayer = nil
+            local chosenPlayer = nil
+            JoelBotC.ogreIsEvil = false
+
+            hook.Add("Think", "rdmtJoelBotCOgreChoose", function()
+                if JoelBotC.seatingGUIPressingPlayer == ply and JoelBotC.seatingGUIButtonPressed ~= nil then
+
+                    chosenPlayer = JoelBotC.seatingOrder[JoelBotC.seatingGUIButtonPressed]
+
+                    if JoelBotC:IsDroisoned(ply) then
+                        JoelBotC.ogreIsEvil = false
+                    elseif JoelBotC:RegistersEvil(chosenPlayer) then
+                        JoelBotC.ogreIsEvil = true
+
+                        if chosenPlayer:IsRecluse() then
+                            Randomat:SmallNotify(
+                                "You chose the Recluse, so learn that you are now EVIL",
+                                5,
+                                ply
+                            )
+                        end
+                    end
+                    JoelBotC:SendSeatingGUIDestroy(ply)
+                    JoelBotC:NextNightStep()
+
+                    timer.Remove("rdmtJoelBotCOgre10")
+                    timer.Remove("rdmtJoelBotCOgre5")
+                    timer.Remove("rdmtJoelBotCOgre4")
+                    timer.Remove("rdmtJoelBotCOgre3")
+                    timer.Remove("rdmtJoelBotCOgre2")
+                    timer.Remove("rdmtJoelBotCOgre1")
+                    timer.Remove("rdmtJoelBotCOgre0")
+                    hook.Remove("Think", "rdmtJoelBotCOgreChoose")
+                end
+            end)
+        end
+    end
+end
 
 
 
@@ -1118,8 +1224,15 @@ end
 
 -- poisoner
 function JoelBotC:PoisonerNight()
+    local poisonerExists = nil
+    
     for _, ply in ipairs(JoelBotC.players) do
-        if ply:IsRole(ROLE_POSIONERJBC) and not ply.BotCDead then
+        if ply:IsRole(ROLE_POISONERJBC) and not ply.BotCDead then
+            poisonerExists = true
+
+            print("Ran Poisoner night function for:")
+            print(ply:Nick())
+
             JoelBotC:SendSeatingGUICreate(ply)
 
             Randomat:SmallNotify("15 Seconds: Choose a player to poison for tonight and tomorrow", 5, ply)
@@ -1145,11 +1258,14 @@ function JoelBotC:PoisonerNight()
             timer.Create("rdmtJoelBotCPoisoner0", 15, 1, function()
                 hook.Remove("Think", "rdmtJoelBotCPoisonerPoison")
                 JoelBotC:SendSeatingGUIDestroy(ply)
+                JoelBotC:NextNightStep()
             end)
 
             JoelBotC.seatingGUIButtonPressed = nil
             JoelBotC.seatingGUIPressingPlayer = nil
-            JoelBotC.poisonerPoisonedPlayer.poisonerPoisoned = false
+            if JoelBotC.poisonerPoisonedPlayer then
+                JoelBotC.poisonerPoisonedPlayer.poisonerPoisoned = false
+            end
             JoelBotC.poisonerPoisonedPlayer = nil
             hook.Add("Think", "rdmtJoelBotCPoisonerPoison", function()
                 if JoelBotC.seatingGUIPressingPlayer == ply and JoelBotC.seatingGUIButtonPressed ~= nil then
@@ -1157,6 +1273,7 @@ function JoelBotC:PoisonerNight()
                         JoelBotC.poisonerPoisonedPlayer = JoelBotC.players[JoelBotC.seatingGUIButtonPressed]
                     end
                     JoelBotC:SendSeatingGUIDestroy(ply)
+                    JoelBotC:NextNightStep()
 
                     timer.Remove("rdmtJoelBotCPoisoner10")
                     timer.Remove("rdmtJoelBotCPoisoner5")
@@ -1169,6 +1286,10 @@ function JoelBotC:PoisonerNight()
                 end
             end)
         end
+    end
+
+    if not poisonerExists then
+        JoelBotC:NextNightStep()
     end
 end
 
@@ -1197,6 +1318,8 @@ function JoelBotC:OrganGrinderNight()
             net.Send(ply)
         end
     end
+
+    JoelBotC:NextNightStep()
 end
 
 net.Receive("rdmtJoelBotCOrganGrinderGUI", function(_, ply)
@@ -1240,6 +1363,7 @@ function JoelBotC:AssassinNight()
             timer.Create("rdmtJoelBotCAssassin0", 15, 1, function()
                 hook.Remove("Think", "rdmtJoelBotCAssassinKill")
                 JoelBotC:SendSeatingGUIDestroy(ply)
+                JoelBotC:NextNightStep()
             end)
 
             JoelBotC.seatingGUIButtonPressed = nil
@@ -1252,6 +1376,7 @@ function JoelBotC:AssassinNight()
                     end
                     JoelBotC.assassinAbilityUsed = true
                     JoelBotC:SendSeatingGUIDestroy(ply)
+                    JoelBotC:NextNightStep()
 
                     timer.Remove("rdmtJoelBotCAssassin10")
                     timer.Remove("rdmtJoelBotCAssassin5")
@@ -1274,8 +1399,12 @@ end
 
 -- pukka
 function JoelBotC:PukkaNight()
+    local pukkaExists = nil
+
     for _, ply in ipairs(JoelBotC.players) do
         if ply:IsPukka() and not ply.BotCDead then
+
+            pukkaExists = true
 
             JoelBotC.pukkaPoisonedPlayer = JoelBotC.pukkaPoisonedPlayer or nil
             JoelBotC.pukkaTonightPoisoned = nil
@@ -1306,6 +1435,7 @@ function JoelBotC:PukkaNight()
             timer.Create("rdmtJoelBotCPukka0", 15, 1, function()
                 hook.Remove("Think", "rdmtJoelBotCPukkaPoison")
                 JoelBotC:SendSeatingGUIDestroy(ply)
+                JoelBotC:NextNightStep()
             end)
 
             JoelBotC.seatingGUIButtonPressed = nil
@@ -1317,6 +1447,7 @@ function JoelBotC:PukkaNight()
                         JoelBotC.pukkaTonightPoisoned = JoelBotC.players[JoelBotC.seatingGUIButtonPressed]
                     end
                     JoelBotC:SendSeatingGUIDestroy(ply)
+                    JoelBotC:NextNightStep()
 
                     timer.Remove("rdmtJoelBotCPukka10")
                     timer.Remove("rdmtJoelBotCPukka5")
@@ -1337,6 +1468,10 @@ function JoelBotC:PukkaNight()
 
             JoelBotC.pukkaPoisonedPlayer = JoelBotC.pukkaTonightPoisoned
         end
+    end
+
+    if not pukkaExists then
+        JoelBotC:NextNightStep()
     end
 end
 
@@ -1371,6 +1506,7 @@ function JoelBotC:ImpNight()
             timer.Create("rdmtJoelBotCImp0", 15, 1, function()
                 hook.Remove("Think", "rdmtJoelBotCImpKill")
                 JoelBotC:SendSeatingGUIDestroy(ply)
+                JoelBotC:NextNightStep()
             end)
 
             JoelBotC.seatingGUIButtonPressed = nil
@@ -1415,6 +1551,8 @@ function JoelBotC:ImpNight()
 
                     JoelBotC:NightPreKill(JoelBotC.impTargetedPlayer, ply)
 
+                    JoelBotC:NextNightStep()
+
                     hook.Remove("Think", "rdmtJoelBotCImpKill")
                 end
             end)
@@ -1438,6 +1576,7 @@ function JoelBotC:PoSingleKill(ply)
     timer.Create("rdmtJoelBotCPo0", 15, 1, function()
         hook.Remove("Think", "rdmtJoelBotCPoKill")
         JoelBotC:SendSeatingGUIDestroy(ply)
+        JoelBotC:NextNightStep()
     end)
 
     JoelBotC.seatingGUIButtonPressed = nil
@@ -1467,6 +1606,8 @@ function JoelBotC:PoSingleKill(ply)
                 JoelBotC:NightPreKill(JoelBotC.poTargetedPlayer, ply)
             end
 
+            JoelBotC:NextNightStep()
+
             hook.Remove("Think", "rdmtJoelBotCPoKill")
         end
     end)
@@ -1493,6 +1634,7 @@ function JoelBotC:PoTripleKill(ply)
         timer.Create("rdmtJoelBotCPo0", 15, 1, function()
             hook.Remove("Think", "rdmtJoelBotCPoKill3")
             JoelBotC:SendSeatingGUIDestroy(ply)
+            JoelBotC:NextNightStep()
         end)
 
         JoelBotC.seatingGUIButtonPressed = nil
@@ -1517,6 +1659,8 @@ function JoelBotC:PoTripleKill(ply)
                     JoelBotC:NightPreKill(JoelBotC.poTargetedPlayer, ply)
                 end
 
+                JoelBotC:NextNightStep()
+
                 hook.Remove("Think", "rdmtJoelBotCPoKill3")
             end
         end)
@@ -1540,6 +1684,7 @@ function JoelBotC:PoTripleKill(ply)
         timer.Create("rdmtJoelBotCPo0", 15, 1, function()
             hook.Remove("Think", "rdmtJoelBotCPoKill2")
             JoelBotC:SendSeatingGUIDestroy(ply)
+            JoelBotC:NextNightStep()
         end)
 
         JoelBotC.seatingGUIButtonPressed = nil
@@ -1588,6 +1733,7 @@ function JoelBotC:PoTripleKill(ply)
     timer.Create("rdmtJoelBotCPo0", 15, 1, function()
         hook.Remove("Think", "rdmtJoelBotCPoKill1")
         JoelBotC:SendSeatingGUIDestroy(ply)
+        JoelBotC:NextNightStep()
     end)
 
     JoelBotC.seatingGUIButtonPressed = nil

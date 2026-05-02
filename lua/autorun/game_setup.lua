@@ -350,20 +350,25 @@ if SERVER then
         -- Create Demon's bluff pool (not-in-play good roles) -------------------------------------------------------
         JoelBotC.demonBluffsTownsfolkPool = {}
         JoelBotC.demonBluffsOutsiderPool = {}
+        JoelBotC.demonBluffs = {}
 
-        table.Add(JoelBotC.demonBluffsTownsfolkPool, townsfolkPool)
-        table.Add(JoelBotC.demonBluffsOutsiderPool, outsiderPool)
+        table.Add(JoelBotC.demonBluffsTownsfolkPool, JoelBotC.unusedTownsfolk)
+        table.Add(JoelBotC.demonBluffsOutsiderPool, JoelBotC.unusedOutsiders)
 
         -- Remove any roles we don't want to be Demon bluffs here
-        table.RemoveByValue(JoelBotC.demonBluffsOutsiderPool, ROLE_RECLUSEJBC)
-        table.RemoveByValue(JoelBotC.demonBluffsOutsiderPool, ROLE_DRUNKJBC)
+        -- table.RemoveByValue(JoelBotC.demonBluffsOutsiderPool, ROLE_RECLUSEJBC)
+        -- table.RemoveByValue(JoelBotC.demonBluffsOutsiderPool, ROLE_DRUNKJBC)
         -- table.RemoveByValue(JoelBotC.demonBluffsPool, ROLE_NIGHTWATCHMANJBC)
 
         -- Pick which roles should be bluffs - two Townsfolk, one Outsider
         table.Shuffle(JoelBotC.demonBluffsTownsfolkPool)
+        print("Potential Townsfolk bluffs:")
+        PrintTable(JoelBotC.demonBluffsTownsfolkPool)
         table.insert(JoelBotC.demonBluffs, 1, JoelBotC.demonBluffsTownsfolkPool[1])
         table.insert(JoelBotC.demonBluffs, 2, JoelBotC.demonBluffsTownsfolkPool[2])
         table.Shuffle(JoelBotC.demonBluffsOutsiderPool)
+        print("Potential Outsider bluffs:")
+        PrintTable(JoelBotC.demonBluffsOutsiderPool)
         table.insert(JoelBotC.demonBluffs, 3, JoelBotC.demonBluffsOutsiderPool[1])
 
         -- Try and make one of either the Empath or the Fortune Teller (or any ongoing info role added in the future) a bluff
@@ -433,6 +438,8 @@ if SERVER then
         -- for key, value in ipairs(JoelBotC.demonBluffs) do
         --     print(key, ROLE_STRINGS[value])
         -- end
+        print("Demon bluffs:")
+        PrintTable(JoelBotC.demonBluffs)
     end
 
     function JoelBotC:AssignRolesAndSeats()
@@ -479,6 +486,13 @@ if SERVER then
         SendFullStateUpdate()
 
         -- Create tables of which players are each character type
+        JoelBotC.townsfolkPlayers = {}
+        JoelBotC.outsiderPlayers = {}
+        JoelBotC.minionPlayers = {}
+        JoelBotC.demonPlayers = {}
+        JoelBotC.goodPlayers = {}
+        JoelBotC.evilPlayers = {}
+
         for _, ply in player.Iterator() do
             if IsValid(ply) and not ply:IsSpec() then
                 if ply.townsfolk then
@@ -503,7 +517,7 @@ if SERVER then
         JoelBotC.seatingOrder = table.Copy(JoelBotC.players)
 
         for i, ply in ipairs(JoelBotC.seatingOrder) do
-            PrintMessage(HUD_PRINTTALK, "Seat " .. i .. ": " .. ply:Nick())
+            PrintMessage(HUD_PRINTTALK, "Seat " .. i .. ": " .. ply:Nick() .. " - " .. ROLE_STRINGS[ply.botc_role])
             ply.seatNumber = i
         end
 
