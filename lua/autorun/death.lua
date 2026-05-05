@@ -93,6 +93,10 @@ if SERVER then
         end
 
         JoelBotC.morningDeaths = {}
+
+        timer.Create("rdmtJoelBotCStartDiscussionDelay", 5, 1, function()
+            JoelBotC:StartDiscussion()
+        end)
     end
 
     -- Non-execution kill (WIP)

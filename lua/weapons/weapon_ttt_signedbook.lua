@@ -51,6 +51,15 @@ local BOOK_SYNC_NET = "ttt_books_signedbook_sync"
 if CLIENT then
 
     resource.AddFile("resource/fonts/Minecraft.ttf")
+    surface.CreateFont("Minecraft50", {
+        font = "Minecraft",
+        size = 50,
+        weight = 2000,
+        additive = false,
+        antialias = true
+    })
+
+    resource.AddFile("resource/fonts/Minecraft.ttf")
     surface.CreateFont("Minecraft40", {
         font = "Minecraft",
         size = 40,
@@ -72,6 +81,15 @@ if CLIENT then
     surface.CreateFont("Minecraft20", {
         font = "Minecraft",
         size = 20,
+        weight = 500,
+        additive = false,
+        antialias = true
+    })
+
+    resource.AddFile("resource/fonts/Minecraft.ttf")
+    surface.CreateFont("Minecraft25", {
+        font = "Minecraft",
+        size = 25,
         weight = 500,
         additive = false,
         antialias = true

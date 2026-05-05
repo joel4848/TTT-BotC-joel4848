@@ -80,9 +80,7 @@ if SERVER then
         elseif buttonPressed == 11 then
             JoelBotC:StartNominations()
         elseif buttonPressed == 12 then
-            print("Ran Start Night")
-            JoelBotC.isFirstNight = false
-            JoelBotC:StartNight()
+            JoelBotC:StartDiscussion()
         end
     end)
 end
@@ -241,7 +239,7 @@ if CLIENT then
             "Morning deaths",
             "Ghost Votes",
             "Start Nominations",
-            "Start First Night"
+            "Start Discussion"
         }
 
         for y=1,4 do

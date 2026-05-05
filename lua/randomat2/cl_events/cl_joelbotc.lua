@@ -97,12 +97,6 @@ function EVENT:Begin()
         end)
     end)
 
-    net.Receive("rdmtJoelBotCNightEnds", function()
-        hook.Remove("RenderScreenspaceEffects", "JoelBOTC_NightEffect")
-        hook.Remove("SetupWorldFog", "NightFog")
-        hook.Remove("PostDrawSkyBox", "DarkSky")
-    end)
-
     net.Receive("rdmtJoelBotCAliveDeadUpdate", function()
         JoelBotC.isAliveClient = net.ReadTable()
 

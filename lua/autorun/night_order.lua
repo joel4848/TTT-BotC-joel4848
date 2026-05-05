@@ -8,7 +8,6 @@ JoelBotC.isFirstNight = JoelBotC.isFirstNight or nil
 if SERVER then
 
     util.AddNetworkString("rdmtJoelBotCNightStarts")
-    util.AddNetworkString("rdmtJoelBotCNightEnds")
 
     local nightStep = nil
     
@@ -201,11 +200,6 @@ if SERVER then
                 end
             end
         end
-    end
-
-    function JoelBotC:StartDay()
-        net.Start("rdmtJoelBotCNightEnds")
-        net.Broadcast()
     end
 
     function JoelBotC:NextNightStep()

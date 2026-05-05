@@ -57,11 +57,11 @@ function EVENT:Begin()
         Randomat:SmallNotify("Night 1 will start in 2 seconds...", 5)
     end)
 
-    timer.Create("rdmtJoelBotC_gamestart_4", 5, 1, function()
-        print("Ran Start Night")
-        JoelBotC.isFirstNight = true
-        JoelBotC:StartNight()
-    end)
+    -- timer.Create("rdmtJoelBotC_gamestart_4", 5, 1, function()
+    --     print("Ran Start Night")
+    --     JoelBotC.isFirstNight = true
+    --     JoelBotC:StartNight()
+    -- end)
 end
 
 function EVENT:End(isActive)
