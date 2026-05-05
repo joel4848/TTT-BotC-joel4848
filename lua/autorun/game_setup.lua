@@ -586,7 +586,7 @@ if SERVER then
                         {text = "Seating order"},
                         {text = "\n"},
                         {text = "Page 4: ", bold = true},
-                        {text = "Information you've learned"}
+                        {text = "Your info"}
                     }},
 
                     {Segments = {
@@ -598,17 +598,18 @@ if SERVER then
                         {text = "\n\n"},
                         {text = "Your role is "},
                         {text = ROLE_STRINGS_EXT[ply:GetRole()] .. "! "},
-                        {text = "You'll find your ability in the \"Information you've learned\" section."},
+                        {text = "You'll find your ability in the "},
+                        {text = "\"Your info\" ", bold = true},
+                        {text = "section."},
                         {text = "\n\n"},
                         {text = "This is a fully-automated, barely-tested, completely non-guaranteed implementation of BotC. If you enjoyed my other randomats so far then... that's a surprise. Good luck!"}
                     }},
 
                     { Segments = seatingSegments },
 
-                    -- Next page etc.
-                    --{Segments = {
-                    --    {text = "Test", bold = true, align = "center"}
-                    --}}
+                    {Segments = {
+                        {text = "Your info", bold = true, underline = true, align = "center"},
+                    }}
 
                 }
             })

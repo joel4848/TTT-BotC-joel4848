@@ -889,7 +889,7 @@ function JoelBotC:EmpathNight()
             -- Actually give the information
             if empathInfo == 0 then
                 Randomat:SmallNotify(
-                        "Your nightly information: None of your alive neighbours are evil",
+                        "Your nightly information: Neither of your alive neighbours are evil",
                         5,
                         ply
                     )
