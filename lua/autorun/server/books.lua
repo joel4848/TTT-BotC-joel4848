@@ -86,9 +86,6 @@ function GiveBookQuill(ply)
     return wep
 end
 
----------------------------------------------------------------
---  GiveSignedBook(ply, bookData)
----------------------------------------------------------------
 function GiveSignedBook(ply, bookData)
     if not IsValid(ply) then return nil end
 
@@ -130,9 +127,32 @@ function GiveSignedBook(ply, bookData)
     return wep
 end
 
----------------------------------------------------------------
---  UpdateSignedBook(ply, newBookData)
----------------------------------------------------------------
+function SendSignedBookUpdate(ply, newBookData)
+    if not IsValid(ply) then return end
+
+    local wep = ply:GetWeapon("weapon_ttt_signedbook")
+    if not IsValid(wep) then
+        wep = ply:Give("weapon_ttt_signedbook")
+        --ErrorNoHalt("[TTT Books] SendSignedBookUpdate: " .. tostring(ply) .. " has no signed book to update\n")
+        --return
+    end
+
+    local pages = SanitisePages(newBookData.pages)
+    local payload = {
+        title  = tostring(newBookData.title or "Signed Book"),
+        author = tostring(newBookData.author or ""),
+        pages  = pages,
+    }
+
+    wep.BookTitle        = payload.title
+    wep.BookAuthor       = payload.author
+    wep.BookTexts        = payload.pages
+    wep.BookPageCapacity = #payload.pages
+
+    SendSignedBookData(ply, wep, payload)
+end
+
+-- Legacy
 function UpdateSignedBook(ply, newBookData)
     if not IsValid(ply) then return nil end
 
@@ -142,38 +162,138 @@ function UpdateSignedBook(ply, newBookData)
     return GiveSignedBook(ply, newBookData)
 end
 
----------------------------------------------------------------
---  How to use
----------------------------------------------------------------
---[[
-GiveBookQuill(ply)
+JoelBotC = JoelBotC or {}
+JoelBotC.roleAbilities = JoelBotC.roleAbilities or {}
 
-GiveSignedBook(ply, {
-    title  = "Detective's Notes",
-    author = "The Detective",
-    pages  = {
-        { Text = "Page one content here.\n\nMore text on this page." },
-        { Text = "Page two content." },
+function JoelBotC:RoleAbilitiesForBook()
+    JoelBotC.roleAbilities = {
+        [ROLE_STEWARDJBC]       = "You start knowing 1 good player",
+        [ROLE_KNIGHTJBC]        = "You start knowing 2 players who are not the Demon",
+        [ROLE_ORACLEJBC]        = "Each night*, you learn how many dead players are evil",
+        [ROLE_CHEFJBC]          = "You start knowing how many pairs of evil players there are",
+        [ROLE_UNDERTAKERJBC]    = "Each night*, you learn which character died by execution today",
+        [ROLE_NOBLEJBC]         = "You start knowing 3 players, 1 and only 1 of whom is evil",
+        [ROLE_INVESTIGATORJBC]  = "You start knowing that 1 of 2 players is a particular Minion",
+        [ROLE_MONKJBC]          = "Each night*, choose a player (not yourself): they are safe from the Demon tonight",
+        [ROLE_WASHERWOMANJBC]   = "You start knowing that 1 of 2 players is a particular Townsfolk",
+        [ROLE_NIGHTWATCHMANJBC] = "Once per game, at night, choose a player: they learn you are the Nightwatchman",
+        [ROLE_GRANDMOTHERJBC]   = "You start knowing a good player and their role. If the Demon kills them, you die too",
+        [ROLE_SEAMSTRESSJBC]    = "Once per game, at night, choose 2 players: you learn if they are the same alignment",
+        [ROLE_LIBRARIANJBC]     = "You start knowing that 1 of 2 players is a particular Outsider (or that there are none)",
+        [ROLE_EMPATHJBC]        = "Each night, you learn how many of your alive neighbours are evil",
+        [ROLE_SOLDIERJBC]       = "You are safe from the Demon",
+        [ROLE_RAVENKEEPERJBC]   = "If you die at night, choose a player and learn their role",
+        [ROLE_FORTUNETELLERJBC] = "Each night, choose 2 players and learn if either is the Demon (or your Red Herring)",
+        [ROLE_VIRGINJBC]        = "The 1st time you are nominated, if the nominator is a Townsfolk, they are executed immediately",
+        [ROLE_OGREJBC]          = "On your 1st night, choose a player and become their alignment",
+        [ROLE_SWEETHEARTJBC]    = "When you die, 1 player is drunk from now on",
+        [ROLE_SAINTJBC]         = "If you die by execution, your team loses",
+        [ROLE_DRUNKJBC]         = "You do not know you are the Drunk. You think you are a Townsfolk role, but your ability malfunctions",
+        [ROLE_RECLUSEJBC]       = "You might register as evil and as a Minion or Demon, even if dead",
+        [ROLE_POISONERJBC]      = "Each night, choose a player: they are poisoned tonight and tomorrow",
+        [ROLE_SCARLETWOMANJBC]  = "If there are 5 or more players alive and the Demon dies, you become the Demon",
+        [ROLE_ORGANGRINDERJBC]  = "Votes and vote tallies are secret. Each night, chose if you are drunk tomorrow (so votes/tallies are not secret)",
+        [ROLE_ASSASSINJBC]      = "Once per game, at night, choose a player: they die, even if they could not otherwise",
+        [ROLE_BARONJBC]         = "There are 2 extra Outsiders in play",
+        [ROLE_PUKKAJBC]         = "Each night, choose a player: they are poisoned. The previously poisoned player dies then stops being poisoned",
+        [ROLE_IMPJBC]           = "Each night*, choose a player: they die. If you kill yourself this way, a Minion becomes the Imp",
+        [ROLE_POJBC]            = "Each night*, you may choose a player: they die. If your last choice was no one, choose 3 players tonight",
     }
-})
+end
 
-GiveSignedBook(ply, {
-    title  = "Secret Instructions",
-    author = "The Admin",
-    pages  = {
-        { Segments = {
-            { text = "WARNING: ", bold = true, color = Color(200,0,0) },
-            { text = "Do not show this to anyone.\n\n" },
-            { text = "Your target is ", italic = true },
-            { text = "PlayerName", bold = true, underline = true, color = Color(0,0,200) },
-            { text = "." },
-        }},
-        { Text = "Second page of instructions." },
+function JoelBotC:InitInfoBook(ply)
+    if not IsValid(ply) then return end
+
+    local roleID      = ply.botc_role or ply:GetRole()
+    local roleName    = ROLE_STRINGS[roleID] or "Unknown"
+    local roleAbility = JoelBotC.roleAbilities[roleID] or "no ability description available"
+
+    ply.infoBookSegments = {
+        { text = "Role:\n",    bold = true, underline = true },
+        { text = roleName .. " - " .. roleAbility .. "\n" },
+        { text = "------------------------\n", color = Color(100, 100, 100) },
     }
-})
+end
 
-UpdateSignedBook(ply, {
-    title = "Updated Notes",
-    pages = { { Text = "This replaces the old content." } }
-})
-]]
+function JoelBotC:AppendInfoBook(ply, sectionTitle, infoLine)
+    if not IsValid(ply) then return end
+    if not ply.infoBookSegments then return end
+
+    table.insert(ply.infoBookSegments, {
+        text      = sectionTitle .. "\n",
+        bold      = true,
+        underline = true,
+    })
+
+    table.insert(ply.infoBookSegments, {
+        text = infoLine .. "\n",
+    })
+
+    JoelBotC:RebuildInfoBook(ply)
+end
+
+function JoelBotC:RebuildInfoBook(ply)
+    if not IsValid(ply) then return end
+
+    local seatingSegments = {}
+    table.insert(seatingSegments, {
+        text      = "Seating:\n\n",
+        color     = Color(100, 0, 200),
+        bold      = true,
+        underline = true,
+        align     = "center",
+    })
+    for i, p in ipairs(JoelBotC.seatingOrder) do
+        local prefix = (i < 10) and ("Seat " .. i .. ":   ") or ("Seat " .. i .. ": ")
+        table.insert(seatingSegments, {
+            text      = prefix .. p:Nick() .. "\n",
+            color     = Color(0, 0, 0),
+            bold      = false,
+            italic    = false,
+            underline = false,
+            align     = "left",
+        })
+    end
+
+    local bookData = {
+        title  = "Your Information",
+        author = "The Storyteller",
+        pages  = {
+            -- Page 1: Contents
+            { Segments = {
+                { text = "\n\nContents:", bold = true, align = "center" },
+                { text = "\n\n" },
+                { text = "Page 2: ", bold = true },
+                { text = "Wtf is going on?" },
+                { text = "\n" },
+                { text = "Page 3: ", bold = true },
+                { text = "Seating order" },
+                { text = "\n" },
+                { text = "Page 4: ", bold = true },
+                { text = "Your info" },
+            }},
+            -- Page 2: Explanation
+            { Segments = {
+                { text = "Wtf is going on?", bold = true, underline = true, align = "center" },
+                { text = "\n" },
+                { text = "Hello, and welcome to " },
+                { text = "Joel4848's ", bold = true },
+                { text = "BotC in, uh, TTT!" },
+                { text = "\n\n" },
+                { text = "Your role is " },
+                { text = ROLE_STRINGS_EXT[ply:GetRole()] .. "! " },
+                { text = "You'll find your ability in the " },
+                { text = "\"Your info\" ", bold = true },
+                { text = "section." },
+                { text = "\n\n" },
+                { text = "This is a fully-automated, barely-tested, completely non-guaranteed implementation of BotC. If you enjoyed my other randomats so far then... that's a surprise. Good luck!" },
+            }},
+            -- Page 3: Seating
+            { Segments = seatingSegments },
+            -- Page 4: 'Your info'
+            { Segments = ply.infoBookSegments },
+        },
+    }
+
+    SendSignedBookUpdate(ply, bookData)
+end

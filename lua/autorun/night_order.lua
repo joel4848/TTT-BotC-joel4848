@@ -4,6 +4,7 @@ JoelBotC.otherNightOrder = JoelBotC.otherNightOrder or {}
 JoelBotC.nightFunctions = JoelBotC.nightFunctions or {}
 JoelBotC.firstNightOrderMaster = JoelBotC.firstNightOrderMaster or {}
 JoelBotC.isFirstNight = JoelBotC.isFirstNight or nil
+JoelBotC.currentNight = JoelBotC.currentNight or 0
 
 if SERVER then
 
@@ -114,15 +115,10 @@ if SERVER then
     end
 
     function JoelBotC:MinionInfo()
-        -- No info in a Teensyville game
         if #JoelBotC.players > 6 then
-            -- Tell the Minions who the Demon and their fellow Minions are
-            local dmn = nil
-            local mns = {}
+            local dmn = JoelBotC.demonPlayers[1]
+            local mns = table.Copy(JoelBotC.minionPlayers)
             local minionMessage = nil
-
-            dmn = JoelBotC.demonPlayers[1]
-            mns = table.Copy(JoelBotC.minionPlayers)
 
             print("Running Minion Info")
             print("Demon = " .. tostring(dmn) .. " i.e. " .. dmn:Nick())
@@ -149,37 +145,30 @@ if SERVER then
                         end
                     end
 
-                    Randomat:SmallNotify(
-                        "Your Demon is " .. dmn:Nick(),
-                        5,
-                        ply
-                    )
-
+                    Randomat:SmallNotify("Your Demon is " .. dmn:Nick(), 5, ply)
                     timer.Simple(5, function()
-                        Randomat:SmallNotify(
-                            minionMessage,
-                            5,
-                            ply
-                        )
+                        Randomat:SmallNotify(minionMessage, 5, ply)
                     end)
+
+                    -- Book entry
+                    JoelBotC:AppendInfoBook(ply, "Minion info:", "Your Demon is " .. dmn:Nick() .. ".\n" .. minionMessage)
                 end
             end
         end
     end
 
     function JoelBotC:DemonInfo()
-        -- No info in a Teensyville game
         if #JoelBotC.players > 6 then
-            -- Tell the Demon their bluffs
             for _, ply in ipairs(JoelBotC.players) do
                 if ply.demon then
-                    Randomat:SmallNotify("Your bluffs are " .. ROLE_STRINGS[JoelBotC.demonBluffs[1]] .. ", " .. ROLE_STRINGS[JoelBotC.demonBluffs[2]] .. " and " .. ROLE_STRINGS[JoelBotC.demonBluffs[3]],
-                        5,
-                        ply
+                    local bluffStr = ROLE_STRINGS[JoelBotC.demonBluffs[1]] .. ", " .. ROLE_STRINGS[JoelBotC.demonBluffs[2]] .. " and " .. ROLE_STRINGS[JoelBotC.demonBluffs[3]]
+
+                    Randomat:SmallNotify(
+                        "Your bluffs are " .. bluffStr,
+                        5, ply
                     )
 
-                    local mns = {}
-                    mns = table.Copy(JoelBotC.minionPlayers)
+                    local mns = table.Copy(JoelBotC.minionPlayers)
                     local minionMessage = nil
 
                     if #mns == 1 then
@@ -191,12 +180,12 @@ if SERVER then
                     end
 
                     timer.Simple(5, function()
-                        Randomat:SmallNotify(
-                            minionMessage,
-                            5,
-                            ply
-                        )
+                        Randomat:SmallNotify(minionMessage, 5, ply)
                     end)
+
+                    -- Book entry
+                    JoelBotC:AppendInfoBook(ply, "Demon info:",
+                        "Your bluffs are " .. bluffStr .. ".\n" .. minionMessage)
                 end
             end
         end
@@ -265,6 +254,7 @@ if SERVER then
     end
 
     function JoelBotC:StartNight()
+        JoelBotC.currentNight = JoelBotC.currentNight + 1
 
         net.Start("rdmtJoelBotCNightStarts")
         net.Broadcast()

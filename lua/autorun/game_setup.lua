@@ -528,91 +528,18 @@ if SERVER then
     end
 
     function JoelBotC:GiveStartingBooks()
-        for _, ply in ipairs(JoelBotC.players) do
-            -- Give notebook
-            GiveBookQuill(ply)
+        JoelBotC:RoleAbilitiesForBook()
 
+        for _, ply in ipairs(JoelBotC.players) do
+            -- Give notebook and admin book
+            GiveBookQuill(ply)
             ply:Give("weapon_ttt_joelbotc_adminbook")
 
-            -- Prepare seating text segments
-            local seatingSegments = {}
+            -- Set up this player's info book segment store (role + ability + divider)
+            JoelBotC:InitInfoBook(ply)
 
-            -- "SEATING" title
-            table.insert(seatingSegments, {
-                text = "Seating:\n\n",
-                color = Color(100,0,200),
-                bold = true,
-                italic = false,
-                underline = true,
-                align = "center"
-            })
-
-            -- Add each player
-            for i, ply in ipairs(JoelBotC.seatingOrder) do
-                if i < 10 then
-                    table.insert(seatingSegments, {
-                        text = "Seat " .. i .. ":   " .. ply:Nick() .. "\n",
-                        color = Color(0,0,0), -- black text
-                        bold = false,
-                        italic = false,
-                        underline = false,
-                        align = "left"
-                    })
-                else
-                    table.insert(seatingSegments, {
-                        text = "Seat " .. i .. ": " .. ply:Nick() .. "\n",
-                        color = Color(0,0,0), -- black text
-                        bold = false,
-                        italic = false,
-                        underline = false,
-                        align = "left"
-                    })
-                end
-            end
-
-            -- Give the signed book
-            GiveSignedBook(ply, {
-                title  = "Your Information",
-                author = "The Storyteller",
-                pages  = {
-
-                    {Segments = {
-                        {text = "\n\nContents:", bold = true, align = "center"},
-                        {text = "\n\n"},
-                        {text = "Page 2: ", bold = true},
-                        {text = "Wtf is going on?"},
-                        {text = "\n"},
-                        {text = "Page 3: ", bold = true},
-                        {text = "Seating order"},
-                        {text = "\n"},
-                        {text = "Page 4: ", bold = true},
-                        {text = "Your info"}
-                    }},
-
-                    {Segments = {
-                        {text = "Wtf is going on?", bold = true, underline = true, align = "center"},
-                        {text = "\n"},
-                        {text = "Hello, and welcome to "},
-                        {text = "Joel4848's ", bold = true},
-                        {text = "BotC in, uh, TTT!"},
-                        {text = "\n\n"},
-                        {text = "Your role is "},
-                        {text = ROLE_STRINGS_EXT[ply:GetRole()] .. "! "},
-                        {text = "You'll find your ability in the "},
-                        {text = "\"Your info\" ", bold = true},
-                        {text = "section."},
-                        {text = "\n\n"},
-                        {text = "This is a fully-automated, barely-tested, completely non-guaranteed implementation of BotC. If you enjoyed my other randomats so far then... that's a surprise. Good luck!"}
-                    }},
-
-                    { Segments = seatingSegments },
-
-                    {Segments = {
-                        {text = "Your info", bold = true, underline = true, align = "center"},
-                    }}
-
-                }
-            })
+            -- Issue the signed book (all 4 pages, "Your info" starts with just role/ability)
+            JoelBotC:RebuildInfoBook(ply)
 
             ply:SelectWeapon("weapon_ttt_signedbook")
         end
