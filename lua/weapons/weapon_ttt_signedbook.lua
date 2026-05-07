@@ -172,11 +172,17 @@ if CLIENT then
             end
         end
 
-        local function addToken(tokenText, fontName, tokenColor)
+        local function addToken(tokenText, fontName, tokenColor, drawUnderline, precomputedWidth)
             if tokenText == "" then return end
 
             surface.SetFont(fontName)
-            local tokenW, tokenH = surface.GetTextSize(tokenText)
+            local tokenW, tokenH
+            if precomputedWidth then
+                tokenW = precomputedWidth
+                tokenH = select(2, surface.GetTextSize(tokenText))
+            else
+                tokenW, tokenH = surface.GetTextSize(tokenText)
+            end
             lineHeight = math.max(lineHeight, tokenH + 3)
 
             if currentLine.width > 0 and currentLine.width + tokenW > maxWidth then
@@ -184,14 +190,16 @@ if CLIENT then
             end
 
             currentLine.tokens[#currentLine.tokens + 1] = {
-                text  = tokenText,
-                font  = fontName,
-                color = tokenColor,
+                text          = tokenText,
+                font          = fontName,
+                color         = tokenColor,
+                drawUnderline = drawUnderline or false,
+                width         = tokenW,
             }
             currentLine.width = currentLine.width + tokenW
         end
 
-        local function processText(rawText, fontName, tokenColor, align)
+        local function processText(rawText, fontName, noUnderlineFontName, tokenColor, align, segUnderline)
             rawText = tostring(rawText or "")
             align   = align or "left"
 
@@ -210,19 +218,27 @@ if CLIENT then
                     local matched = false
                     for word, trailing in paragraph:gmatch("([^%s]+)(%s*)") do
                         matched = true
-                        addToken(word .. trailing, fontName, tokenColor)
+                        addToken(word, fontName, tokenColor, false)
+                        if trailing ~= "" then
+                            surface.SetFont(fontName)
+                            local wordAndTrailingW = select(1, surface.GetTextSize(word .. trailing))
+                            local wordOnlyW        = select(1, surface.GetTextSize(word))
+                            local trailingW        = wordAndTrailingW - wordOnlyW
+                            addToken(trailing, noUnderlineFontName, tokenColor, segUnderline, trailingW)
+                        end
                     end
                     if not matched then
-                        addToken(paragraph, fontName, tokenColor)
+                        addToken(paragraph, fontName, tokenColor, false)
                     end
                 end
             end
         end
 
         for _, seg in ipairs(segments) do
-            local fontName   = BuildFormattedFont(seg.bold, seg.italic, seg.underline)
-            local tokenColor = NormalizeSegmentColor(seg.color)
-            processText(seg.text, fontName, tokenColor, seg.align)
+            local fontName            = BuildFormattedFont(seg.bold, seg.italic, seg.underline)
+            local noUnderlineFontName = BuildFormattedFont(seg.bold, seg.italic, false)
+            local tokenColor          = NormalizeSegmentColor(seg.color)
+            processText(seg.text, fontName, noUnderlineFontName, tokenColor, seg.align, seg.underline or false)
         end
 
         if #currentLine.tokens > 0 then
@@ -418,26 +434,32 @@ if CLIENT then
             content._Layout = layout
             content._LineHeight = lineHeight
             content.Paint = function(self, w, h)
-            local y = 4
+                local y = 4
 
-            for _, line in ipairs(self._Layout or {}) do
-                local x = 4
-            
-                if line.align == "center" then
-                    x = (w - line.width) / 2
+                for _, line in ipairs(self._Layout or {}) do
+                    local x = 4
+
+                    if line.align == "center" then
+                        x = (w - line.width) / 2
+                    end
+
+                    for _, token in ipairs(line.tokens or {}) do
+                        surface.SetFont(token.font)
+                        surface.SetTextColor(token.color)
+                        surface.SetTextPos(x, y)
+                        surface.DrawText(token.text)
+
+                        if token.drawUnderline then
+                            surface.SetDrawColor(token.color)
+                            surface.DrawRect(x - 4, y + (self._LineHeight or 18) - 5, token.width + 4, 1)
+                        end
+
+                        x = x + token.width
+                    end
+
+                    y = y + (self._LineHeight or 18)
                 end
-            
-                for _, token in ipairs(line.tokens or {}) do
-                    surface.SetFont(token.font)
-                    surface.SetTextColor(token.color)
-                    surface.SetTextPos(x, y)
-                    surface.DrawText(token.text)
-                
-                    x = x + select(1, surface.GetTextSize(token.text))
-                end
-            
-                y = y + (self._LineHeight or 18)
-            end
+
         end
 
             scroll:AddItem(content)
