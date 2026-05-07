@@ -737,9 +737,9 @@ function JoelBotC:LibrarianNight()
                 JoelBotC:AppendInfoBook(ply, "Night 1:", infoLine)
             end
         end
-
-        JoelBotC:NextNightStep()  -- note: original had this inside the outer loop, preserved as-is
     end
+
+    JoelBotC:NextNightStep()
 end
 
 
@@ -838,77 +838,83 @@ end
 
 -- ravenkeeper
 function JoelBotC:RavenkeeperNight()
+    print("JoelBotC.ravenkeeperKilledByDemon = " .. tostring(JoelBotC.ravenkeeperKilledByDemon))
+
     for _, ply in ipairs(JoelBotC.players) do
-        if ply:IsRavenkeeper() and JoelBotC.ravenkeeperKilledByDemon then
-            JoelBotC:SendSeatingGUICreate(ply)
+        if ply:IsRavenkeeper() then
+            if JoelBotC.ravenkeeperKilledByDemon then
 
-            Randomat:SmallNotify("15 Seconds: You have been killed by the Demon.\n             Choose a player to learn their role", 5, ply)
+                JoelBotC:SendSeatingGUICreate(ply)
 
-            timer.Create("rdmtJoelBotCRavenkeeper10", 5, 1, function()
-                Randomat:SmallNotify("10 seconds to choose", 5, ply)
-            end)
-            timer.Create("rdmtJoelBotCRavenkeeper5", 10, 1, function()
-                Randomat:SmallNotify("5 seconds to choose", 1, ply)
-            end)
-            timer.Create("rdmtJoelBotCRavenkeeper4", 11, 1, function()
-                Randomat:SmallNotify("4 seconds to choose", 1, ply)
-            end)
-            timer.Create("rdmtJoelBotCRavenkeeper3", 12, 1, function()
-                Randomat:SmallNotify("3 seconds to choose", 1, ply)
-            end)
-            timer.Create("rdmtJoelBotCRavenkeeper2", 13, 1, function()
-                Randomat:SmallNotify("2 seconds to choose", 1, ply)
-            end)
-            timer.Create("rdmtJoelBotCRavenkeeper1", 14, 1, function()
-                Randomat:SmallNotify("1 second to choose", 1, ply)
-            end)
-            timer.Create("rdmtJoelBotCRavenkeeper0", 15, 1, function()
-                hook.Remove("Think", "rdmtJoelBotCRavenkeeperChoose")
-                JoelBotC:SendSeatingGUIDestroy(ply)
-                JoelBotC:NextNightStep()
-            end)
+                Randomat:SmallNotify("15 Seconds: You have been killed by the Demon.\n             Choose a player to learn their role", 5, ply)
 
-            JoelBotC.seatingGUIButtonPressed = nil
-            JoelBotC.seatingGUIPressingPlayer = nil
-            local chosenPlayer = nil
-            local chosenPlayerRole = nil
-
-            hook.Add("Think", "rdmtJoelBotCRavenkeeperChoose", function()
-                if JoelBotC.seatingGUIPressingPlayer == ply and JoelBotC.seatingGUIButtonPressed ~= nil then
-                    
-                    chosenPlayer = JoelBotC.seatingOrder[JoelBotC.seatingGUIButtonPressed]
-                    chosenPlayerRole = chosenPlayer:GetRoleString()
-                    
-                    if JoelBotC:IsDroisoned(ply) then
-                        if JoelBotC:RegistersEvil(chosenPlayer) then
-                            local ravenkeeperDemonBluffPool = table.Copy(JoelBotC.demonBluffs)
-                            table.Shuffle(ravenkeeperDemonBluffPool)
-                            chosenPlayerRole = ROLE_STRINGS[ravenkeeperDemonBluffPool[1]]
-                        else
-                            local ravenkeeperEvilRolePool = table.Copy(JoelBotC.minionsInBag)
-                            table.Add(ravenkeeperEvilRolePool, JoelBotC.demonsInBag)
-                            table.Shuffle(ravenkeeperEvilRolePool)
-                            chosenPlayerRole = ROLE_STRINGS[ravenkeeperEvilRolePool[1]]
-                        end
-                    end
+                timer.Create("rdmtJoelBotCRavenkeeper10", 5, 1, function()
+                    Randomat:SmallNotify("10 seconds to choose", 5, ply)
+                end)
+                timer.Create("rdmtJoelBotCRavenkeeper5", 10, 1, function()
+                    Randomat:SmallNotify("5 seconds to choose", 1, ply)
+                end)
+                timer.Create("rdmtJoelBotCRavenkeeper4", 11, 1, function()
+                    Randomat:SmallNotify("4 seconds to choose", 1, ply)
+                end)
+                timer.Create("rdmtJoelBotCRavenkeeper3", 12, 1, function()
+                    Randomat:SmallNotify("3 seconds to choose", 1, ply)
+                end)
+                timer.Create("rdmtJoelBotCRavenkeeper2", 13, 1, function()
+                    Randomat:SmallNotify("2 seconds to choose", 1, ply)
+                end)
+                timer.Create("rdmtJoelBotCRavenkeeper1", 14, 1, function()
+                    Randomat:SmallNotify("1 second to choose", 1, ply)
+                end)
+                timer.Create("rdmtJoelBotCRavenkeeper0", 15, 1, function()
+                    hook.Remove("Think", "rdmtJoelBotCRavenkeeperChoose")
                     JoelBotC:SendSeatingGUIDestroy(ply)
                     JoelBotC:NextNightStep()
+                end)
 
-                    -- NEW:
-                    local rkInfoLine = chosenPlayer:Nick() .. " is the " .. chosenPlayerRole
-                    Randomat:SmallNotify(rkInfoLine, 5, ply)
-                    JoelBotC:AppendInfoBook(ply, "Night " .. JoelBotC.currentNight .. ":", rkInfoLine)
+                JoelBotC.seatingGUIButtonPressed = nil
+                JoelBotC.seatingGUIPressingPlayer = nil
+                local chosenPlayer = nil
+                local chosenPlayerRole = nil
 
-                    timer.Remove("rdmtJoelBotCRavenkeeper10")
-                    timer.Remove("rdmtJoelBotCRavenkeeper5")
-                    timer.Remove("rdmtJoelBotCRavenkeeper4")
-                    timer.Remove("rdmtJoelBotCRavenkeeper3")
-                    timer.Remove("rdmtJoelBotCRavenkeeper2")
-                    timer.Remove("rdmtJoelBotCRavenkeeper1")
-                    timer.Remove("rdmtJoelBotCRavenkeeper0")
-                    hook.Remove("Think", "rdmtJoelBotCRavenkeeperChoose")
-                end
-            end)
+                hook.Add("Think", "rdmtJoelBotCRavenkeeperChoose", function()
+                    if JoelBotC.seatingGUIPressingPlayer == ply and JoelBotC.seatingGUIButtonPressed ~= nil then
+
+                        chosenPlayer = JoelBotC.seatingOrder[JoelBotC.seatingGUIButtonPressed]
+                        chosenPlayerRole = chosenPlayer:GetRoleString()
+
+                        if JoelBotC:IsDroisoned(ply) then
+                            if JoelBotC:RegistersEvil(chosenPlayer) then
+                                local ravenkeeperDemonBluffPool = table.Copy(JoelBotC.demonBluffs)
+                                table.Shuffle(ravenkeeperDemonBluffPool)
+                                chosenPlayerRole = ROLE_STRINGS[ravenkeeperDemonBluffPool[1]]
+                            else
+                                local ravenkeeperEvilRolePool = table.Copy(JoelBotC.minionsInBag)
+                                table.Add(ravenkeeperEvilRolePool, JoelBotC.demonsInBag)
+                                table.Shuffle(ravenkeeperEvilRolePool)
+                                chosenPlayerRole = ROLE_STRINGS[ravenkeeperEvilRolePool[1]]
+                            end
+                        end
+                        JoelBotC:SendSeatingGUIDestroy(ply)
+                        JoelBotC:NextNightStep()
+
+                        local rkInfoLine = chosenPlayer:Nick() .. " is the " .. chosenPlayerRole
+                        Randomat:SmallNotify(rkInfoLine, 5, ply)
+                        JoelBotC:AppendInfoBook(ply, "Night " .. JoelBotC.currentNight .. ":", rkInfoLine)
+
+                        timer.Remove("rdmtJoelBotCRavenkeeper10")
+                        timer.Remove("rdmtJoelBotCRavenkeeper5")
+                        timer.Remove("rdmtJoelBotCRavenkeeper4")
+                        timer.Remove("rdmtJoelBotCRavenkeeper3")
+                        timer.Remove("rdmtJoelBotCRavenkeeper2")
+                        timer.Remove("rdmtJoelBotCRavenkeeper1")
+                        timer.Remove("rdmtJoelBotCRavenkeeper0")
+                        hook.Remove("Think", "rdmtJoelBotCRavenkeeperChoose")
+                    end
+                end)
+            else
+                JoelBotC:NextNightStep()
+            end
         end
     end
 end
@@ -1317,8 +1323,16 @@ end
 function JoelBotC:PukkaNight()
     local pukkaExists = nil
 
+    print("************ RUNNING PUKKA NIGHT ************")
+
     for _, ply in ipairs(JoelBotC.players) do
+
+        print("Is " .. ply:Nick() .. " the Pukka? " .. tostring(ply:IsPukka()))
+        print("Is " .. ply:Nick() .. " BotC dead?? " .. tostring(ply.BotCDead))
+
         if ply:IsPukka() and not ply.BotCDead then
+
+            print("Running PukkaNight() for " .. ply:Nick())
 
             pukkaExists = true
 
@@ -1328,27 +1342,35 @@ function JoelBotC:PukkaNight()
 
             JoelBotC:SendSeatingGUICreate(ply)
 
+            print("Running 15-second warning")
             Randomat:SmallNotify("15 Seconds: Choose a player to poison tonight and kill tomorrow night", 5, ply)
 
             timer.Create("rdmtJoelBotCPukka10", 5, 1, function()
+                print("Running 10-second warning")
                 Randomat:SmallNotify("10 seconds to choose", 5, ply)
             end)
             timer.Create("rdmtJoelBotCPukka5", 10, 1, function()
+                print("Running 5-second warning")
                 Randomat:SmallNotify("5 seconds to choose", 1, ply)
             end)
             timer.Create("rdmtJoelBotCPukka4", 11, 1, function()
+                print("Running 4-second warning")
                 Randomat:SmallNotify("4 seconds to choose", 1, ply)
             end)
             timer.Create("rdmtJoelBotCPukka3", 12, 1, function()
+                print("Running 3-second warning")
                 Randomat:SmallNotify("3 seconds to choose", 1, ply)
             end)
             timer.Create("rdmtJoelBotCPukka2", 13, 1, function()
+                print("Running 2-second warning")
                 Randomat:SmallNotify("2 seconds to choose", 1, ply)
             end)
             timer.Create("rdmtJoelBotCPukka1", 14, 1, function()
+                print("Running 1-second warning")
                 Randomat:SmallNotify("1 second to choose", 1, ply)
             end)
             timer.Create("rdmtJoelBotCPukka0", 15, 1, function()
+                print("Closing Pukka screen")
                 hook.Remove("Think", "rdmtJoelBotCPukkaPoison")
                 JoelBotC:SendSeatingGUIDestroy(ply)
                 JoelBotC:NextNightStep()

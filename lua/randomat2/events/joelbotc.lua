@@ -20,10 +20,15 @@ JoelBotC.rolesInGame = JoelBotC.rolesInGame or {}
 JoelBotC.rolePool = JoelBotC.rolePool or {}
 JoelBotC.recentExecutee = JoelBotC.recentExecutee or nil
 JoelBotC.deadPlayers = JoelBotC.deadPlayers or {}
+JoelBotC.BotCEventRunning = JoelBotC.BotCEventRunning or nil
 
 local originalDetectiveCvar = nil
 
 function EVENT:Begin()
+
+    JoelBotC.BotCEventRunning = true
+
+    JoelBotC.ravenkeeperKilledByDemon = nil
 
     JoelBotC:ChangeRoleColours()
 
@@ -149,6 +154,7 @@ function EVENT:End(isActive)
     timer.Remove("rdmtJoelBotCAssassin0")
     hook.Remove("Think", "rdmtJoelBotCAssassinKill")
 
+    JoelBotC.BotCEventRunning = false
 end
 
 Randomat:register(EVENT)

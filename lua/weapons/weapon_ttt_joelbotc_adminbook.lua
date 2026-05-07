@@ -76,7 +76,7 @@ if SERVER then
         elseif buttonPressed == 9 then
             JoelBotC:MorningDeaths()
         elseif buttonPressed == 10 then
-            JoelBotC:DetermineGhostVotes()
+            JoelBotC:StartNight()
         elseif buttonPressed == 11 then
             JoelBotC:StartNominations()
         elseif buttonPressed == 12 then
@@ -237,7 +237,7 @@ if CLIENT then
             "Revive seat 2",
             "Is Role Alive?",
             "Morning deaths",
-            "Ghost Votes",
+            "Start Night",
             "Start Nominations",
             "Start Discussion"
         }

@@ -192,6 +192,8 @@ if SERVER then
     end
 
     function JoelBotC:NextNightStep()
+        if not JoelBotC.BotCEventRunning then return end
+
         timer.Simple(1, function()
             if JoelBotC.isFirstNight then
 
@@ -255,12 +257,12 @@ if SERVER then
 
     function JoelBotC:StartNight()
         JoelBotC.currentNight = JoelBotC.currentNight + 1
+        nightStep = 1
 
         net.Start("rdmtJoelBotCNightStarts")
         net.Broadcast()
 
         JoelBotC:GetNightFunctions()
-        nightStep = 1
 
         if JoelBotC.isFirstNight then
             JoelBotC:MinionInfo()
