@@ -75,7 +75,8 @@ if SERVER then
         net.Start("rdmtJoelBotCEndDay")
         net.Broadcast()
         JoelBotC.votesToEndDay = {}
-        -- Start nominations here ------------------------------------------------------------------------------
+        
+        JoelBotC:StartNominations()
     end
 
     net.Receive("rdmtJoelBotCEndDayVote", function(len, ply)

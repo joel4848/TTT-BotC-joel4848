@@ -67,6 +67,28 @@ function EVENT:Begin()
         JoelBotC.isFirstNight = true
         JoelBotC:StartNight()
     end)
+
+    self:AddHook("TTTCheckForWin", function()
+        local demonAlive = false
+        local livingCount = JoelBotC:AlivePlayerCount()
+
+        for _, ply in ipairs(JoelBotC.demonPlayers) do
+            if not ply.BotCDead then
+                demonAlive = true
+            end
+        end
+
+        -- If there isn't an alive Demon, the Good team wins
+        if not demonAlive then return WIN_INNOCENT end
+
+        -- Otherwise, if there are <= 2 players alive, one of which is the Demon, then the Evil team wins
+        if livingCount <= 2 and demonAlive then
+            return WIN_TRAITOR
+        end
+
+        -- Otherwise, keep on playing
+        return WIN_NONE
+    end)
 end
 
 function EVENT:End(isActive)

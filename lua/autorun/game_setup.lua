@@ -303,10 +303,10 @@ if SERVER then
 
         --for testing
         else
-            townsfolkAmount = 0
-            outsidersAmount = 0
-            minionsAmount = 4
-            demonsAmount = 0
+            townsfolkAmount = 1
+            outsidersAmount = 1
+            minionsAmount = 1
+            demonsAmount = 1
         end
 
         -- Shuffle players
@@ -445,6 +445,11 @@ if SERVER then
     function JoelBotC:AssignRolesAndSeats()
         -- More shufflage
         table.Shuffle(JoelBotC.rolePool)
+
+        JoelBotC.townsfolkInBag = {}
+        JoelBotC.outsidersInBag = {}
+        JoelBotC.minionsInBag = {}
+        JoelBotC.demonsInBag = {}
 
         -- Time to actually assign roles to players!
         for i, ply in ipairs(JoelBotC.players) do

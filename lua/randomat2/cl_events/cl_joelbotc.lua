@@ -180,6 +180,28 @@ function EVENT:Begin()
     net.Receive("rdmtJoelBotCOpenSeatingGUI", function()
         JoelBotC:SeatingGUICreate()
     end)
+
+    -- Win condition stuff
+    LANG.AddToLanguage("english", "win_joelbotc_good", string.upper("The Good team wins!"))
+    LANG.AddToLanguage("english", "win_joelbotc_evil", string.upper("The Evil team wins!"))
+
+    hook.Add("TTTScoringWinTitleOverride", "JoelBotCWinTitle", function(wintype)
+        local newTitle = {}
+
+        if wintype == WIN_INNOCENT then
+            newTitle.txt = "win_joelbotc_good"
+            newTitle.c = Color(31, 101, 255, 255)
+        else
+            newTitle.txt = "win_joelbotc_evil"
+            newTitle.c = Color(206, 1, 0, 255)
+        end
+
+        return newTitle
+    end)
+
+    hook.Add("TTTPrepareRound", "JoelBotCWinTitle", function()
+        hook.Remove("TTTScoringWinTitleOverride", "JoelBotCWinTitle")
+    end)
 end
 
 function EVENT:End()
