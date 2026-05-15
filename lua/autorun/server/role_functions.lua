@@ -1469,7 +1469,7 @@ function JoelBotC:ImpNight()
                         local aliveMinions = {}
                         local newImp = nil
                         for _, min in ipairs(JoelBotC.minionPlayers) do
-                            if min:IsScarletWoman() and not min.BotCDead then
+                            if min:IsScarletWoman() and not min.BotCDead and JoelBotC:AlivePlayerCount() >= 5 then
                                 newImp = min
                             elseif not min.BotCDead then
                                 table.insert(aliveMinions, min)
