@@ -49,6 +49,10 @@ if SERVER then
             end
         end
 
+        if target.demon and JoelBotC:AlivePlayerCount() >= 5 then
+            JoelBotC:MakeScarletWomanDemon(target.botc_role)
+        end
+
         target.BotCDead = true
         table.insert(JoelBotC.morningDeaths, target)
         
@@ -102,6 +106,10 @@ if SERVER then
     -- Non-execution kill (WIP)
     function JoelBotC:Kill(ply)
         if not IsValid(ply) then return end
+
+        if ply.demon and JoelBotC:AlivePlayerCount() >= 5 then
+            JoelBotC:MakeScarletWomanDemon(ply.botc_role)
+        end
 
         ply.BotCDead = true
         JoelBotC.isAlive[ply] = false
@@ -386,6 +394,10 @@ if SERVER then
         -- Kill player and spawn ragdoll just before impact
         timer.Simple(2.6, function()
             if not IsValid(ply) then return end
+
+            if ply.demon and JoelBotC:AlivePlayerCount() >= 5 then
+                JoelBotC:MakeScarletWomanDemon(ply.botc_role)
+            end
 
             ply.BotCDead = true
             JoelBotC.isAlive[ply] = false

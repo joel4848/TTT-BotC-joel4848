@@ -1218,6 +1218,24 @@ end
 
 -- scarletwoman
 
+function JoelBotC:MakeScarletWomanDemon(demonType)
+    for _, ply in ipairs(JoelBotC.players) do
+        if ply:IsScarletWoman() and not ply.BotCDead and not JoelBotC:IsDroisoned(ply) then
+            ply.minion = nil
+            ply.demon = true
+
+            table.RemoveByValue(JoelBotC.minionPlayers, ply)
+            table.insert(JoelBotC.demonPlayers, ply)
+            ply.botc_role = demonType
+
+            Randomat:SetRole(ply, ply.botc_role)
+            SendFullStateUpdate()
+
+            Randomat:SmallNotify("You are now the " .. ROLE_STRINGS[demonType], 5, ply)
+        end
+    end
+end
+
 
 
 -- organgrinder
