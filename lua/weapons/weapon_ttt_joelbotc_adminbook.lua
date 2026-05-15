@@ -87,6 +87,36 @@ end
 
 if CLIENT then
 
+    local buttonFunctions = {
+        "Open Seat GUI",
+        "Close Seat GUI",
+        "Open Po GUI",
+        "Execute seat 2",
+        "Open Nomination GUI",
+        "Close Nomination GUI",
+        "Revive seat 2",
+        "Is Role Alive?",
+        "Morning deaths",
+        "Start Night",
+        "Start Nominations",
+        "Start Discussion"
+    }
+
+    -- local buttonFunctions = {
+    --     "Red, Tag '1'",                 -- 1
+    --     "Blue, Tag '1'",                -- 2
+    --     "Green, Tag 'two'",             -- 3
+    --     "Clear '1'",                    -- 4
+    --     "Clear 'two'",                  -- 5
+    --     "Clear 'Wrong'",                -- 6
+    --     "Clear all",                    -- 7
+    --     "Msg clear all",                -- 8
+    --     "",                             -- 9
+    --     "",                             -- 10
+    --     "",                             -- 11
+    --     ""                              -- 12
+    -- }
+
     surface.CreateFont( "ButtonFontLarge", {
         font = "Arial",
         size = 24, -- Change this value to increase/decrease size
@@ -227,20 +257,6 @@ if CLIENT then
         -- Button grid
         local buttonCellSize = width * 0.1
         buttons = {}
-        local buttonFunctions = {
-            "Open Seat GUI",
-            "Close Seat GUI",
-            "Open Po GUI",
-            "Execute seat 2",
-            "Open Nomination GUI",
-            "Close Nomination GUI",
-            "Revive seat 2",
-            "Is Role Alive?",
-            "Morning deaths",
-            "Start Night",
-            "Start Nominations",
-            "Start Discussion"
-        }
 
         for y=1,4 do
             for x=1,3 do
@@ -257,18 +273,20 @@ if CLIENT then
                 buttons[id] = btn
 
                 btn.OnDepressed = function(self)
+                    print("Pressed button " .. tostring(id))
                     net.Start("TTT_adminBookChoice")
                         net.WriteInt(id, 8)
+                        print("Net sent button press - " .. tostring(id))
                     net.SendToServer()
                     
-                    if IsValid(AdminBookFrame) then
-                        AdminBookFrame:Remove()
-                    end
+                    -- if IsValid(AdminBookFrame) then
+                    --     AdminBookFrame:Remove()
+                    -- end
                 
-                    gui.EnableScreenClicker(false)
+                    -- gui.EnableScreenClicker(false)
                 
-                    AdminBookFrame = nil
-                    BookOpen = false
+                    -- AdminBookFrame = nil
+                    -- BookOpen = false
 
                 end
             end
