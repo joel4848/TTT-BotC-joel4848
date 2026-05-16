@@ -240,8 +240,8 @@ if SERVER then
                 -- Reset various things
                 ply.botc_role = nil
                 ply.golemNominated = nil
-                ply.BotCDead = false
-                ply.hasGhostVote = true
+                ply.BotCDead = nil
+                ply.hasGhostVote = nil
                 ply.townsfolk = nil
                 ply.outsider = nil
                 ply.minion = nil
