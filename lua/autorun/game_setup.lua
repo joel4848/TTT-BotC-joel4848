@@ -425,13 +425,11 @@ if SERVER then
 
         -- Pick which roles should be bluffs - two Townsfolk, one Outsider
         table.Shuffle(JoelBotC.demonBluffsTownsfolkPool)
-        print("Potential Townsfolk bluffs:")
-        PrintTable(JoelBotC.demonBluffsTownsfolkPool)
+
         table.insert(JoelBotC.demonBluffs, 1, JoelBotC.demonBluffsTownsfolkPool[1])
         table.insert(JoelBotC.demonBluffs, 2, JoelBotC.demonBluffsTownsfolkPool[2])
         table.Shuffle(JoelBotC.demonBluffsOutsiderPool)
-        print("Potential Outsider bluffs:")
-        PrintTable(JoelBotC.demonBluffsOutsiderPool)
+
         table.insert(JoelBotC.demonBluffs, 3, JoelBotC.demonBluffsOutsiderPool[1])
 
         -- Try and make one of either the Empath or the Fortune Teller (or any ongoing info role added in the future) a bluff
@@ -599,7 +597,7 @@ if SERVER then
         for _, ply in ipairs(JoelBotC.players) do
             -- Give notebook and admin book
             GiveBookQuill(ply)
-            ply:Give("weapon_ttt_joelbotc_adminbook")
+            -- ply:Give("weapon_ttt_joelbotc_adminbook")
 
             -- Set up this player's info book segment store (role + ability + divider)
             JoelBotC:InitInfoBook(ply)

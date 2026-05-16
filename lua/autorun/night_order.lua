@@ -123,11 +123,6 @@ if SERVER then
             local mns = table.Copy(JoelBotC.minionPlayers)
             local minionMessage = nil
 
-            print("Running Minion Info")
-            print("Demon = " .. tostring(dmn) .. " i.e. " .. dmn:Nick())
-            print("Minion table:")
-            PrintTable(mns)
-
             for _, ply in ipairs(JoelBotC.players) do
                 if ply.minion then
                     if #mns == 1 then
@@ -214,13 +209,13 @@ if SERVER then
         timer.Simple(1, function()
             if JoelBotC.isFirstNight then
 
-                print("---------------------------------------------------------------------")
-                print("-----------                  NIGHT 1                     ------------")
-                print("---------------------------------------------------------------------")
-                print("Time: " .. math.floor(SysTime()))
-                print("Ran Next Night Step")
-                print("nightStep = " .. nightStep)
-                print("#JoelBotC.firstNightOrderMaster = " .. #JoelBotC.firstNightOrderMaster)
+                -- print("---------------------------------------------------------------------")
+                -- print("-----------                  NIGHT 1                     ------------")
+                -- print("---------------------------------------------------------------------")
+                -- print("Time: " .. math.floor(SysTime()))
+                -- print("Ran Next Night Step")
+                -- print("nightStep = " .. nightStep)
+                -- print("#JoelBotC.firstNightOrderMaster = " .. #JoelBotC.firstNightOrderMaster)
 
                 if nightStep > #JoelBotC.firstNightOrderMaster then
                     JoelBotC.isFirstNight = false
@@ -232,23 +227,23 @@ if SERVER then
                     local currentFn = JoelBotC.nightFunctions[currentRole] or nil
 
                     if JoelBotC.rolesInGame[currentRole] then
-                        print("Running function: " .. roleData.name)
+                        -- print("Running function: " .. roleData.name)
                         nightStep = nightStep + 1
                         roleData.fn(JoelBotC)
                     else
-                        print("Role not in game - " .. roleData.name)
+                        -- print("Role not in game - " .. roleData.name)
                         nightStep = nightStep + 1
                         JoelBotC:NextNightStep()
                     end
                 end
             else
-                print("---------------------------------------------------------------------")
-                print("-----------                OTHER NIGHT                   ------------")
-                print("---------------------------------------------------------------------")
-                print("Time: " .. math.floor(SysTime()))
-                print("Ran Next Night Step")
-                print("nightStep = " .. nightStep)
-                print("#JoelBotC.otherNightOrderMaster = " .. #JoelBotC.otherNightOrderMaster)
+                -- print("---------------------------------------------------------------------")
+                -- print("-----------                OTHER NIGHT                   ------------")
+                -- print("---------------------------------------------------------------------")
+                -- print("Time: " .. math.floor(SysTime()))
+                -- print("Ran Next Night Step")
+                -- print("nightStep = " .. nightStep)
+                -- print("#JoelBotC.otherNightOrderMaster = " .. #JoelBotC.otherNightOrderMaster)
 
                 if nightStep > #JoelBotC.otherNightOrderMaster then
                     nightStep = 1
@@ -259,11 +254,11 @@ if SERVER then
                     local currentFn = JoelBotC.nightFunctions[currentRole] or nil
 
                     if JoelBotC.rolesInGame[currentRole] then
-                        print("Running function: " .. roleData.name)
+                        -- print("Running function: " .. roleData.name)
                         nightStep = nightStep + 1
                         roleData.fn(JoelBotC)
                     else
-                        print("Role not in game - " .. roleData.name)
+                        -- print("Role not in game - " .. roleData.name)
                         nightStep = nightStep + 1
                         JoelBotC:NextNightStep()
                     end

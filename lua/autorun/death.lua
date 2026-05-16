@@ -77,8 +77,6 @@ if SERVER then
         
         -- Announce who died in the night
         local names = {}
-        print("Morning deaths =")
-        PrintTable(JoelBotC.morningDeaths)
         for _, ply in ipairs(JoelBotC.morningDeaths) do
             table.insert(names, ply:Nick())
         end
