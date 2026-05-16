@@ -186,6 +186,7 @@ function JoelBotC:RoleAbilitiesForBook()
         [ROLE_FORTUNETELLERJBC] = "Each night, choose 2 players and learn if either is the Demon (or your Red Herring)",
         [ROLE_VIRGINJBC]        = "The 1st time you are nominated, if the nominator is a Townsfolk, they are executed immediately",
         [ROLE_OGREJBC]          = "On your 1st night, choose a player and become their alignment",
+        [ROLE_SNITCHJBC]        = "Minions get 3 bluffs (as well as the Demon)",
         [ROLE_GOLEMJBC]         = "You can only nominate once per game. If the person you nominate isn't the Demon, they die",
         [ROLE_SWEETHEARTJBC]    = "When you die, 1 player is drunk from now on",
         [ROLE_SAINTJBC]         = "If you die by execution, your team loses",

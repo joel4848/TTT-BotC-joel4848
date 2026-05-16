@@ -38,6 +38,7 @@ if SERVER then
             [ROLE_FORTUNETELLERJBC] = false,
             [ROLE_VIRGINJBC] = false,
             [ROLE_OGREJBC] = false,
+            [ROLE_SNITCHJBC] = false,
             [ROLE_GOLEMJBC] = false,
             [ROLE_SWEETHEARTJBC] = false,
             [ROLE_SAINTJBC] = false,
@@ -159,11 +160,11 @@ if SERVER then
     end
 
     function JoelBotC:DemonInfo()
+        local bluffStr = ROLE_STRINGS[JoelBotC.demonBluffs[1]] .. ", " .. ROLE_STRINGS[JoelBotC.demonBluffs[2]] .. " and " .. ROLE_STRINGS[JoelBotC.demonBluffs[3]]
+
         if #JoelBotC.players > 6 then
             for _, ply in ipairs(JoelBotC.players) do
                 if ply.demon then
-                    local bluffStr = ROLE_STRINGS[JoelBotC.demonBluffs[1]] .. ", " .. ROLE_STRINGS[JoelBotC.demonBluffs[2]] .. " and " .. ROLE_STRINGS[JoelBotC.demonBluffs[3]]
-
                     Randomat:SmallNotify(
                         "Your bluffs are " .. bluffStr,
                         5, ply
@@ -188,6 +189,20 @@ if SERVER then
                     JoelBotC:AppendInfoBook(ply, "Demon info:",
                         "Your bluffs are " .. bluffStr .. ".\n" .. minionMessage)
                 end
+            end
+        end
+        if JoelBotC:SnitchExists() then
+            for _, ply in ipairs(JoelBotC.players) do
+                if ply.minion then
+                    Randomat:SmallNotify(
+                        "There is a Snitch! The bluffs are " .. bluffStr,
+                        5, ply
+                    )
+                end
+
+                -- Book entry
+                JoelBotC:AppendInfoBook(ply, "There is a Snitch!",
+                    "The bluffs are " .. bluffStr)
             end
         end
     end
@@ -257,6 +272,7 @@ if SERVER then
     end
 
     function JoelBotC:StartNight()
+        print("RUNNING START NIGHT")
         JoelBotC.currentNight = JoelBotC.currentNight + 1
         nightStep = 1
 
@@ -266,9 +282,11 @@ if SERVER then
         JoelBotC:GetNightFunctions()
 
         if JoelBotC.isFirstNight then
+            print("RUNNING IS FIRST NIGHT")
             JoelBotC:MinionInfo()
 
             timer.Simple(3, function()
+                print("RUNNING DEMON INFO")
                 JoelBotC:DemonInfo()
 
                 timer.Simple(10, function()

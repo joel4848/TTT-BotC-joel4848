@@ -1116,6 +1116,22 @@ function JoelBotC:OgreNight()
 end
 
 
+
+-- Snitch
+function JoelBotC:SnitchExists()
+    print("RUNNING SNITCH EXISTS")
+    local snitchExists = false
+    
+    for _, ply in ipairs(JoelBotC.players) do
+        if ply:IsSnitch() and not ply.BotCDead and not JoelBotC:IsDroisoned(ply) then
+            snitchExists = true
+        end
+    end
+
+    return snitchExists
+end
+
+
 -- Golem
 
 

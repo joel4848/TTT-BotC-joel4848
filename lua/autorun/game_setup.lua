@@ -22,6 +22,7 @@ if SERVER then
     local fortunetellerEnabled = CreateConVar("randomat_joelbotc_fortuneteller_enabled", 1, FCVAR_NONE, "Whether the Fortune Teller is on the script", 0, 1):GetBool()
     local virginEnabled = CreateConVar("randomat_joelbotc_virgin_enabled", 1, FCVAR_NONE, "Whether the Virgin is on the script", 0, 1):GetBool()
     local ogreEnabled = CreateConVar("randomat_joelbotc_ogre_enabled", 1, FCVAR_NONE, "Whether the Ogre is on the script", 0, 1):GetBool()
+    local snitchEnabled = CreateConVar("randomat_joelbotc_snitch_enabled", 1, FCVAR_NONE, "Whether the Snitch is on the script", 0, 1):GetBool()
     local golemEnabled = CreateConVar("randomat_joelbotc_golem_enabled", 1, FCVAR_NONE, "Whether the Golem is on the script", 0, 1):GetBool()
     local sweetheartEnabled = CreateConVar("randomat_joelbotc_sweetheart_enabled", 1, FCVAR_NONE, "Whether the Sweetheart is on the script", 0, 1):GetBool()
     local saintEnabled = CreateConVar("randomat_joelbotc_saint_enabled", 1, FCVAR_NONE, "Whether the Saint is on the script", 0, 1):GetBool()
@@ -179,6 +180,9 @@ if SERVER then
         end
         if ogreEnabled then
             table.insert(JoelBotC.enabledOutsiders, ROLE_OGREJBC)
+        end
+        if snitchEnabled then
+            table.insert(JoelBotC.enabledOutsiders, ROLE_SNITCHJBC)
         end
         if golemEnabled then
             table.insert(JoelBotC.enabledOutsiders, ROLE_GOLEMJBC)
@@ -459,8 +463,6 @@ if SERVER then
         -- for key, value in ipairs(JoelBotC.demonBluffs) do
         --     print(key, ROLE_STRINGS[value])
         -- end
-        print("Demon bluffs:")
-        PrintTable(JoelBotC.demonBluffs)
     end
 
     function JoelBotC:AssignRolesAndSeats()
