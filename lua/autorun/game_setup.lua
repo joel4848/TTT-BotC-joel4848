@@ -194,7 +194,8 @@ if SERVER then
             table.insert(JoelBotC.enabledOutsiders, ROLE_SAINTJBC)
         end
         if drunkEnabled then
-            table.insert(JoelBotC.enabledOutsiders, ROLE_DRUNKJBC)
+            -- The Drunk is not currently implemented
+            -- table.insert(JoelBotC.enabledOutsiders, ROLE_DRUNKJBC)
         end
         if recluseEnabled then
             table.insert(JoelBotC.enabledOutsiders, ROLE_RECLUSEJBC)
