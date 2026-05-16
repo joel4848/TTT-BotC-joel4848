@@ -337,7 +337,7 @@ if SERVER then
         -- Shuffle players
         table.Shuffle(JoelBotC.players)
 
-        -- Make working copies of character type tables and shuffle (Can one shuffle too much?)
+        -- Make working copies of character type tables and shuffle
         local townsfolkPool = table.Copy(JoelBotC.enabledTownsfolk)
         local outsiderPool = table.Copy(JoelBotC.enabledOutsiders)
         local minionPool = table.Copy(JoelBotC.enabledMinions)
@@ -365,6 +365,43 @@ if SERVER then
         AddRoles(minionPool, minionsAmount, "minion")
         AddRoles(demonPool, demonsAmount, "demon")
 
+        -- Baron bollocks
+        local hasBaron = false
+        for _, data in ipairs(JoelBotC.rolePool) do
+            if data.role == ROLE_BARONJBC then
+                hasBaron = true
+                break
+            end
+        end
+
+        if hasBaron then
+            local townsfolkRemoved = 0
+
+            for i = #JoelBotC.rolePool, 1, -1 do
+                if townsfolkRemoved >= 2 then break end
+
+                local data = JoelBotC.rolePool[i]
+
+                if data.alignment == "townsfolk" and data.role ~= ROLE_EMPATHJBC and data.role ~= ROLE_FORTUNETELLERJBC then
+                    local removedData = table.remove(JoelBotC.rolePool, i)
+                    table.insert(townsfolkPool, removedData.role)
+
+                    townsfolkRemoved = townsfolkRemoved + 1
+                end
+            end
+
+            table.Shuffle(outsiderPool) 
+
+            local outsidersAdded = 0
+            for i = 1, 2 do
+                local nextOutsider = table.remove(outsiderPool)
+                if nextOutsider then
+                    table.insert(JoelBotC.rolePool, {role = nextOutsider, alignment = "outsider"})
+                    outsidersAdded = outsidersAdded + 1
+                end
+            end
+        end
+
         JoelBotC.unusedTownsfolk = table.Copy(townsfolkPool)
         JoelBotC.unusedOutsiders = table.Copy(outsiderPool)
         JoelBotC.unusedMinions = table.Copy(minionPool)
@@ -372,7 +409,6 @@ if SERVER then
     end
 
     function JoelBotC:SelectDemonBluffs()
-        -- Create Demon's bluff pool (not-in-play good roles) -------------------------------------------------------
         JoelBotC.demonBluffsTownsfolkPool = {}
         JoelBotC.demonBluffsOutsiderPool = {}
         JoelBotC.demonBluffs = {}
