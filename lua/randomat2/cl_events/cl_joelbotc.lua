@@ -16,6 +16,8 @@ function EVENT:Begin()
 
     JoelBotC.eventActiveClient = true
 
+    JoelBotC:MessageOverlayCreate()
+
     self:AddHook("TTTTargetIDPlayerRing", function(ent, client, ring_visible)
         return false
     end)
@@ -209,6 +211,7 @@ function EVENT:End()
     -- Remove any overlays etc.
     JoelBotC:SeatingGUIDestroy()
     JoelBotC:BotCTitleDestroy()
+    JoelBotC:MessageOverlayDestroy()
 
     -- Remove hooks
 

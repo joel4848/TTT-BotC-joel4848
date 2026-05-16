@@ -32,9 +32,6 @@ if SERVER then
                                                                 -- Maybe I could do it with timer.Remove but I'm here now
     util.AddNetworkString("rdmtJoelBotCVoteToggle")             -- tells server and players that someone toggled their vote on/off
     util.AddNetworkString("rdmtJoelBotCVoteLockIn")             -- for big hand movement & vote counting
-    util.AddNetworkString("rdmtJoelBotCNomMessage")             -- sends various messages to one or all clients
-    util.AddNetworkString("rdmtJoelBotCMiddleMessage")          -- sends nomination 'error' messages
-    util.AddNetworkString("rdmtJoelBotCBottomMessage")          -- sends who (if anyone) is on the block, and minimum required votes
     util.AddNetworkString("rdmtJoelBotCEndSpeech")              -- nominator/nominee ending prosecution/defence early
     util.AddNetworkString("rdmtJoelBotCOGActive")               -- whether there is an active OG affecting nominations/voting
 
@@ -51,20 +48,6 @@ if SERVER then
     -------------------------------------------------------------------------------------
     -- Helper bois
     -------------------------------------------------------------------------------------
-
-    function JoelBotC:SendMiddleMessage(message, duration, target)
-        msg = message or ""
-        dtn = duration or 3
-
-        net.Start("rdmtJoelBotCMiddleMessage")
-            net.WriteString(msg)
-            net.WriteInt(dtn, 7)
-        if target then
-            net.Send(target)
-        else
-            net.Broadcast()
-        end
-    end
 
     function JoelBotC:DetermineRequiredVotes()
         voteThreshold = math.ceil(JoelBotC:AlivePlayerCount() / 2)
@@ -87,38 +70,6 @@ if SERVER then
 
         net.Start("rdmtJoelBotCGhostVoteUpdate")
             net.WriteTable(JoelBotC.ghostVotes)
-        net.Broadcast()
-    end
-
-    function JoelBotC:UpdateBottomMessage(clear, nominated, marked)
-        local clearMessage = clear ~= false
-        local requiredVotes = JoelBotC:DetermineRequiredVotes()
-        local nominatedNick = nominated and nominated:Nick() or nil
-        local markedNick = marked and marked:Nick() or nil
-        local finalMessage = ""
-
-        if not JoelBotC:IsOGSober() then
-            if nominatedNick and markedNick then
-                finalMessage = "Nominated: " .. nominatedNick .. " | Marked: " .. markedNick .. " | Votes required: " .. requiredVotes .. " (" .. (requiredVotes - 1) .. " to tie)"
-            elseif nominatedNick then
-                finalMessage = "Nominated: " .. nominatedNick .. " | Votes required: " .. requiredVotes
-            elseif markedNick then
-                finalMessage = "Marked: " .. markedNick .. " | Votes required: " .. requiredVotes .. " (" .. (requiredVotes - 1) .. " to tie)"
-            end
-        else
-            if nominatedNick then
-                finalMessage = "Nominated: " .. nominatedNick .. " | Marked: ? | Votes required: ?"
-            else
-                finalMessage = "Marked: ? | Votes required: ?"
-            end
-        end
-
-        if clearMessage then
-            finalMessage = ""
-        end
-
-        net.Start("rdmtJoelBotCBottomMessage")
-            net.WriteString(finalMessage)
         net.Broadcast()
     end
 
@@ -521,10 +472,6 @@ if SERVER then
 
         JoelBotC:UpdateBottomMessage(false, nil, JoelBotC.marked)
 
-        net.Start("rdmtJoelBotCNomMessage")
-            net.WriteString(resultMsg)
-        net.Broadcast()
-
         BroadcastPhase("result", {message = resultMsg})
 
         -- Reopen nominations after 5 seconds
@@ -704,10 +651,6 @@ if CLIENT then
     local endSpeechBtn = nil
     local voteToggleBtn = nil
 
-    -- Middle message (Errors, vote results etc.)
-    local middleMessage = ""
-    local middleExpiry  = 0
-
     -- Bottom message (Who (if anyone) is on the block, and votes required)
     local bottomMessage = ""
     local bottomExpiry  = 0
@@ -785,21 +728,12 @@ if CLIENT then
     end
 
     function JoelBotC:UpdateGhostVoteIcons()
-        -- print("**************************************************************************")
-        -- print("Running JoelBotC:UpdateGhostVoteIcons()")
-
         for i, ghostIcon in ipairs(ghostIcon) do
-            -- print("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~")
-            -- print("Step 1 for icon " .. i)
             if IsValid(ghostIcon) then
-                -- print("Step 2 for icon " .. i)
                 local ply = JoelBotC.seatingOrderClient[i]
-                -- print("ply = " .. ply:Nick())
+
                 ghostIcon:SetVisible(false)
-                -- print("Visible = " .. tostring(ghostIcon:IsVisible()))
-                -- print("JoelBotC.isAliveClient[ply] = " .. tostring(JoelBotC.isAliveClient[ply]))
-                -- print("JoelBotC.organgrinderActive = " .. tostring(JoelBotC.organgrinderActive))
-                -- print("ply.hasGhostVote = " .. tostring(ply.hasGhostVote))
+
                 if JoelBotC.isAliveClient[ply] then
                     ghostIcon:SetImage("vgui/ttt/joelbotc/ghost_white_icon.png")
                 elseif JoelBotC.organgrinderActive then
@@ -814,9 +748,6 @@ if CLIENT then
                 end
             end
         end
-
-        -- print("Finished running JoelBotC:UpdateGhostVoteIcons()")
-        -- print("**************************************************************************")
     end
 
     -------------------------------------------------------------------------------------
@@ -993,12 +924,6 @@ if CLIENT then
         else
             SetHandTarget(false, seat, voteIntervalCvar:GetFloat() / 2)
         end
-    end)
-
-    net.Receive("rdmtJoelBotCMiddleMessage", function()
-        middleMessage = net.ReadString()
-        local duration = net.ReadInt(7)
-        middleExpiry = CurTime() + duration
     end)
 
     net.Receive("rdmtJoelBotCBottomMessage", function()
@@ -1221,16 +1146,8 @@ if CLIENT then
 
                 for idx, line in ipairs(lines) do
                     local lineY = startY + (idx - 1) * lineH
-                    -- draw.SimpleText(line, "Minecraft40", cx + 2, lineY + 2, Color(0,0,0,200), TEXT_ALIGN_CENTER)
-                    -- draw.SimpleText(line, "Minecraft40", cx, lineY, Color(255,255,255,255), TEXT_ALIGN_CENTER)
                     draw.SimpleTextOutlined(line, "Minecraft40", cx, lineY, Color(255, 255, 255, 255), TEXT_ALIGN_CENTER, TEXT_ALIGN_CENTER, 1, Color(0, 0, 0, 200))
                 end
-            end
-
-            -- Middle message
-            if middleMessage ~= "" and CurTime() < middleExpiry then
-                -- draw.SimpleText(middleMessage, "Minecraft40", cx + 2, middleY + 2, Color(0, 0, 0, 255), TEXT_ALIGN_CENTER)
-                draw.SimpleTextOutlined(middleMessage, "Minecraft40", cx, ScrH() / 2, Color(255, 170, 0, 255), TEXT_ALIGN_CENTER, TEXT_ALIGN_CENTER, 1, Color(0, 0, 0, 200))
             end
 
             -- Bottom message
@@ -1245,7 +1162,6 @@ if CLIENT then
                 surface.SetDrawColor(0, 0, 0, 150)
                 surface.DrawRect( cx - textW / 2 - padding, bottomY - textH / 2 - padding, textW + padding * 2, textH + padding * 2)
 
-                -- draw.SimpleText(bottomMessage, "Minecraft30", cx + 2, bottomY + 2, Color(0, 0, 0, 255), TEXT_ALIGN_CENTER)
                 draw.SimpleTextOutlined(bottomMessage, "Minecraft30", cx, bottomY, Color(230, 200, 250), TEXT_ALIGN_CENTER, TEXT_ALIGN_CENTER, 1, Color(0, 0, 0, 200))
             end
         end
