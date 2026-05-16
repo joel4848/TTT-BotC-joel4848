@@ -38,6 +38,7 @@ if SERVER then
             [ROLE_FORTUNETELLERJBC] = false,
             [ROLE_VIRGINJBC] = false,
             [ROLE_OGREJBC] = false,
+            [ROLE_GOLEMJBC] = false,
             [ROLE_SWEETHEARTJBC] = false,
             [ROLE_SAINTJBC] = false,
             [ROLE_DRUNKJBC] = false,

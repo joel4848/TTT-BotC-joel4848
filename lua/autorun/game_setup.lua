@@ -22,6 +22,7 @@ if SERVER then
     local fortunetellerEnabled = CreateConVar("randomat_joelbotc_fortuneteller_enabled", 1, FCVAR_NONE, "Whether the Fortune Teller is on the script", 0, 1):GetBool()
     local virginEnabled = CreateConVar("randomat_joelbotc_virgin_enabled", 1, FCVAR_NONE, "Whether the Virgin is on the script", 0, 1):GetBool()
     local ogreEnabled = CreateConVar("randomat_joelbotc_ogre_enabled", 1, FCVAR_NONE, "Whether the Ogre is on the script", 0, 1):GetBool()
+    local golemEnabled = CreateConVar("randomat_joelbotc_golem_enabled", 1, FCVAR_NONE, "Whether the Golem is on the script", 0, 1):GetBool()
     local sweetheartEnabled = CreateConVar("randomat_joelbotc_sweetheart_enabled", 1, FCVAR_NONE, "Whether the Sweetheart is on the script", 0, 1):GetBool()
     local saintEnabled = CreateConVar("randomat_joelbotc_saint_enabled", 1, FCVAR_NONE, "Whether the Saint is on the script", 0, 1):GetBool()
     local drunkEnabled = CreateConVar("randomat_joelbotc_drunk_enabled", 1, FCVAR_NONE, "Whether the Drunk is on the script", 0, 1):GetBool()
@@ -179,6 +180,9 @@ if SERVER then
         if ogreEnabled then
             table.insert(JoelBotC.enabledOutsiders, ROLE_OGREJBC)
         end
+        if golemEnabled then
+            table.insert(JoelBotC.enabledOutsiders, ROLE_GOLEMJBC)
+        end
         if sweetheartEnabled then
             table.insert(JoelBotC.enabledOutsiders, ROLE_MOONCHILDJBC)
         end
@@ -226,14 +230,31 @@ if SERVER then
                 table.insert(JoelBotC.players, ply)
                 ply.hasRole = nil
                 ply.currentRole = ply:GetRole() or nil
-                ply.BotCDead = false
-                ply.hasGhostVote = true
                 JoelBotC.isAlive[ply] = true
 
                 ply:StripWeapons()
                 ply:SetFOV(0, 0.2)
                 ply:Give("weapon_ttt_unarmed")
                 ply:Give("weapon_zm_carry")
+
+                -- Reset various things
+                ply.botc_role = nil
+                ply.golemNominated = nil
+                ply.BotCDead = false
+                ply.hasGhostVote = true
+                ply.townsfolk = nil
+                ply.outsider = nil
+                ply.minion = nil
+                ply.demon = nil
+                ply.goodTeam = nil
+                ply.evilTeam = nil
+                ply.seatNumber = nil
+                ply.nominated = nil
+                ply.hasBeenNominated = nil
+                ply.infoBookSegments = {}
+                ply.poisonerPoisoned = nil
+                ply.pukkaPoisoned = nil
+                ply.organgrinderDrunk = nil
             end
         end
 

@@ -139,6 +139,8 @@ function EVENT:End(isActive)
     timer.Remove("rdmtJoelBotC_gamestart_3")
     timer.Remove("rdmtJoelBotC_gamestart_4")
 
+    timer.Remove("rdmtJoelBotC_nom_announcement_delay")
+
 
     -- Clear active roles table (I think this is the right way to do it?)
     for role, _ in ipairs(JoelBotC.rolesInGame) do

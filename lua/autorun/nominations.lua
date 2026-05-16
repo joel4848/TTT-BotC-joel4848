@@ -52,6 +52,20 @@ if SERVER then
     -- Helper bois
     -------------------------------------------------------------------------------------
 
+    function JoelBotC:SendMiddleMessage(message, duration, target)
+        msg = message or ""
+        dtn = duration or 3
+
+        net.Start("rdmtJoelBotCMiddleMessage")
+            net.WriteString(msg)
+            net.WriteInt(dtn, 7)
+        if target then
+            net.Send(target)
+        else
+            net.Broadcast()
+        end
+    end
+
     function JoelBotC:DetermineRequiredVotes()
         voteThreshold = math.ceil(JoelBotC:AlivePlayerCount() / 2)
         toBeatCurrentMax = JoelBotC.markedVotes + 1
@@ -256,10 +270,25 @@ if SERVER then
             else
                 msg = nomineePly:Nick() .. " has already been nominated today!"
             end
-            net.Start("rdmtJoelBotCMiddleMessage")
-                net.WriteString(msg)
-            net.Send(nominatorPly)
+            
+            JoelBotC:SendMiddleMessage(msg, 3, nominatorPly)
+
             return
+        end
+
+        local diesToGolem = nil 
+
+        if nominatorPly:IsGolem() then
+            if nominatorPly.golemNominated then
+                Randomat:SmallNotify("You are the Golem and can only nominate once per game!", 5, nominatorPly)
+                return
+            else
+                nominatorPly.golemNominated = true
+
+                if not nomineePly.demon then
+                    diesToGolem = nomineePly
+                end
+            end
         end
 
         nominatorPly.nominated = true
@@ -271,36 +300,45 @@ if SERVER then
 
         JoelBotC:UpdateBottomMessage(false, nomineePly, JoelBotC.marked)
 
-        JoelBotC.currentNominator = nominatorSeat
-        JoelBotC.currentNominee = nomineeSeat
-        JoelBotC.lockedInSeats = {}
-
-        JoelBotC.playerVotes = {}
-        for _, p in ipairs(JoelBotC.seatingOrder) do
-            JoelBotC.playerVotes[p] = false
+        if diesToGolem then
+            JoelBotC:SendMiddleMessage(nominatorPly:Nick() .. " has nominated " .. nomineePly:Nick() .. ", who dies", 5)
+            JoelBotC:Kill(nomineePly)
+        else
+            JoelBotC:SendMiddleMessage(nominatorPly:Nick() .. " has nominated " .. nomineePly:Nick(), 5)
         end
 
-        local nominatorNick = nominatorPly:Nick()
-        local nomineeNick = nomineePly:Nick()
-        PrintMessage(HUD_PRINTTALK, nominatorNick .. " nominated " .. nomineeNick)
+        timer.Create("rdmtJoelBotC_nom_announcement_delay", 5, 1, function()
+            JoelBotC.currentNominator = nominatorSeat
+            JoelBotC.currentNominee = nomineeSeat
+            JoelBotC.lockedInSeats = {}
 
-        BroadcastPhase("prosecution", {
-            nominatorSeat = nominatorSeat,
-            nomineeSeat = nomineeSeat,
-            nominatorName = nominatorNick,
-            nomineeName = nomineeNick,
-            prosecutionTime = prosecutionTimeCvar:GetInt(),
-        })
+            JoelBotC.playerVotes = {}
+            for _, p in ipairs(JoelBotC.seatingOrder) do
+                JoelBotC.playerVotes[p] = false
+            end
 
-        RunCountdown("rdmtJoelBotCProsecution", prosecutionTimeCvar:GetInt(),
-            function(remaining) BroadcastTimer(remaining) end,
-            function() JoelBotC:StartDefence(nominatorSeat, nomineeSeat, nomineeNick, defenceTimeCvar:GetInt()) end
-        )
+            local nominatorNick = nominatorPly:Nick()
+            local nomineeNick = nomineePly:Nick()
+            PrintMessage(HUD_PRINTTALK, nominatorNick .. " nominated " .. nomineeNick)
 
-        JoelBotC._prosecutionEndCallback = function()
-            timer.Remove("rdmtJoelBotCProsecution")
-            JoelBotC:StartDefence(nominatorSeat, nomineeSeat, nomineeNick, defenceTimeCvar:GetInt())
-        end
+            BroadcastPhase("prosecution", {
+                nominatorSeat = nominatorSeat,
+                nomineeSeat = nomineeSeat,
+                nominatorName = nominatorNick,
+                nomineeName = nomineeNick,
+                prosecutionTime = prosecutionTimeCvar:GetInt(),
+            })
+
+            RunCountdown("rdmtJoelBotCProsecution", prosecutionTimeCvar:GetInt(),
+                function(remaining) BroadcastTimer(remaining) end,
+                function() JoelBotC:StartDefence(nominatorSeat, nomineeSeat, nomineeNick, defenceTimeCvar:GetInt()) end
+            )
+
+            JoelBotC._prosecutionEndCallback = function()
+                timer.Remove("rdmtJoelBotCProsecution")
+                JoelBotC:StartDefence(nominatorSeat, nomineeSeat, nomineeNick, defenceTimeCvar:GetInt())
+            end
+        end)
     end
 
     -- Start defence
@@ -959,7 +997,8 @@ if CLIENT then
 
     net.Receive("rdmtJoelBotCMiddleMessage", function()
         middleMessage = net.ReadString()
-        middleExpiry = CurTime() + 3
+        local duration = net.ReadInt(7)
+        middleExpiry = CurTime() + duration
     end)
 
     net.Receive("rdmtJoelBotCBottomMessage", function()

@@ -1116,6 +1116,9 @@ function JoelBotC:OgreNight()
 end
 
 
+-- Golem
+
+
 
 -- sweetheart
 function JoelBotC:SweetheartDeath(sweetheart)
