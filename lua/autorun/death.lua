@@ -53,6 +53,10 @@ if SERVER then
             JoelBotC:MakeScarletWomanDemon(target.botc_role)
         end
 
+        if killer.demon and target:IsRavenkeeper() then
+            JoelBotC.ravenkeeperKilledByDemon = true
+        end
+
         target.BotCDead = true
         table.insert(JoelBotC.morningDeaths, target)
         

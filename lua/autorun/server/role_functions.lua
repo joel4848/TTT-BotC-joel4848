@@ -838,8 +838,6 @@ end
 
 -- ravenkeeper
 function JoelBotC:RavenkeeperNight()
-    print("JoelBotC.ravenkeeperKilledByDemon = " .. tostring(JoelBotC.ravenkeeperKilledByDemon))
-
     for _, ply in ipairs(JoelBotC.players) do
         if ply:IsRavenkeeper() then
             if JoelBotC.ravenkeeperKilledByDemon then
