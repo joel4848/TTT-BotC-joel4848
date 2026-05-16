@@ -28,7 +28,48 @@ function EVENT:Begin()
 
     JoelBotC.BotCEventRunning = true
 
+    self:AddHook("PlayerCanPickupWeapon", function(ply, wep)
+        if not IsValid(wep) then return false end
+
+        local class = WEPS.GetClass(wep)
+
+        -- Allow freeze guns and homerun bats
+        if class == "weapon_zm_improvised" or
+        class == "weapon_ttt_unarmed" or
+        class == "weapon_zm_carry" or
+        class == "weapon_ttt_joelbotc_adminbook" or
+        class == "weapon_ttt_signedbook" or
+        class == "weapon_ttt_bookquill" then
+            return true
+        end
+
+        return false
+    end)
+
+    self:AddHook("EntityTakeDamage", function(ent, dmginfo)
+        if IsPlayer(ent) then
+            return true
+        end
+    end)
+
+    local lastUpdate = nil
+    self:AddHook("Think", function()
+        local curTime = CurTime()
+        if lastUpdate == nil or curTime >= lastUpdate then
+            lastUpdate = curTime + 1
+            -- Change the round time so it effectively never ends
+            SetGlobalFloat("ttt_round_end", curTime + 90000)
+        end
+    end)
+
     JoelBotC.ravenkeeperKilledByDemon = nil
+    JoelBotC.monkPlayer = nil
+    JoelBotC.monkProtectedPlayer = nil
+    JoelBotC.isFirstNight = true
+    JoelBotC.isCurrentlyNight = nil
+    JoelBotC.grandmother = nil
+    JoelBotC.grandchild  = nil
+    JoelBotC.morningDeaths = {}
 
     JoelBotC:ChangeRoleColours()
 
@@ -54,21 +95,29 @@ function EVENT:Begin()
         JoelBotC:GiveStartingBooks()
     end)
 
-    timer.Create("rdmtJoelBotC_gamestart_2", 2, 1, function()
+    timer.Create("rdmtJoelBotC_gamestart_2", 5, 1, function()
         Randomat:SmallNotify("Check your inventory for your notebook and information book!", 5)
     end)
 
-    timer.Create("rdmtJoelBotC_gamestart_3", 3, 1, function()
-        Randomat:SmallNotify("Night 1 will start in 2 seconds...", 5)
+    timer.Create("rdmtJoelBotC_gamestart_3", 10, 1, function()
+        Randomat:SmallNotify("Night 1 will start in 5 seconds...", 5)
     end)
 
-    timer.Create("rdmtJoelBotC_gamestart_4", 5, 1, function()
-        print("Ran Start Night")
+    timer.Create("rdmtJoelBotC_gamestart_4", 10, 1, function()
         JoelBotC.isFirstNight = true
-        JoelBotC:StartNight()
+        JoelBotC.currentNight = 0
+        timer.Create("rdmtJoelBotCNominationsEnd", 5, 1, function() 
+            JoelBotC:SendMiddleMessage("Night " .. tostring(JoelBotC.currentNight + 1) .. " begins...", 5)
+
+            timer.Create("rdmtJoelBotCStartNightAfterNominations", 5, 1, function() 
+                JoelBotC:StartNight()
+            end)
+        end)
     end)
 
     self:AddHook("TTTCheckForWin", function()
+        if JoelBotC.isCurrentlyNight then return WIN_NONE end
+
         local demonAlive = false
         local livingCount = JoelBotC:AlivePlayerCount()
 
@@ -141,6 +190,10 @@ function EVENT:End(isActive)
 
     timer.Remove("rdmtJoelBotC_nom_announcement_delay")
 
+    timer.Remove("rdmtJoelBotCNominationsEnd")
+    timer.Remove("rdmtJoelBotCStartNightAfterNominations")
+    timer.Remove("RdmtJoelBotCEndDayStartNominations")
+    timer.Remove("rdmtJoelBotCStartDiscussionsAfterMorningDeaths")
 
     -- Clear active roles table (I think this is the right way to do it?)
     for role, _ in ipairs(JoelBotC.rolesInGame) do

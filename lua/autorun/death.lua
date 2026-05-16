@@ -41,10 +41,10 @@ if SERVER then
     -- 'Kill' during the night (disable their ability but don't run the kill animation yet)
     function JoelBotC:NightPreKill(target, killer)
         if not killer:IsRole(ROLE_ASSASSINJBC) then
-            if JoelBotC.monkProtectedPlayer == target and JoelBotC:IsRoleBotCAlive(ROLE_MONKJBC) then
+            if JoelBotC.monkProtectedPlayer == target and JoelBotC:IsRoleBotCAlive(ROLE_MONKJBC) and not JoelBotC:IsDroisoned(JoelBotC.monkPlayer) then
                 return
             end
-            if target:IsSoldier() then
+            if target:IsSoldier() and not JoelBotC:IsDroisoned(target) then
                 return
             end
         end
@@ -53,27 +53,32 @@ if SERVER then
             JoelBotC:MakeScarletWomanDemon(target.botc_role)
         end
 
-        if killer.demon and target:IsRavenkeeper() then
+        if killer.demon and target:IsRavenkeeper() and not target.BotCDead then
             JoelBotC.ravenkeeperKilledByDemon = true
         end
 
-        target.BotCDead = true
-        table.insert(JoelBotC.morningDeaths, target)
-        
-        if target == JoelBotC.grandchild and not JoelBotC.grandmother.BotCDead then
+        if target == JoelBotC.grandchild and not target.BotCDead and JoelBotC.grandmother.BotCDead then
             JoelBotC.grandmother.BotCDead = true 
             table.insert(JoelBotC.morningDeaths, JoelBotC.grandmother)
         end
 
-        if target:IsSweetheart() and target.BotCDead then
+        if target:IsSweetheart() and not target.BotCDead and not JoelBotC:IsDroisoned(target) then
             JoelBotC:SweetheartDeath(target)
         end
+
+        if not target.BotCDead then
+            table.insert(JoelBotC.morningDeaths, target)
+        end
+
+        target.BotCDead = true
     end
 
     function JoelBotC:MorningDeaths()
         
         -- Announce who died in the night
         local names = {}
+        print("Morning deaths =")
+        PrintTable(JoelBotC.morningDeaths)
         for _, ply in ipairs(JoelBotC.morningDeaths) do
             table.insert(names, ply:Nick())
         end
@@ -82,18 +87,20 @@ if SERVER then
         local count = #names
         local announcementMessage = ""
 
-        if count == 0 then
-            announcementMessage = "No one died in the night"
-        elseif count == 1 then
-            announcementMessage = "Last night, " .. names[1] .. " died"
-        elseif count == 2 then
-            announcementMessage = "Last night, " .. names[1] .. " and " .. names[2] .. " died"
-        else
-            local namesPart = table.concat(names, ", ", 1, count - 1)
-            announcementMessage = "Last night, " .. namesPart .. " and " .. names[count] .. " died"
-        end
+        if JoelBotC.currentNight ~= 1 then
+            if count == 0 then
+                announcementMessage = "No one died in the night"
+            elseif count == 1 then
+                announcementMessage = "Last night, " .. names[1] .. " died"
+            elseif count == 2 then
+                announcementMessage = "Last night, " .. names[1] .. " and " .. names[2] .. " died"
+            else
+                local namesPart = table.concat(names, ", ", 1, count - 1)
+                announcementMessage = "Last night, " .. namesPart .. " and " .. names[count] .. " died"
+            end
 
-        Randomat:SmallNotify(announcementMessage, 5)
+            Randomat:SmallNotify(announcementMessage, 5)
+        end
 
         -- Now kill them!
         for _, ply in ipairs(JoelBotC.morningDeaths) do
@@ -101,9 +108,13 @@ if SERVER then
         end
 
         JoelBotC.morningDeaths = {}
+        names = {}
 
         timer.Create("rdmtJoelBotCStartDiscussionDelay", 5, 1, function()
-            JoelBotC:StartDiscussion()
+            JoelBotC.isCurrentlyNight = false
+            timer.Create("rdmtJoelBotCStartDiscussionsAfterMorningDeaths", 0.5, 1, function()
+                JoelBotC:StartDiscussion()
+            end)
         end)
     end
 

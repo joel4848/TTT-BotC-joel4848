@@ -20,6 +20,7 @@ JoelBotC.outsidersInBag = JoelBotC.outsidersInBag or {}
 JoelBotC.minionsInBag = JoelBotC.minionsInBag or {}
 JoelBotC.demonsInBag = JoelBotC.demonsInBag or {}
 JoelBotC.ogreIsEvil = JoelBotC.ogreIsEvil or nil
+JoelBotC.monkPlayer = JoelBotC.monkPlayer or nil
 
 function JoelBotC:GetNightFunctions()
     JoelBotC.nightFunctions = {
@@ -372,8 +373,13 @@ end
 
 -- monk
 function JoelBotC:MonkNight()
+    local didMonkStuff = false
     for _, ply in ipairs(JoelBotC.players) do
         if ply:IsMonk() and not ply.BotCDead then
+            didMonkStuff = true
+
+            JoelBotC.monkPlayer = ply
+
             JoelBotC:SendSeatingGUICreate(ply)
 
             Randomat:SmallNotify("15 Seconds: Choose a player to protect from the Demon tonight", 5, ply)
@@ -424,6 +430,9 @@ function JoelBotC:MonkNight()
                 end
             end)
         end
+    end
+    if not didMonkStuff then
+        JoelBotC:NextNightStep()
     end
 end
 
@@ -484,8 +493,12 @@ end
 
 -- nightwatchman
 function JoelBotC:NightwatchmanNight()
+    local didNightwatchmanStuff = false 
+
     for _, ply in ipairs(JoelBotC.players) do
         if ply:IsNightwatchman() and not ply.BotCDead and not JoelBotC.nightwatchmanAbilityUsed then
+            didNightwatchmanStuff = true
+
             JoelBotC:SendSeatingGUICreate(ply)
             
             Randomat:SmallNotify("15 Seconds: Use your ability tonight? Choose a player to be told you are the Nightwatchman", 5, ply)
@@ -540,6 +553,10 @@ function JoelBotC:NightwatchmanNight()
             end)
         end
     end
+
+    if not didNightwatchmanStuff then
+        JoelBotC:NextNightStep()
+    end
 end
 
 -- grandmother
@@ -553,8 +570,12 @@ function JoelBotC:GrandmotherNight()
             local grandchild, grandchildRole
             local grandmotherPool = {}
 
-            if math.random(0, 4) == 4 then
-                grandmotherPool = table.Copy(JoelBotC.outsiderPlayers)
+            if #JoelBotC.outsiderPlayers > 0 then
+                if math.random(0, 4) == 4 then
+                    grandmotherPool = table.Copy(JoelBotC.outsiderPlayers)
+                else
+                    grandmotherPool = table.Copy(JoelBotC.townsfolkPlayers)
+                end
             else
                 grandmotherPool = table.Copy(JoelBotC.townsfolkPlayers)
             end
@@ -598,8 +619,12 @@ end
 
 -- seamstress
 function JoelBotC:SeamstressNight()
+    local didSeamstressStuff = false 
+
     for _, ply in ipairs(JoelBotC.players) do
         if ply:IsSeamstress() and not ply.BotCDead then
+            didSeamstressStuff = true
+
             JoelBotC:SendSeatingGUICreate(ply)
 
             Randomat:SmallNotify("15 Seconds: Use your ability tonight? Choose two\nplayers and learn if they're the same alignment", 5, ply)
@@ -678,6 +703,10 @@ function JoelBotC:SeamstressNight()
                 end
             end)
         end
+    end
+
+    if not didSeamstressStuff then
+        JoelBotC:NextNightStep()
     end
 end
 
@@ -838,9 +867,12 @@ end
 
 -- ravenkeeper
 function JoelBotC:RavenkeeperNight()
+    local didRavenkeeperStuff = false
+
     for _, ply in ipairs(JoelBotC.players) do
         if ply:IsRavenkeeper() then
             if JoelBotC.ravenkeeperKilledByDemon then
+                didRavenkeeperStuff = true
 
                 JoelBotC:SendSeatingGUICreate(ply)
 
@@ -910,10 +942,15 @@ function JoelBotC:RavenkeeperNight()
                         hook.Remove("Think", "rdmtJoelBotCRavenkeeperChoose")
                     end
                 end)
+
+                JoelBotC.ravenkeeperKilledByDemon = nil
             else
                 JoelBotC:NextNightStep()
             end
         end
+    end
+    if not didRavenkeeperStuff then
+        JoelBotC:NextNightStep()
     end
 end
 
@@ -934,8 +971,11 @@ function JoelBotC.FortuneTellerRedHerring()
 end
 
 function JoelBotC:FortuneTellerNight()
+    local didFortuneTellerStuff = false
+
     for _, ply in ipairs(JoelBotC.players) do
         if ply:IsFortuneTeller() then
+            didFortuneTellerStuff = true
 
             -- Helper function for whether a chosen player should register as the Demon to the FT
             local function FortuneTellerYes(choice)
@@ -1036,6 +1076,10 @@ function JoelBotC:FortuneTellerNight()
             end)
         end
     end
+
+    if not didFortuneTellerStuff then
+        JoelBotC:NextNightStep()
+    end
 end
 
 
@@ -1045,8 +1089,11 @@ end
 
 -- ogre
 function JoelBotC:OgreNight()
+    local didOgreStuff = false
     for _, ply in ipairs(JoelBotC.players) do
         if ply:IsOgre() then
+            didOgreStuff = true
+
             JoelBotC:SendSeatingGUICreate(ply)
 
             Randomat:SmallNotify("15 Seconds: Pick a player and join their team.\n             (You don't learn which team)", 5, ply)
@@ -1111,13 +1158,16 @@ function JoelBotC:OgreNight()
             end)
         end
     end
+
+    if not didOgreStuff then
+        JoelBotC:NextNightStep()
+    end
 end
 
 
 
 -- Snitch
 function JoelBotC:SnitchExists()
-    print("RUNNING SNITCH EXISTS")
     local snitchExists = false
     
     for _, ply in ipairs(JoelBotC.players) do
@@ -1163,14 +1213,13 @@ end
 
 -- poisoner
 function JoelBotC:PoisonerNight()
+    local didPoisonerStuff = false
     local poisonerExists = nil
     
     for _, ply in ipairs(JoelBotC.players) do
         if ply:IsRole(ROLE_POISONERJBC) and not ply.BotCDead then
+            didPoisonerStuff = true
             poisonerExists = true
-
-            print("Ran Poisoner night function for:")
-            print(ply:Nick())
 
             JoelBotC:SendSeatingGUICreate(ply)
 
@@ -1227,14 +1276,13 @@ function JoelBotC:PoisonerNight()
         end
     end
 
-    if not poisonerExists then
+    if not didPoisonerStuff then
         JoelBotC:NextNightStep()
     end
 end
 
 
 -- scarletwoman
-
 function JoelBotC:MakeScarletWomanDemon(demonType)
     for _, ply in ipairs(JoelBotC.players) do
         if ply:IsScarletWoman() and not ply.BotCDead and not JoelBotC:IsDroisoned(ply) then
@@ -1291,19 +1339,21 @@ end)
 
 -- assassin
 function JoelBotC:AssassinNight()
+    local didAssassinStuff = false
+
     for _, ply in ipairs(JoelBotC.players) do
         if ply:IsRole(ROLE_ASSASSINJBC) and not ply.BotCDead and not JoelBotC.assassinAbilityUsed then
-            
+            didAssassinStuff = true
+
             JoelBotC.assassinTargetTonight = nil
             JoelBotC:SendSeatingGUICreate(ply)
             
             Randomat:SmallNotify("15 Seconds: Use your ability tonight?\nChoose a player to kill", 5, ply)
-            
+
             timer.Create("rdmtJoelBotCAssassin10", 5, 1, function()
                 Randomat:SmallNotify("10 seconds to choose", 5, ply)
             end)
             timer.Create("rdmtJoelBotCAssassin5", 10, 1, function()
-                Randomat:SmallNotify("5 seconds to choose", 1, ply)
             end)
             timer.Create("rdmtJoelBotCAssassin4", 11, 1, function()
                 Randomat:SmallNotify("4 seconds to choose", 1, ply)
@@ -1347,6 +1397,10 @@ function JoelBotC:AssassinNight()
             end)
         end
     end
+
+    if not didAssassinStuff then
+        JoelBotC:NextNightStep()
+    end
 end
 
 
@@ -1356,19 +1410,12 @@ end
 
 -- pukka
 function JoelBotC:PukkaNight()
+    local didPukkaStuff
     local pukkaExists = nil
 
-    print("************ RUNNING PUKKA NIGHT ************")
-
     for _, ply in ipairs(JoelBotC.players) do
-
-        print("Is " .. ply:Nick() .. " the Pukka? " .. tostring(ply:IsPukka()))
-        print("Is " .. ply:Nick() .. " BotC dead?? " .. tostring(ply.BotCDead))
-
         if ply:IsPukka() and not ply.BotCDead then
-
-            print("Running PukkaNight() for " .. ply:Nick())
-
+            didPukkaStuff = true
             pukkaExists = true
 
             JoelBotC.pukkaPoisonedPlayer = JoelBotC.pukkaPoisonedPlayer or nil
@@ -1443,7 +1490,7 @@ function JoelBotC:PukkaNight()
         end
     end
 
-    if not pukkaExists then
+    if not didPukkaStuff then
         JoelBotC:NextNightStep()
     end
 end
@@ -1451,8 +1498,11 @@ end
 
 -- imp
 function JoelBotC:ImpNight()
+    local didImpStuff = false 
+
     for _, ply in ipairs(JoelBotC.players) do
         if ply:IsImp() and not ply.BotCDead then
+            didImpStuff = true
 
             JoelBotC:SendSeatingGUICreate(ply)
 
@@ -1530,6 +1580,10 @@ function JoelBotC:ImpNight()
                 end
             end)
         end
+    end
+
+    if not didImpStuff then
+        JoelBotC:NextNightStep()
     end
 end
 
@@ -1742,8 +1796,12 @@ end
 
 
 function JoelBotC:PoNight()
+    local didPoStuff = false
+
     for _, ply in ipairs(JoelBotC.players) do
         if ply:IsPo() and not ply.BotCDead then
+            didPoStuff = true
+
             if JoelBotC.poChoseNoKill then
                 JoelBotC:PoTripleKill(ply)
             else
@@ -1751,6 +1809,10 @@ function JoelBotC:PoNight()
             end
             
         end
+    end
+
+    if not didPoStuff then
+        JoelBotC:NextNightStep()
     end
 end
 

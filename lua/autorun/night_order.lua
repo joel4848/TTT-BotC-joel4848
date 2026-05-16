@@ -5,6 +5,7 @@ JoelBotC.nightFunctions = JoelBotC.nightFunctions or {}
 JoelBotC.firstNightOrderMaster = JoelBotC.firstNightOrderMaster or {}
 JoelBotC.isFirstNight = JoelBotC.isFirstNight or nil
 JoelBotC.currentNight = JoelBotC.currentNight or 0
+JoelBotC.isCurrentlyNight = JoelBotC.isCurrentlyNight or nil
 
 if SERVER then
 
@@ -272,7 +273,8 @@ if SERVER then
     end
 
     function JoelBotC:StartNight()
-        print("RUNNING START NIGHT")
+        JoelBotC.isCurrentlyNight = true
+
         JoelBotC.currentNight = JoelBotC.currentNight + 1
         nightStep = 1
 
@@ -282,17 +284,27 @@ if SERVER then
         JoelBotC:GetNightFunctions()
 
         if JoelBotC.isFirstNight then
-            print("RUNNING IS FIRST NIGHT")
-            JoelBotC:MinionInfo()
+            if #JoelBotC.players > 6 then
+                JoelBotC:MinionInfo()
 
-            timer.Simple(3, function()
-                print("RUNNING DEMON INFO")
-                JoelBotC:DemonInfo()
+                timer.Simple(3, function()
+                    JoelBotC:DemonInfo()
 
-                timer.Simple(10, function()
-                    JoelBotC:NextNightStep()
+                    timer.Simple(10, function()
+                        JoelBotC:NextNightStep()
+                    end)
                 end)
-            end)
+            else
+                JoelBotC:MinionInfo()
+
+                timer.Simple(1, function()
+                    JoelBotC:DemonInfo()
+                
+                    timer.Simple(1, function()
+                        JoelBotC:NextNightStep()
+                    end)
+                end)
+            end
         else
             JoelBotC:NextNightStep()
         end

@@ -48,9 +48,7 @@ if SERVER then
         JoelBotC:SendCentralMessage("A new day dawns in " .. JoelBotC.townName .. "!", 5, nil, Color(50, 70, 255), Color(0, 0, 0))
 
         timer.Create("rdmtJoelBotCMorningMessageDelay", 5, 1, function()
-            if JoelBotC.MorningDeaths then
-                JoelBotC:MorningDeaths()
-            end
+            JoelBotC:MorningDeaths()
         end)
     end
 
@@ -76,7 +74,9 @@ if SERVER then
         net.Broadcast()
         JoelBotC.votesToEndDay = {}
         
-        JoelBotC:StartNominations()
+        timer.Create("RdmtJoelBotCEndDayStartNominations", 5, 1, function()
+            JoelBotC:StartNominations()
+        end)
     end
 
     net.Receive("rdmtJoelBotCEndDayVote", function(len, ply)

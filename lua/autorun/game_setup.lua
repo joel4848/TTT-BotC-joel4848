@@ -26,7 +26,7 @@ if SERVER then
     local golemEnabled = CreateConVar("randomat_joelbotc_golem_enabled", 1, FCVAR_NONE, "Whether the Golem is on the script", 0, 1):GetBool()
     local sweetheartEnabled = CreateConVar("randomat_joelbotc_sweetheart_enabled", 1, FCVAR_NONE, "Whether the Sweetheart is on the script", 0, 1):GetBool()
     local saintEnabled = CreateConVar("randomat_joelbotc_saint_enabled", 1, FCVAR_NONE, "Whether the Saint is on the script", 0, 1):GetBool()
-    local drunkEnabled = CreateConVar("randomat_joelbotc_drunk_enabled", 1, FCVAR_NONE, "Whether the Drunk is on the script", 0, 1):GetBool()
+    local drunkEnabled = CreateConVar("randomat_joelbotc_drunk_enabled", 0, FCVAR_NONE, "Whether the Drunk is on the script", 0, 1):GetBool()
     local recluseEnabled = CreateConVar("randomat_joelbotc_recluse_enabled", 1, FCVAR_NONE, "Whether the Recluse is on the script", 0, 1):GetBool()
     local poisonerEnabled = CreateConVar("randomat_joelbotc_poisoner_enabled", 1, FCVAR_NONE, "Whether the Poisoner is on the script", 0, 1):GetBool()
     local scarletwomanEnabled = CreateConVar("randomat_joelbotc_scarletwoman_enabled", 1, FCVAR_NONE, "Whether the Scarlet Woman is on the script", 0, 1):GetBool()

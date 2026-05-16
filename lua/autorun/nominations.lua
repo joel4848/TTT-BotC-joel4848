@@ -520,6 +520,7 @@ if SERVER then
             resultMsg = "The day ends and " .. JoelBotC.marked:Nick() .. " is executed!"
         end
         PrintMessage(HUD_PRINTTALK, resultMsg)
+        JoelBotC:SendMiddleMessage(resultMsg, 5, target)
 
         -- Execute the marked player
         if IsValid(JoelBotC.marked) then
@@ -542,6 +543,14 @@ if SERVER then
         JoelBotC.currentNominator = nil
         JoelBotC._prosecutionEndCallback = nil
         JoelBotC._defenceEndCallback = nil
+
+        timer.Create("rdmtJoelBotCNominationsEnd", 5, 1, function() 
+            JoelBotC:SendMiddleMessage("Night " .. tostring(JoelBotC.currentNight + 1) .. " begins...", 5)
+
+            timer.Create("rdmtJoelBotCStartNightAfterNominations", 5, 1, function() 
+                JoelBotC:StartNight()
+            end)
+        end)
     end
 end
 
