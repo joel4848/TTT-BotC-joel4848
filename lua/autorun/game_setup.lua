@@ -217,7 +217,8 @@ if SERVER then
             table.insert(JoelBotC.enabledMinions, ROLE_BARONJBC)
         end
         if pukkaEnabled then
-            table.insert(enabledDemons, ROLE_PUKKAJBC)
+            -- The Pukka is currently broken
+            -- table.insert(enabledDemons, ROLE_PUKKAJBC)
         end
         if impEnabled then
             table.insert(enabledDemons, ROLE_IMPJBC)
