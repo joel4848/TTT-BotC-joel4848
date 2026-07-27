@@ -268,11 +268,11 @@ if CLIENT then
         JoelBotC:DisplayCentralMessage(message, duration, textColour, outlineColour)
     end)
 
-    net.Receive("rdmtJoelBotCNightEnds", function()
-        hook.Remove("RenderScreenspaceEffects", "JoelBOTC_NightEffect")
-        hook.Remove("SetupWorldFog", "NightFog")
-        hook.Remove("PostDrawSkyBox", "DarkSky")
-    end)
+    -- net.Receive("rdmtJoelBotCNightEnds", function()
+    --     hook.Remove("RenderScreenspaceEffects", "JoelBOTC_NightEffect")
+    --     hook.Remove("SetupWorldFog", "NightFog")
+    --     hook.Remove("PostDrawSkyBox", "DarkSky")
+    -- end)
 
     net.Receive("rdmtJoelBotCDiscussionBegins", function()
         JoelBotC:StartDiscussionTimer(3)

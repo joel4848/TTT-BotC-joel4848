@@ -76,6 +76,8 @@ if SERVER then
         elseif buttonPressed == 9 then
             JoelBotC:MorningDeaths()
         elseif buttonPressed == 10 then
+            net.Start("rdmtJoelBotCNightStarts")
+            net.Broadcast()
             JoelBotC:StartNight()
         elseif buttonPressed == 11 then
             JoelBotC:StartNominations()

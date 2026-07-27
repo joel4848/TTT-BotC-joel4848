@@ -15,6 +15,8 @@ JoelBotC.seatingOrderClient = JoelBotC.seatingOrderClient or {}
 function EVENT:Begin()
 
     JoelBotC.eventActiveClient = true
+    hook.Run("RdmtJoelBotC_Client_EventStarted")
+    hook.Run("RdmtJoelBotC_Client_EventEnded")
 
     JoelBotC:MessageOverlayCreate()
 
@@ -72,32 +74,32 @@ function EVENT:Begin()
         ply.originalRenderMode = ply:GetRenderMode()
     end
 
-    net.Receive("rdmtJoelBotCNightStarts", function()
-        hook.Add("RenderScreenspaceEffects", "JoelBOTC_NightEffect", function()
-            local tab = {}
-            tab["$pp_colour_brightness"] = -0.25
-            tab["$pp_colour_contrast"] = 0.8
-            tab["$pp_colour_colour"] = 0.5
-
-            DrawColorModify(tab)
-        end)
-
-        hook.Add("SetupWorldFog", "NightFog", function()
-
-            render.FogMode(MATERIAL_FOG_LINEAR)
-            render.FogStart(1)
-            render.FogEnd(1)
-            render.FogMaxDensity(0.8)
-
-            render.FogColor(30, 30, 40)
-
-            return true
-        end)
-
-        hook.Add("PostDrawSkyBox", "DarkSky", function()
-            render.Clear(20,20,60,50,true,true)
-        end)
-    end)
+    -- net.Receive("rdmtJoelBotCNightStarts", function()
+    --     hook.Add("RenderScreenspaceEffects", "JoelBOTC_NightEffect", function()
+    --         local tab = {}
+    --         tab["$pp_colour_brightness"] = -0.25
+    --         tab["$pp_colour_contrast"] = 0.8
+    --         tab["$pp_colour_colour"] = 0.5
+-- 
+    --         DrawColorModify(tab)
+    --     end)
+-- 
+    --     hook.Add("SetupWorldFog", "NightFog", function()
+-- 
+    --         render.FogMode(MATERIAL_FOG_LINEAR)
+    --         render.FogStart(1)
+    --         render.FogEnd(1)
+    --         render.FogMaxDensity(0.8)
+-- 
+    --         render.FogColor(30, 30, 40)
+-- 
+    --         return true
+    --     end)
+-- 
+    --     hook.Add("PostDrawSkyBox", "DarkSky", function()
+    --         render.Clear(20,20,60,50,true,true)
+    --     end)
+    -- end)
 
     net.Receive("rdmtJoelBotCAliveDeadUpdate", function()
         JoelBotC.isAliveClient = net.ReadTable()
@@ -214,7 +216,6 @@ function EVENT:End()
     JoelBotC:MessageOverlayDestroy()
 
     -- Remove hooks
-
     hook.Remove("ScoreboardShow", "JoelBotC_BlockScoreboardShow")
     hook.Remove("ScoreboardHide", "JoelBotC_BlockScoreboardHide")
     hook.Remove("PlayerButtonDown", "JoelBotC_EnableMouseInGUI")
@@ -223,6 +224,10 @@ function EVENT:End()
     hook.Remove("RenderScreenspaceEffects", "JoelBOTC_NightEffect")
     hook.Remove("SetupWorldFog", "NightFog")
     hook.Remove("PostDrawSkyBox", "DarkSky")
+
+    hook.Remove("RenderScreenspaceEffects", "RdmtJoelBotC_Night_RenderScreenspaceEffects")
+    hook.Remove("SetupSkyboxFog", "RdmtJoelBotC_Night_SetupSkyboxFog")
+    hook.Remove("SetupWorldFog", "RdmtJoelBotC_Night_SetupWorldFog")
 
     -- Remove timers
     timer.Remove("rdmtJoelBotCMoveBigHand")

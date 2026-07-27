@@ -273,8 +273,8 @@ if SERVER then
         JoelBotC.currentNight = JoelBotC.currentNight + 1
         nightStep = 1
 
-        net.Start("rdmtJoelBotCNightStarts")
-        net.Broadcast()
+        -- net.Start("rdmtJoelBotCNightStarts")
+        -- net.Broadcast()
 
         JoelBotC:GetNightFunctions()
 

@@ -580,10 +580,10 @@ if SERVER then
         -- Create seating order table
         JoelBotC.seatingOrder = table.Copy(JoelBotC.players)
 
-        for i, ply in ipairs(JoelBotC.seatingOrder) do
-            PrintMessage(HUD_PRINTTALK, "Seat " .. i .. ": " .. ply:Nick() .. " - " .. ROLE_STRINGS[ply.botc_role])
-            ply.seatNumber = i
-        end
+        -- for i, ply in ipairs(JoelBotC.seatingOrder) do
+        --     PrintMessage(HUD_PRINTTALK, "Seat " .. i .. ": " .. ply:Nick() .. " - " .. ROLE_STRINGS[ply.botc_role])
+        --     ply.seatNumber = i
+        -- end
 
         net.Start("rdmtJoelBotCSeatingOrder")
             net.WriteTable(JoelBotC.seatingOrder)
@@ -597,7 +597,7 @@ if SERVER then
         for _, ply in ipairs(JoelBotC.players) do
             -- Give notebook and admin book
             GiveBookQuill(ply)
-            -- ply:Give("weapon_ttt_joelbotc_adminbook")
+            ply:Give("weapon_ttt_joelbotc_adminbook")
 
             -- Set up this player's info book segment store (role + ability + divider)
             JoelBotC:InitInfoBook(ply)
