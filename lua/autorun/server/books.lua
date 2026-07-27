@@ -31,14 +31,14 @@ local function SanitisePages(pages)
                 segs[#segs + 1] = s
             end
 
-            out[#out + 1] = { Segments = segs }
+            out[#out + 1] = {Segments = segs}
         else
-            out[#out + 1] = { Text = tostring((page and page.Text) or "") }
+            out[#out + 1] = {Text = tostring((page and page.Text) or "")}
         end
     end
 
     if #out == 0 then
-        out[1] = { Text = "" }
+        out[1] = {Text = ""}
     end
 
     return out
@@ -79,7 +79,7 @@ function GiveBookQuill(ply)
         return nil
     end
 
-    wep.BookTexts        = { { Text = "" } }
+    wep.BookTexts        = {{Text = ""}}
     wep.BookPage         = 1
     wep.BookPageCapacity = 1
 
@@ -211,9 +211,9 @@ function JoelBotC:InitInfoBook(ply)
     local roleAbility = JoelBotC.roleAbilities[roleID] or "no ability description available"
 
     ply.infoBookSegments = {
-        { text = "Role:\n",    bold = true, underline = true },
-        { text = roleName .. " - " .. roleAbility .. "\n" },
-        { text = "------------------------\n", color = Color(100, 100, 100) },
+        {text = "Role:\n",    bold = true, underline = true},
+        {text = roleName .. " - " .. roleAbility .. "\n"},
+        {text = "------------------------\n", color = Color(100, 100, 100)},
     }
 end
 
@@ -232,6 +232,64 @@ function JoelBotC:AppendInfoBook(ply, sectionTitle, infoLine)
     })
 
     JoelBotC:RebuildInfoBook(ply)
+end
+
+local function BuildBookScript()
+    local scriptSegments = {
+        {text = "Script:", bold = true, align = "center"},
+        {text = "\n"},
+    }
+
+    local townsfolk = {}
+    local outsiders = {}
+    local minions   = {}
+    local demons    = {}
+
+    for _, role in ipairs(JoelBotC.enabledTownsfolk) do
+        local roleName = ROLE_STRINGS[role]
+        table.insert(townsfolk, roleName)
+    end
+
+    for _, role in ipairs(JoelBotC.enabledOutsiders) do
+        local roleName = ROLE_STRINGS[role]
+        table.insert(outsiders, roleName)
+    end
+
+    for _, role in ipairs(JoelBotC.enabledMinions) do
+        local roleName = ROLE_STRINGS[role]
+        table.insert(minions, roleName)
+    end
+
+    for _, role in ipairs(JoelBotC.enabledDemons) do
+        local roleName = ROLE_STRINGS[role]
+        table.insert(demons, roleName)
+    end
+
+    -- Townsfolk
+    table.insert(scriptSegments, {text = "Townsfolk\n", underline = true, align = "center", color = Color(31, 101, 255, 255)})
+    for _, roleName in ipairs(townsfolk) do
+        table.insert(scriptSegments, {text = roleName .. "\n", color = Color(31, 101, 255, 255)})
+    end
+
+    -- Outsiders
+    table.insert(scriptSegments, {text = "Outsiders\n", underline = true, align = "center", color = Color(70, 213, 255, 255)})
+    for _, roleName in ipairs(outsiders) do
+        table.insert(scriptSegments, {text = roleName .. "\n", color = Color(70, 213, 255, 255)})
+    end
+
+    -- Minions
+    table.insert(scriptSegments, {text = "Minions\n", underline = true, align = "center", color = Color(255, 105, 0, 255)})
+    for _, roleName in ipairs(minions) do
+        table.insert(scriptSegments, {text = roleName .. "\n", color = Color(255, 105, 0, 255)})
+    end
+
+    -- Demons
+    table.insert(scriptSegments, {text = "Demons\n", underline = true, align = "center", color = Color(206, 1, 0, 255)})
+    for _, roleName in ipairs(demons) do
+        table.insert(scriptSegments, {text = roleName .. "\n"})
+    end
+
+    return scriptSegments
 end
 
 function JoelBotC:RebuildInfoBook(ply)
@@ -257,43 +315,50 @@ function JoelBotC:RebuildInfoBook(ply)
         })
     end
 
+    local scriptSegments = BuildBookScript()
+
     local bookData = {
         title  = "Your Information",
         author = "The Storyteller",
         pages  = {
             -- Page 1: Contents
-            { Segments = {
-                { text = "\n\nContents:", bold = true, align = "center" },
-                { text = "\n\n" },
-                { text = "Page 2: ", bold = true },
-                { text = "Wtf is going on?" },
-                { text = "\n" },
-                { text = "Page 3: ", bold = true },
-                { text = "Seating order" },
-                { text = "\n" },
-                { text = "Page 4: ", bold = true },
-                { text = "Your info" },
+            {Segments = {
+                {text = "\n\nContents:", bold = true, align = "center"},
+                {text = "\n\n"},
+                {text = "Page 2: ", bold = true},
+                {text = "Wtf is going on?"},
+                {text = "\n"},
+                {text = "Page 3: ", bold = true},
+                {text = "Seating order"},
+                {text = "\n"},
+                {text = "Page 4: ", bold = true},
+                {text = "Your info"},
+                {text = "\n"},
+                {text = "Page 5: ", bold = true},
+                {text = "The script"},
             }},
             -- Page 2: Explanation
-            { Segments = {
-                { text = "Wtf is going on?", bold = true, underline = true, align = "center" },
-                { text = "\n" },
-                { text = "Hello, and welcome to " },
-                { text = "Joel4848's ", bold = true },
-                { text = "BotC in, uh, TTT!" },
-                { text = "\n\n" },
-                { text = "Your role is " },
-                { text = ROLE_STRINGS_EXT[ply:GetRole()] .. "! " },
-                { text = "You'll find your ability in the " },
-                { text = "\"Your info\" ", bold = true },
-                { text = "section." },
-                { text = "\n\n" },
-                { text = "This is a fully-automated, barely-tested, completely non-guaranteed implementation of BotC. If you enjoyed my other randomats so far then... that's a surprise. Good luck!" },
+            {Segments = {
+                {text = "Wtf is going on?", bold = true, underline = true, align = "center"},
+                {text = "\n"},
+                {text = "Hello, and welcome to "},
+                {text = "Joel4848's ", bold = true},
+                {text = "BotC in, uh, TTT!"},
+                {text = "\n\n"},
+                {text = "Your role is "},
+                {text = ROLE_STRINGS_EXT[ply:GetRole()] .. "! "},
+                {text = "You'll find your ability in the "},
+                {text = "\"Your info\" ", bold = true},
+                {text = "section."},
+                {text = "\n\n"},
+                {text = "This is a fully-automated, barely-tested, completely non-guaranteed implementation of BotC. If you enjoyed my other randomats so far then... that's a surprise. Good luck!"},
             }},
             -- Page 3: Seating
-            { Segments = seatingSegments },
+            {Segments = seatingSegments},
             -- Page 4: 'Your info'
-            { Segments = ply.infoBookSegments },
+            {Segments = ply.infoBookSegments},
+            -- Page 5: Script
+            {Segments = scriptSegments}
         },
     }
 

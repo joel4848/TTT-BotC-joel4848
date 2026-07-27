@@ -60,7 +60,7 @@ if SERVER then
     JoelBotC.enabledTownsfolk = {}
     JoelBotC.enabledOutsiders = {}
     JoelBotC.enabledMinions = {}
-    local enabledDemons = {}
+    JoelBotC.enabledDemons = {}
     JoelBotC.townsfolkPlayers = {}
     JoelBotC.outsiderPlayers = {}
     JoelBotC.goodPlayers = {}
@@ -123,7 +123,7 @@ if SERVER then
         JoelBotC.enabledTownsfolk = {}
         JoelBotC.enabledOutsiders = {}
         JoelBotC.enabledMinions = {}
-        enabledDemons = {}
+        JoelBotC.enabledDemons = {}
         if stewardEnabled then
             table.insert(JoelBotC.enabledTownsfolk, ROLE_STEWARDJBC)
         end
@@ -218,13 +218,13 @@ if SERVER then
         end
         if pukkaEnabled then
             -- The Pukka is currently broken
-            -- table.insert(enabledDemons, ROLE_PUKKAJBC)
+            -- table.insert(JoelBotC.enabledDemons, ROLE_PUKKAJBC)
         end
         if impEnabled then
-            table.insert(enabledDemons, ROLE_IMPJBC)
+            table.insert(JoelBotC.enabledDemons, ROLE_IMPJBC)
         end
         if poEnabled then
-            table.insert(enabledDemons, ROLE_POJBC)
+            table.insert(JoelBotC.enabledDemons, ROLE_POJBC)
         end
     end
 
@@ -345,7 +345,7 @@ if SERVER then
         local townsfolkPool = table.Copy(JoelBotC.enabledTownsfolk)
         local outsiderPool = table.Copy(JoelBotC.enabledOutsiders)
         local minionPool = table.Copy(JoelBotC.enabledMinions)
-        local demonPool = table.Copy(enabledDemons)
+        local demonPool = table.Copy(JoelBotC.enabledDemons)
 
         table.Shuffle(townsfolkPool)
         table.Shuffle(outsiderPool)
