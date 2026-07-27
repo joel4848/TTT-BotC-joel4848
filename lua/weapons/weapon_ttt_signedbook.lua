@@ -67,7 +67,7 @@ if CLIENT then
         additive = false,
         antialias = true
     })
-    
+
     resource.AddFile("resource/fonts/Minecraft.ttf")
     surface.CreateFont("Minecraft30", {
         font = "Minecraft",
@@ -153,7 +153,7 @@ if CLIENT then
             }
         end
 
-        local lines      = {}
+        local lines = {}
         local lineHeight = 18
 
         local currentLine = { tokens = {}, width = 0, align = "left" }
@@ -320,11 +320,11 @@ if CLIENT then
     end
 
     function SWEP:PrimaryAttack()
-        self.Weapon:SetNextPrimaryFire(CurTime() + 0.5)
+        self:SetNextPrimaryFire(CurTime() + 0.5)
     end
 
     function SWEP:SecondaryAttack()
-        self.Weapon:SetNextSecondaryFire(CurTime() + 0.3)
+        self:SetNextSecondaryFire(CurTime() + 0.3)
         if CLIENT and not self.BookOpen then
             self:OpenBook()
         end
@@ -471,14 +471,14 @@ if CLIENT then
         RenderPage()
 
 
-        
+
         -- PageUp
         local PageUp = vgui.Create("DImageButton", Frame)
         PageUp:SetSize(PBW, PBH)
         PageUp:SetPos(BX + BW * 0.7, PBY)
         PageUp:SetImage("materials/pageup.png")
         PageUp:SetVisible(false)
-        
+
         -- PageDown
         local PageDown = vgui.Create("DImageButton", Frame)
         PageDown:SetSize(PBW, PBH)
@@ -588,18 +588,18 @@ if CLIENT then
 
         self:SetModelScale(0.5, 0)
 
-        if not IsValid(self.Owner) then
+        if not IsValid(self:GetOwner()) then
             self:DrawModel()
             return
         end
 
-        local hand = self.Owner:LookupBone("ValveBiped.Bip01_R_Hand")
+        local hand = self:GetOwner():LookupBone("ValveBiped.Bip01_R_Hand")
         if not hand then
             self:DrawModel()
             return
         end
 
-        local pos, ang = self.Owner:GetBonePosition(hand)
+        local pos, ang = self:GetOwner():GetBonePosition(hand)
         if not pos then
             self:DrawModel()
             return
@@ -610,7 +610,7 @@ if CLIENT then
 
         -- Rotate to match natural holding angle
         ang:RotateAroundAxis(ang:Up(), 0)
-        ang:RotateAroundAxis(ang:Right(), 0) 
+        ang:RotateAroundAxis(ang:Right(), 0)
         ang:RotateAroundAxis(ang:Forward(), 0)
 
         self:SetPos(pos)

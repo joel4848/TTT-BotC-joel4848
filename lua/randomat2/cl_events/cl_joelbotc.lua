@@ -35,7 +35,7 @@ function EVENT:Begin()
     end)
 
     self:AddHook("TTTScoreboardPlayerRole", function(ply, client, color, roleText)
-        return false, false 
+        return false, false
     end)
 
     hook.Add("ScoreboardShow", "JoelBotC_BlockScoreboardShow", function()
@@ -248,7 +248,7 @@ function EVENT:End()
             end
         end
     end
-    
+
 
 
     JoelBotC.eventActiveClient = nil
