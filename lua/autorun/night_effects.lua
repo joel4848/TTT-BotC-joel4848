@@ -8,24 +8,16 @@ if CLIENT then
     local nightIntensity = 0
 
     local function Night_SetupWorldFog()
-        -- LocalPlayer():PrintMessage(HUD_PRINTTALK, "isNight = " .. tostring(isNight))
-        -- LocalPlayer():PrintMessage(HUD_PRINTTALK, "nightIntensity = " .. nightIntensity)
         -- if not IsPlayer(client) then
         --     client = LocalPlayer()
         -- end
 
         if not isNight and nightIntensity == 0 then return end
 
-        if isNight then
-            print("isNight = " .. tostring(isNight))
-            print("nightIntensity = " .. nightIntensity)
-        end
-
         if isNight and nightIntensity < 1 then
             nightIntensity = nightIntensity + 0.01
             if nightIntensity > 1 then nightIntensity = 1 end
         elseif not isNight and nightIntensity > 0 then
-            print("Reducing night intensity")
             nightIntensity = nightIntensity - 0.01
             if nightIntensity < 0 then nightIntensity = 0 end
         end
@@ -111,14 +103,11 @@ if CLIENT then
     end
 
     net.Receive("rdmtJoelBotCNightStarts", function()
-        print("Received night starts")
         isNight = true
     end)
 
     net.Receive("rdmtJoelBotCNightEnds", function()
-        print("Received night end")
         isNight = false
-        print("isNight = " .. tostring(isNight))
     end)
 
     hook.Add("RdmtJoelBotC_Client_EventStarted", "RdmtJoelBotC_AddNightEffectHooks", function()

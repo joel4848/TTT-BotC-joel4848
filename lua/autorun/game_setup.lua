@@ -242,6 +242,8 @@ if SERVER then
                 ply:SetFOV(0, 0.2)
                 ply:Give("weapon_ttt_unarmed")
                 ply:Give("weapon_zm_carry")
+                ply:Give("weapon_zm_improvised")
+                ply:SelectWeapon("weapon_zm_improvised")
 
                 -- Reset various things
                 ply.botc_role = nil
@@ -597,7 +599,7 @@ if SERVER then
         for _, ply in ipairs(JoelBotC.players) do
             -- Give notebook and admin book
             GiveBookQuill(ply)
-            ply:Give("weapon_ttt_joelbotc_adminbook")
+            -- ply:Give("weapon_ttt_joelbotc_adminbook")
 
             -- Set up this player's info book segment store (role + ability + divider)
             JoelBotC:InitInfoBook(ply)

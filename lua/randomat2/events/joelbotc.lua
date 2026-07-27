@@ -25,15 +25,19 @@ JoelBotC.BotCEventRunning = JoelBotC.BotCEventRunning or nil
 local originalDetectiveCvar = nil
 
 function EVENT:Begin()
-
     JoelBotC.BotCEventRunning = true
+
+    self:AddHook("EntityTakeDamage", function(target, _)
+        if target:IsPlayer() then
+            return true
+        end
+    end )
 
     self:AddHook("PlayerCanPickupWeapon", function(ply, wep)
         if not IsValid(wep) then return false end
 
         local class = WEPS.GetClass(wep)
 
-        -- Allow freeze guns and homerun bats
         if class == "weapon_zm_improvised" or
         class == "weapon_ttt_unarmed" or
         class == "weapon_zm_carry" or
