@@ -128,19 +128,14 @@ if CLIENT then
     end
 
     net.Receive("ttt_books_signedbook_sync", function()
-        print("Received ttt_books_signedbook_sync")
         local ent = net.ReadEntity()
         local raw = net.ReadString()
-        print("ent = " .. tostring(ent))
 
-        pendingSignedBookData[entIndex] = raw
+        pendingSignedBookData[ent] = raw
 
-        print("IsValid(ent) = " .. tostring(IsValid(ent)))
-        print("ent:GetClass() = " .. ent:GetClass())
         if IsValid(ent) and ent:GetClass() == "weapon_ttt_signedbook" and ent.ApplyRawBookData then
-            print("APPLIED RAW BOOK DATA")
             ent:ApplyRawBookData(raw)
-            pendingSignedBookData[entIndex] = nil
+            pendingSignedBookData[ent] = nil
         end
     end)
 
@@ -260,6 +255,7 @@ if CLIENT then
         self.BookTitle  = tostring(decoded.title or "Signed Book")
         self.BookAuthor = tostring(decoded.author or "")
 
+        PrintTable(decoded.pages)
         if istable(decoded.pages) and #decoded.pages > 0 then
             self.BookTexts = decoded.pages
         else
@@ -293,9 +289,9 @@ if CLIENT then
             return
         end
 
-        local raw = pendingSignedBookData[self:EntIndex()]
+        local raw = pendingSignedBookData[self]
         if raw then
-            pendingSignedBookData[self:EntIndex()] = nil
+            pendingSignedBookData[self] = nil
             self:ApplyRawBookData(raw)
         end
     end
@@ -438,7 +434,7 @@ if CLIENT then
             content.Paint = function(_, w, h)
                 local y = 4
 
-                for _, line in ipairs(self._Layout or {}) do
+                for _, line in ipairs(content._Layout or {}) do
                     local x = 4
 
                     if line.align == "center" then
@@ -453,13 +449,13 @@ if CLIENT then
 
                         if token.drawUnderline then
                             surface.SetDrawColor(token.color)
-                            surface.DrawRect(x - 4, y + (self._LineHeight or 18) - 5, token.width + 4, 1)
+                            surface.DrawRect(x - 4, y + (content._LineHeight or 18) - 5, token.width + 4, 1)
                         end
 
                         x = x + token.width
                     end
 
-                    y = y + (self._LineHeight or 18)
+                    y = y + (content._LineHeight or 18)
                 end
 
         end

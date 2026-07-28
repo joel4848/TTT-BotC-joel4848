@@ -110,7 +110,7 @@ function GiveSignedBook(ply, bookData)
         pages  = pages,
     }
 
-    timer.Simple(0, function()
+    timer.Simple(0.1, function()
         if IsValid(ply) and IsValid(wep) then
             SendSignedBookData(ply, wep, payload)
         end
@@ -126,8 +126,6 @@ function GiveSignedBook(ply, bookData)
 end
 
 function SendSignedBookUpdate(ply, newBookData)
-    -- print("Player = " .. ply:Nick())
-    -- PrintTable(newBookData)
     if not IsValid(ply) then return end
 
     local wep = ply:GetWeapon("weapon_ttt_signedbook")
@@ -149,12 +147,13 @@ function SendSignedBookUpdate(ply, newBookData)
     wep.BookTexts        = payload.pages
     wep.BookPageCapacity = #payload.pages
 
-    SendSignedBookData(ply, wep, payload)
+    timer.Simple(0.1, function()
+        SendSignedBookData(ply, wep, payload)
+    end)
 end
 
 -- Legacy
 function UpdateSignedBook(ply, newBookData)
-    print("Running UpdateSignedBook(ply, newBookData)")
     if not IsValid(ply) then return nil end
 
     local existing = ply:GetWeapon("weapon_ttt_signedbook")
