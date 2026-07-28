@@ -143,13 +143,9 @@ if SERVER then
 
     -- Receive when a player presses a button and which button it was that they pressed
     net.Receive("rdmtJoelBotCNominationGUIChoice", function(_, ply)
-        print("Received nomination")
         if not JoelBotC.nominationsOpen then return end
-        print("Nom step 2")
         local nominatorSeat = ply.seatNumber
-        print("nominatorSeat = " .. nominatorSeat)
         if not nominatorSeat then return end
-        print("Ran JoelBotC:PlayerNominated")
         JoelBotC:PlayerNominated(nominatorSeat, net.ReadInt(6))
     end)
 

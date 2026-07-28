@@ -2,8 +2,6 @@ if not SERVER then return end
 
 util.AddNetworkString("ttt_books_signedbook_sync")
 
-local BOOK_SYNC_NET = "ttt_books_signedbook_sync"
-
 local function SanitisePages(pages)
     local out = {}
 
@@ -58,8 +56,8 @@ local function SendSignedBookData(ply, wep, payload)
         return
     end
 
-    net.Start(BOOK_SYNC_NET)
-        net.WriteUInt(wep:EntIndex(), 16)
+    net.Start("ttt_books_signedbook_sync")
+        net.WriteEntity(wep)
         net.WriteString(json)
     net.Send(ply)
 end
@@ -128,6 +126,8 @@ function GiveSignedBook(ply, bookData)
 end
 
 function SendSignedBookUpdate(ply, newBookData)
+    -- print("Player = " .. ply:Nick())
+    -- PrintTable(newBookData)
     if not IsValid(ply) then return end
 
     local wep = ply:GetWeapon("weapon_ttt_signedbook")
@@ -154,6 +154,7 @@ end
 
 -- Legacy
 function UpdateSignedBook(ply, newBookData)
+    print("Running UpdateSignedBook(ply, newBookData)")
     if not IsValid(ply) then return nil end
 
     local existing = ply:GetWeapon("weapon_ttt_signedbook")

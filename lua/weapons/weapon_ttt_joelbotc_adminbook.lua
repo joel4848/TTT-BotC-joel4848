@@ -43,8 +43,6 @@ SWEP.Secondary.Ammo        = "none"
 -- SWEP.BookAuthor       = ""
 local BookOpen         = false
 
--- local BOOK_SYNC_NET = "ttt_books_signedbook_sync"
-
 if SERVER then
     util.AddNetworkString("TTT_adminBookChoice")
 

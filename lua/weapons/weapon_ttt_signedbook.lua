@@ -46,8 +46,6 @@ SWEP.BookTitle        = "Signed Book"
 SWEP.BookAuthor       = ""
 SWEP.BookOpen         = false
 
-local BOOK_SYNC_NET = "ttt_books_signedbook_sync"
-
 if CLIENT then
 
     resource.AddFile("resource/fonts/Minecraft.ttf")
@@ -129,14 +127,18 @@ if CLIENT then
         return name
     end
 
-    net.Receive(BOOK_SYNC_NET, function()
-        local entIndex = net.ReadUInt(16)
+    net.Receive("ttt_books_signedbook_sync", function()
+        print("Received ttt_books_signedbook_sync")
+        local ent = net.ReadEntity()
         local raw = net.ReadString()
+        print("ent = " .. tostring(ent))
 
         pendingSignedBookData[entIndex] = raw
 
-        local ent = Entity(entIndex)
+        print("IsValid(ent) = " .. tostring(IsValid(ent)))
+        print("ent:GetClass() = " .. ent:GetClass())
         if IsValid(ent) and ent:GetClass() == "weapon_ttt_signedbook" and ent.ApplyRawBookData then
+            print("APPLIED RAW BOOK DATA")
             ent:ApplyRawBookData(raw)
             pendingSignedBookData[entIndex] = nil
         end

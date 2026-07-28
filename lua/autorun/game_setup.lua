@@ -557,7 +557,7 @@ if SERVER then
         JoelBotC.seatingOrder = table.Copy(JoelBotC.players)
 
         for i, ply in ipairs(JoelBotC.seatingOrder) do
-            PrintMessage(HUD_PRINTTALK, "Seat " .. i .. ": " .. ply:Nick() .. " - " .. ROLE_STRINGS[ply.botc_role])
+            -- PrintMessage(HUD_PRINTTALK, "Seat " .. i .. ": " .. ply:Nick() .. " - " .. ROLE_STRINGS[ply.botc_role])
             ply.seatNumber = i
         end
 
