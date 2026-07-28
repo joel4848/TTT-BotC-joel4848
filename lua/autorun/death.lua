@@ -435,9 +435,9 @@ if SERVER then
 
             -- Bonk the ragdoll into the ground like it got squished
             for i = 0, rag:GetPhysicsObjectCount() - 1 do
-                local phys = rag:GetPhysicsObjectNum(i)
-                if IsValid(phys) then
-                    phys:ApplyForceCenter(Vector(0, 0, -50000))
+                local ragPhys = rag:GetPhysicsObjectNum(i)
+                if IsValid(ragPhys) then
+                    ragPhys:ApplyForceCenter(Vector(0, 0, -50000))
                 end
             end
 

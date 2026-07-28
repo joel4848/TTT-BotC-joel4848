@@ -12,10 +12,10 @@ local prosecutionTimeCvar = CreateConVar("randomat_joelbotc_prosecution_time", 3
 local defenceTimeCvar = CreateConVar("randomat_joelbotc_defence_time", 30, FCVAR_REPLICATED, "Defence speech time (seconds)", 5, 60)
 local voteIntervalCvar = CreateConVar("randomat_joelbotc_vote_interval", 1.5, FCVAR_REPLICATED, "Time between each vote being locked in (seconds)", 0.1, 5)
 
-local nominationTime = nominationTimeCvar:GetInt()
-local prosecutionTime = prosecutionTimeCvar:GetInt()
-local defenceTime = defenceTimeCvar:GetInt()
-local voteInterval = voteIntervalCvar:GetFloat()
+-- local nominationTime = nominationTimeCvar:GetInt()
+-- local prosecutionTime = prosecutionTimeCvar:GetInt()
+-- local defenceTime = defenceTimeCvar:GetInt()
+-- local voteInterval = voteIntervalCvar:GetFloat()
 
 -----------------------------------------------------------------------------------------
 ---------------------------------------SERVER--------------------------------------------
@@ -143,9 +143,13 @@ if SERVER then
 
     -- Receive when a player presses a button and which button it was that they pressed
     net.Receive("rdmtJoelBotCNominationGUIChoice", function(_, ply)
+        print("Received nomination")
         if not JoelBotC.nominationsOpen then return end
+        print("Nom step 2")
         local nominatorSeat = ply.seatNumber
+        print("nominatorSeat = " .. nominatorSeat)
         if not nominatorSeat then return end
+        print("Ran JoelBotC:PlayerNominated")
         JoelBotC:PlayerNominated(nominatorSeat, net.ReadInt(6))
     end)
 
@@ -434,7 +438,7 @@ if SERVER then
         JoelBotC:UpdateOGActive()
         JoelBotC:DetermineGhostVotes()
 
-        local count = #JoelBotC.seatingOrder
+        -- local count = #JoelBotC.seatingOrder
         local threshold = math.ceil(JoelBotC:AlivePlayerCount() / 2)
         local nomineeNick = JoelBotC.seatingOrder[nomineeSeat]:Nick()
         local vStr = votes .. " vote" .. (votes == 1 and "" or "s")
@@ -561,14 +565,13 @@ end
 -----------------------------------------------------------------------------------------
 
 if CLIENT then
-
     JoelBotC.organgrinderActive = JoelBotC.organgrinderActive or false
     JoelBotC.ghostVotesClient = JoelBotC.ghostVotesClient or {}
 
     local nominationTime = nominationTimeCvar:GetInt()
     local prosecutionTime = prosecutionTimeCvar:GetInt()
     local defenceTime = defenceTimeCvar:GetInt()
-    local voteInterval = voteIntervalCvar:GetFloat()
+    -- local voteInterval = voteIntervalCvar:GetFloat()
 
     -------------------------------------------------------------------------------------
     -- Network helpey bois
@@ -639,11 +642,11 @@ if CLIENT then
         end
     end
 
-    local function AnimateHand(start, target, startTime, period)
+    local function AnimateHand(startPos, targetPos, startTime, period)
         local fraction = math.Clamp((CurTime() - startTime) / period, 0, 1)
-        local diff = (target - start + 180) % 360 - 180
+        local diff = (targetPos - startPos + 180) % 360 - 180
         if diff <= -180 then diff = 180 end
-        return start + (diff * fraction)
+        return startPos + (diff * fraction)
     end
 
     -------------------------------------------------------------------------------------
@@ -664,7 +667,7 @@ if CLIENT then
 
     -- Bottom message (Who (if anyone) is on the block, and votes required)
     local bottomMessage = ""
-    local bottomExpiry  = 0
+    -- local bottomExpiry  = 0
 
     local topBtnTop = 0
     local lowestBtnBottom = 0
@@ -739,23 +742,23 @@ if CLIENT then
     end
 
     function JoelBotC:UpdateGhostVoteIcons()
-        for i, ghostIcon in ipairs(ghostIcon) do
-            if IsValid(ghostIcon) then
+        for i, icon in ipairs(ghostIcon) do
+            if IsValid(icon) then
                 local ply = JoelBotC.seatingOrderClient[i]
 
-                ghostIcon:SetVisible(false)
+                icon:SetVisible(false)
 
                 if JoelBotC.isAliveClient[ply] then
-                    ghostIcon:SetImage("vgui/ttt/joelbotc/ghost_white_icon.png")
+                    icon:SetImage("vgui/ttt/joelbotc/ghost_white_icon.png")
                 elseif JoelBotC.organgrinderActive then
-                    ghostIcon:SetVisible(true)
-                    ghostIcon:SetImage("vgui/ttt/joelbotc/ghost_hidden_icon.png")
+                    icon:SetVisible(true)
+                    icon:SetImage("vgui/ttt/joelbotc/ghost_hidden_icon.png")
                 elseif ply.hasGhostVote then
-                    ghostIcon:SetVisible(true)
-                    ghostIcon:SetImage("vgui/ttt/joelbotc/ghost_white_icon.png")
+                    icon:SetVisible(true)
+                    icon:SetImage("vgui/ttt/joelbotc/ghost_white_icon.png")
                 elseif not ply.hasGhostVote then
-                    ghostIcon:SetVisible(true)
-                    ghostIcon:SetImage("vgui/ttt/joelbotc/ghost_black_icon.png")
+                    icon:SetVisible(true)
+                    icon:SetImage("vgui/ttt/joelbotc/ghost_black_icon.png")
                 end
             end
         end
@@ -838,9 +841,9 @@ if CLIENT then
             end
 
             seatVoteOn = {}
-            for _, voteIcon in ipairs(voteIcon) do
-                if IsValid(voteIcon) then
-                    voteIcon:SetVisible(false)
+            for _, icon in ipairs(voteIcon) do
+                if IsValid(icon) then
+                    icon:SetVisible(false)
                 end
             end
 
@@ -875,10 +878,10 @@ if CLIENT then
             CreateVoteToggleButton()
 
             if JoelBotC.organgrinderActive then
-                for i, voteIcon in ipairs(voteIcon) do
+                for i, icon in ipairs(voteIcon) do
                     if i ~= LocalPlayer().seatNumber then
-                        voteIcon:SetImage("vgui/ttt/joelbotc/vote_icon_hidden.png")
-                        voteIcon:SetVisible(true)
+                        icon:SetImage("vgui/ttt/joelbotc/vote_icon_hidden.png")
+                        icon:SetVisible(true)
                         hiddenVoteIconsShowing = true
                     end
                 end
@@ -888,10 +891,10 @@ if CLIENT then
             overlayTimer = 0
 
             if hiddenVoteIconsShowing then
-                for i, voteIcon in ipairs(voteIcon) do
+                for i, icon in ipairs(voteIcon) do
                     if i ~= LocalPlayer().seatNumber then
-                        voteIcon:SetVisible(false)
-                        voteIcon:SetImage("vgui/ttt/joelbotc/vote_icon.png")
+                        icon:SetVisible(false)
+                        icon:SetImage("vgui/ttt/joelbotc/vote_icon.png")
                         hiddenVoteIconsShowing = false
                     end
                 end
@@ -980,7 +983,7 @@ if CLIENT then
         lowestBtnBottom = 0
         local buttonWidth = {}
 
-        nomGUI.Paint = function(self, w, h)
+        nomGUI.Paint = function(_, w, h)
             bigCurrentAngle = AnimateHand(bigStartAngle, bigTargetAngle, bigRotStartTime, bigRotPeriod)
             smallCurrentAngle = AnimateHand(smallStartAngle, smallTargetAngle, smallRotStartTime, smallRotPeriod)
 
@@ -1038,7 +1041,7 @@ if CLIENT then
             buttonYCoord[i] = finalY
             buttonWidth[i] = finalWidth
 
-            btn.Paint = function(self, w, h)
+            btn.Paint = function(_, w, h)
                 -- if seatVoteOn[self.seatIndex] then
                 --     surface.SetDrawColor(50, 200, 100)
                 if self.isPressed and overlayPhase == "nominations" then
@@ -1050,10 +1053,12 @@ if CLIENT then
                 surface.DrawRect(0, 0, w, h)
             end
 
-            btn.OnMousePressed = function(self) self.isPressed = true end
-            btn.OnMouseReleased = function(self)
-                self.isPressed = false
-                SendButtonPress(self.seatIndex)
+            btn.OnMousePressed = function(button)
+                button.isPressed = true
+            end
+            btn.OnMouseReleased = function(button)
+                button.isPressed = false
+                SendButtonPress(button.seatIndex)
             end
         end
 
@@ -1104,7 +1109,7 @@ if CLIENT then
         -- Ghost vote icons
         for i = 1, count do
             local ghostIconSize = size * 1.2
-            local ghostIconGap = 25 + 15/count
+            -- local ghostIconGap = 25 + 15/count
 
             -- Corresponding button dimensions
             local bw = buttonWidth[i] or 100
@@ -1121,10 +1126,10 @@ if CLIENT then
             elseif (count % 2) == 0 and i == (count / 2) + 1 then
                 iconX = bx
                 iconY = by + (bh / 2) + (ghostIconSize / 3)
-            elseif i > math.ceil((count / 2)) then
+            elseif i > math.ceil(count / 2) then
                 iconX = bx - (bw / 2) - (ghostIconSize / 3)
                 iconY = by
-            elseif i <= math.ceil((count / 2)) then
+            elseif i <= math.ceil(count / 2) then
                 iconX = bx + (bw / 2) + (ghostIconSize / 3)
                 iconY = by
             end
@@ -1145,7 +1150,7 @@ if CLIENT then
         overlay:SetMouseInputEnabled(false)
         overlay:SetKeyboardInputEnabled(false)
 
-        overlay.Paint = function(self, w, h)
+        overlay.Paint = function(_, w, h)
 
             -- Top message
             local lines = GetOverlayLines()

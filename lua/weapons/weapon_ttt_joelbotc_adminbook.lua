@@ -46,7 +46,6 @@ local BookOpen         = false
 -- local BOOK_SYNC_NET = "ttt_books_signedbook_sync"
 
 if SERVER then
-
     util.AddNetworkString("TTT_adminBookChoice")
 
     net.Receive("TTT_adminBookChoice", function(len, ply)
@@ -208,11 +207,11 @@ if CLIENT then
     end
 
     function SWEP:PrimaryAttack()
-        self.Weapon:SetNextPrimaryFire(CurTime() + 0.5)
+        self:SetNextPrimaryFire(CurTime() + 0.5)
     end
 
     function SWEP:SecondaryAttack()
-        self.Weapon:SetNextSecondaryFire(CurTime() + 0.3)
+        self:SetNextSecondaryFire(CurTime() + 0.3)
         if CLIENT and not BookOpen then
             self:OpenBook()
         elseif CLIENT and BookOpen then
@@ -220,11 +219,11 @@ if CLIENT then
         end
     end
 
-    local function sendButton(button)
-        net.Start("TTT_adminBookChoice")
-            net.WriteInt(button, 8)
-        net.SendToServer()
-    end
+    -- local function sendButton(button)
+    --     net.Start("TTT_adminBookChoice")
+    --         net.WriteInt(button, 8)
+    --     net.SendToServer()
+    -- end
 
     function SWEP:OpenBook()
         if BookOpen then return end
@@ -233,9 +232,9 @@ if CLIENT then
 
         gui.EnableScreenClicker(true)
 
-        local swep = self
+        -- local swep = self
 
-        local client = LocalPlayer()
+        -- local client = LocalPlayer()
         local scrW, scrH = ScrW(), ScrH()
         local height = 300
         local width = 600
@@ -252,7 +251,7 @@ if CLIENT then
         AdminBookFrame:SetDeleteOnClose(true)
 
         -- Have to draw something apparently but then make it alpha 0
-        AdminBookFrame.Paint = function(self,w,h)
+        AdminBookFrame.Paint = function(_,w,h)
             draw.RoundedBox(0,4,4,w-8,h-8,Color(0, 0, 0))
         end
 
@@ -274,11 +273,9 @@ if CLIENT then
 
                 buttons[id] = btn
 
-                btn.OnDepressed = function(self)
-                    print("Pressed button " .. tostring(id))
+                btn.OnDepressed = function(button)
                     net.Start("TTT_adminBookChoice")
                         net.WriteInt(id, 8)
-                        print("Net sent button press - " .. tostring(id))
                     net.SendToServer()
 
                     -- if IsValid(AdminBookFrame) then
@@ -327,18 +324,18 @@ if CLIENT then
 
         self:SetModelScale(0.5, 0)
 
-        if not IsValid(self.Owner) then
+        if not IsValid(self:GetOwner()) then
             self:DrawModel()
             return
         end
 
-        local hand = self.Owner:LookupBone("ValveBiped.Bip01_R_Hand")
+        local hand = self:GetOwner():LookupBone("ValveBiped.Bip01_R_Hand")
         if not hand then
             self:DrawModel()
             return
         end
 
-        local pos, ang = self.Owner:GetBonePosition(hand)
+        local pos, ang = self:GetOwner():GetBonePosition(hand)
         if not pos then
             self:DrawModel()
             return

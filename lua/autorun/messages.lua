@@ -67,7 +67,7 @@ if CLIENT then
         msgOverlay:SetKeyboardInputEnabled(false)
         msgOverlay:SetPaintBackgroundEnabled(false)
 
-        msgOverlay.Paint = function(self, w, h)
+        msgOverlay.Paint = function(_, w, h)
             surface.SetDrawColor(255, 255, 255, 255)
             draw.NoTexture()
         end
@@ -83,7 +83,7 @@ if CLIENT then
             self:MoveToFront()
         end
 
-        middle.Paint = function(self, w, h)
+        middle.Paint = function(_, w, h)
             -- Middle message
             if middleMessage ~= "" and CurTime() < middleExpiry then
                 draw.SimpleTextOutlined(middleMessage, "Minecraft40", ScrW() / 2, ScrH() / 2, Color(255, 170, 0, 255), TEXT_ALIGN_CENTER, TEXT_ALIGN_CENTER, 1, Color(0, 0, 0, 200))

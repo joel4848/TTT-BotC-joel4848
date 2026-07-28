@@ -77,14 +77,14 @@ end
 --  Primary fire (do nothing)
 -----------------------------------------------------
 function SWEP:PrimaryAttack()
-    self.Weapon:SetNextPrimaryFire(CurTime() + 0.5)
+    self:SetNextPrimaryFire(CurTime() + 0.5)
 end
 
 -----------------------------------------------------
 --  Secondary fire (open book)
 -----------------------------------------------------
 function SWEP:SecondaryAttack()
-    self.Weapon:SetNextSecondaryFire(CurTime() + 0.3)
+    self:SetNextSecondaryFire(CurTime() + 0.3)
     if CLIENT then
         if not self.BookOpen then
             self:OpenBook()
@@ -333,18 +333,18 @@ if CLIENT then
 
         self:SetModelScale(0.5, 0)
 
-        if not IsValid(self.Owner) then
+        if not IsValid(self:GetOwner()) then
             self:DrawModel()
             return
         end
 
-        local hand = self.Owner:LookupBone("ValveBiped.Bip01_R_Hand")
+        local hand = self:GetOwner():LookupBone("ValveBiped.Bip01_R_Hand")
         if not hand then
             self:DrawModel()
             return
         end
 
-        local pos, ang = self.Owner:GetBonePosition(hand)
+        local pos, ang = self:GetOwner():GetBonePosition(hand)
         if not pos then
             self:DrawModel()
             return

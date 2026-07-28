@@ -161,7 +161,7 @@ if CLIENT then
 
         -- 3. Calculate Width based on Text
         surface.SetFont("Minecraft20")
-        local textW, textH = surface.GetTextSize(endDayText)
+        local textW, _ = surface.GetTextSize(endDayText)
         local padding = 20
         local btnW = textW + padding
         local btnH = 40

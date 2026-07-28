@@ -669,8 +669,8 @@ function JoelBotC:SeamstressNight()
 
                             chosenSeat2 = JoelBotC.seatingGUIButtonPressed
 
-                            chosenPlayer1 = JoelBotC.seatingOrder[chosenSeat1]
-                            chosenPlayer2 = JoelBotC.seatingOrder[chosenSeat2]
+                            local chosenPlayer1 = JoelBotC.seatingOrder[chosenSeat1]
+                            local chosenPlayer2 = JoelBotC.seatingOrder[chosenSeat2]
 
                             local sameTeam = (JoelBotC:RegistersEvil(chosenPlayer1) == JoelBotC:RegistersEvil(chosenPlayer2))
                             if JoelBotC:IsDroisoned(ply) then sameTeam = not sameTeam end
@@ -773,14 +773,17 @@ end
 
 
 -- empath
+local empathInfo
+local deadNeighbours
+
 function JoelBotC:EmpathNight()
     for _, ply in ipairs(JoelBotC.players) do
         if ply:IsEmpath() and not ply.BotCDead then
             local previousEmpathInfo = empathInfo or nil
-            local empathInfo = 0 
+            empathInfo = 0
             local seatCount = #JoelBotC.seatingOrder
             local previousDeadNeighbours = deadNeighbours or nil
-            local deadNeighbours = 0
+            deadNeighbours = 0
 
             -- Find the Empath's seat
             local seatIndex = nil
@@ -1188,7 +1191,7 @@ end
 function JoelBotC:SweetheartDeath(sweetheart)
     local sweetheartPoisonPool = {}
     local sweetheartPoisonedPlayer = nil
-    
+
     if math.random(0, 4) == 4 then
         sweetheartPoisonPool = table.Copy(JoelBotC.outsiderPlayers)
     else
@@ -1214,12 +1217,12 @@ end
 -- poisoner
 function JoelBotC:PoisonerNight()
     local didPoisonerStuff = false
-    local poisonerExists = nil
+    -- local poisonerExists = nil
 
     for _, ply in ipairs(JoelBotC.players) do
         if ply:IsRole(ROLE_POISONERJBC) and not ply.BotCDead then
             didPoisonerStuff = true
-            poisonerExists = true
+            -- poisonerExists = true
 
             JoelBotC:SendSeatingGUICreate(ply)
 
@@ -1330,11 +1333,15 @@ end
 net.Receive("rdmtJoelBotCOrganGrinderGUI", function(_, ply)
     local response = net.ReadBool()
 
-    for _, ply in ipairs(JoelBotC.players) do
-        if ply:IsOrganGrinder() then
-            ply.organgrinderDrunk = response
-        end
+    if ply:IsOrganGrinder() then
+        ply.organgrinderDrunk = response
     end
+
+    -- for _, ply in ipairs(JoelBotC.players) do
+    --     if ply:IsOrganGrinder() then
+    --         ply.organgrinderDrunk = response
+    --     end
+    -- end
 end)
 
 -- assassin
@@ -1411,12 +1418,12 @@ end
 -- pukka
 function JoelBotC:PukkaNight()
     local didPukkaStuff
-    local pukkaExists = nil
+    -- local pukkaExists = nil
 
     for _, ply in ipairs(JoelBotC.players) do
         if ply:IsPukka() and not ply.BotCDead then
             didPukkaStuff = true
-            pukkaExists = true
+            -- pukkaExists = true
 
             JoelBotC.pukkaPoisonedPlayer = JoelBotC.pukkaPoisonedPlayer or nil
             JoelBotC.pukkaTonightPoisoned = nil

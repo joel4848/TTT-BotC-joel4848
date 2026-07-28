@@ -22,9 +22,18 @@ JoelBotC.recentExecutee = JoelBotC.recentExecutee or nil
 JoelBotC.deadPlayers = JoelBotC.deadPlayers or {}
 JoelBotC.BotCEventRunning = JoelBotC.BotCEventRunning or nil
 
-local originalDetectiveCvar = nil
+-- local originalDetectiveCvar = nil
 
 function EVENT:Begin()
+    JoelBotC.players = {}
+    JoelBotC.isAlive = {}
+    JoelBotC.deadPlayers = {}
+    JoelBotC.rolePool = {}
+    JoelBotC.townsfolkInBag = {}
+    JoelBotC.outsidersInBag = {}
+    JoelBotC.minionsInBag = {}
+    JoelBotC.demonsInBag = {}
+
     JoelBotC.BotCEventRunning = true
 
     self:AddHook("EntityTakeDamage", function(target, _)
@@ -201,10 +210,7 @@ function EVENT:End(isActive)
     timer.Remove("RdmtJoelBotCEndDayStartNominations")
     timer.Remove("rdmtJoelBotCStartDiscussionsAfterMorningDeaths")
 
-    -- Clear active roles table (I think this is the right way to do it?)
-    for role, _ in ipairs(JoelBotC.rolesInGame) do
-        JoelBotC.rolesInGame[role] = false
-    end
+    JoelBotC.rolesInGame = {}
 
     -- Misc stuff
     JoelBotC.rolePool = {}

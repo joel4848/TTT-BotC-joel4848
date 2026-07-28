@@ -194,11 +194,10 @@ if SERVER then
                         "There is a Snitch! The bluffs are " .. bluffStr,
                         5, ply
                     )
-                end
 
-                -- Book entry
-                JoelBotC:AppendInfoBook(ply, "There is a Snitch!",
-                    "The bluffs are " .. bluffStr)
+                    -- Book entry
+                    JoelBotC:AppendInfoBook(ply, "There is a Snitch!", "The bluffs are " .. bluffStr)
+                end
             end
         end
     end
@@ -224,7 +223,7 @@ if SERVER then
                 else
                     local currentRole = JoelBotC.firstNightOrderMaster[nightStep]
                     local roleData = JoelBotC.nightFunctions[currentRole]
-                    local currentFn = JoelBotC.nightFunctions[currentRole] or nil
+                    -- local currentFn = JoelBotC.nightFunctions[currentRole] or nil
 
                     if JoelBotC.rolesInGame[currentRole] then
                         -- print("Running function: " .. roleData.name)
@@ -251,7 +250,7 @@ if SERVER then
                 else
                     local currentRole = JoelBotC.otherNightOrderMaster[nightStep]
                     local roleData = JoelBotC.nightFunctions[currentRole]
-                    local currentFn = JoelBotC.nightFunctions[currentRole] or nil
+                    -- local currentFn = JoelBotC.nightFunctions[currentRole] or nil
 
                     if JoelBotC.rolesInGame[currentRole] then
                         -- print("Running function: " .. roleData.name)

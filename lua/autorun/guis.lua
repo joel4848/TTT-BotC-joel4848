@@ -104,7 +104,7 @@ if CLIENT then
             botcTitleParent:SetDeleteOnClose(true)
 
             -- Have to draw something apparently but then make it alpha 0
-            botcTitleParent.Paint = function(self,w,h)
+            botcTitleParent.Paint = function(_, w, h)
                 draw.RoundedBox(0,4,4,w-8,h-8,Color(0, 0, 0, 0))
             end
 
@@ -134,7 +134,7 @@ if CLIENT then
 
         JoelBotC.clientGUIOpen = true
 
-        local players = JoelBotC.seatingOrderClient
+        -- local players = JoelBotC.seatingOrderClient
         local count = #JoelBotC.seatingOrderClient
         if count <= 0 then return end
 
@@ -178,21 +178,23 @@ if CLIENT then
             btn:SetTextColor(Color(0, 0, 0))
             btn.isPressed = false
 
-            btn.Paint = function(self, w, h)
+            btn.Paint = function(_, w, h)
                 if self.isPressed then
                     surface.SetDrawColor(0, 120, 255)
                 else
-                    local colour = (JoelBotC.seatColours[i]) or Color(200, 200, 200)
+                    local colour = JoelBotC.seatColours[i] or Color(200, 200, 200)
                     surface.SetDrawColor(colour)
                 end
                 surface.DrawRect(0, 0, w, h)
             end
 
-            btn.OnMousePressed = function(self)
-                self.isPressed = true
+            btn.OnMousePressed = function(button)
+                button.isPressed = true
                 SeatingGUIButtonPressed(i)
             end
-            btn.OnMouseReleased = function(self) self.isPressed = false end
+            btn.OnMouseReleased = function(button)
+                button.isPressed = false
+            end
         end
 
         if btntxt then
@@ -224,7 +226,7 @@ if CLIENT then
             centerBtn:SetText("")
             centerBtn.isPressed = false
 
-            centerBtn.Paint = function(self, w, h)
+            centerBtn.Paint = function(_, w, h)
 
                 -- fill
                 surface.SetDrawColor(255, 220, 0)
@@ -248,12 +250,12 @@ if CLIENT then
                 end
             end
 
-            centerBtn.OnMousePressed = function(self)
-                self.isPressed = true
+            centerBtn.OnMousePressed = function(button)
+                button.isPressed = true
             end
-            centerBtn.OnMouseReleased = function(self)
-                if self.isPressed == true then
-                    self.isPressed = false
+            centerBtn.OnMouseReleased = function(button)
+                if button.isPressed == true then
+                    button.isPressed = false
 
                     SeatingGUIButtonPressed(-1)
 
@@ -287,7 +289,7 @@ if CLIENT then
             JoelBotC:OgGUIDestroy()
         end)
 
-        ogGUI.Paint = function(self, w, h)
+        ogGUI.Paint = function(_, w, h)
             surface.SetDrawColor(255, 255, 255, 255)
             draw.NoTexture()
 
@@ -313,7 +315,7 @@ if CLIENT then
         drunk:SetTextColor(Color(0, 0, 0))
         drunk.isPressed = false
 
-        drunk.Paint = function(self, w, h)
+        drunk.Paint = function(_, w, h)
             if self.isPressed and self:IsHovered() then
                 surface.SetDrawColor(0, 120, 255)
             else
@@ -322,12 +324,12 @@ if CLIENT then
             surface.DrawRect(0, 0, w, h)
         end
 
-        drunk.OnMousePressed = function(self)
-            self.isPressed = true
+        drunk.OnMousePressed = function(button)
+            button.isPressed = true
         end
-        drunk.OnMouseReleased = function(self)
-            if self.isPressed == true then
-                self.isPressed = false
+        drunk.OnMouseReleased = function(button)
+            if button.isPressed == true then
+                button.isPressed = false
 
                 net.Start("rdmtJoelBotCOrganGrinderGUI")
                     net.WriteBool(true)
@@ -347,7 +349,7 @@ if CLIENT then
         sober:SetTextColor(Color(0, 0, 0))
         sober.isPressed = false
 
-        sober.Paint = function(self, w, h)
+        sober.Paint = function(_, w, h)
             if self.isPressed and self:IsHovered() then
                 surface.SetDrawColor(0, 120, 255)
             else
@@ -356,12 +358,12 @@ if CLIENT then
             surface.DrawRect(0, 0, w, h)
         end
 
-        sober.OnMousePressed = function(self)
-            self.isPressed = true
+        sober.OnMousePressed = function(button)
+            button.isPressed = true
         end
-        sober.OnMouseReleased = function(self)
-            if self.isPressed == true then
-                self.isPressed = false
+        sober.OnMouseReleased = function(button)
+            if button.isPressed == true then
+                button.isPressed = false
 
                 net.Start("rdmtJoelBotCOrganGrinderGUI")
                     net.WriteBool(false)

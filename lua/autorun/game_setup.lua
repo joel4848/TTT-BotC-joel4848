@@ -26,14 +26,14 @@ if SERVER then
     local golemEnabled = CreateConVar("randomat_joelbotc_golem_enabled", 1, FCVAR_NONE, "Whether the Golem is on the script", 0, 1):GetBool()
     local sweetheartEnabled = CreateConVar("randomat_joelbotc_sweetheart_enabled", 1, FCVAR_NONE, "Whether the Sweetheart is on the script", 0, 1):GetBool()
     local saintEnabled = CreateConVar("randomat_joelbotc_saint_enabled", 1, FCVAR_NONE, "Whether the Saint is on the script", 0, 1):GetBool()
-    local drunkEnabled = CreateConVar("randomat_joelbotc_drunk_enabled", 0, FCVAR_NONE, "Whether the Drunk is on the script", 0, 1):GetBool()
+    -- local drunkEnabled = CreateConVar("randomat_joelbotc_drunk_enabled", 0, FCVAR_NONE, "Whether the Drunk is on the script", 0, 1):GetBool()
     local recluseEnabled = CreateConVar("randomat_joelbotc_recluse_enabled", 1, FCVAR_NONE, "Whether the Recluse is on the script", 0, 1):GetBool()
     local poisonerEnabled = CreateConVar("randomat_joelbotc_poisoner_enabled", 1, FCVAR_NONE, "Whether the Poisoner is on the script", 0, 1):GetBool()
     local scarletwomanEnabled = CreateConVar("randomat_joelbotc_scarletwoman_enabled", 1, FCVAR_NONE, "Whether the Scarlet Woman is on the script", 0, 1):GetBool()
     local organgrinderEnabled = CreateConVar("randomat_joelbotc_organgrinder_enabled", 1, FCVAR_NONE, "Whether the Organ Grinder is on the script", 0, 1):GetBool()
     local assassinEnabled = CreateConVar("randomat_joelbotc_assassin_enabled", 1, FCVAR_NONE, "Whether the Assassin is on the script", 0, 1):GetBool()
     local baronEnabled = CreateConVar("randomat_joelbotc_baron_enabled", 1, FCVAR_NONE, "Whether the Baron is on the script", 0, 1):GetBool()
-    local pukkaEnabled = CreateConVar("randomat_joelbotc_pukka_enabled", 1, FCVAR_NONE, "Whether the Pukka is on the script", 0, 1):GetBool()
+    -- local pukkaEnabled = CreateConVar("randomat_joelbotc_pukka_enabled", 1, FCVAR_NONE, "Whether the Pukka is on the script", 0, 1):GetBool()
     local impEnabled = CreateConVar("randomat_joelbotc_imp_enabled", 1, FCVAR_NONE, "Whether the Imp is on the script", 0, 1):GetBool()
     local poEnabled = CreateConVar("randomat_joelbotc_po_enabled", 1, FCVAR_NONE, "Whether the Po is on the script", 0, 1):GetBool()
     -- /'Script' ----------------------------------------------------------------------------------------------------------------
@@ -193,10 +193,10 @@ if SERVER then
         if saintEnabled then
             table.insert(JoelBotC.enabledOutsiders, ROLE_SAINTJBC)
         end
-        if drunkEnabled then
+        -- if drunkEnabled then
             -- The Drunk is not currently implemented
             -- table.insert(JoelBotC.enabledOutsiders, ROLE_DRUNKJBC)
-        end
+        -- end
         if recluseEnabled then
             table.insert(JoelBotC.enabledOutsiders, ROLE_RECLUSEJBC)
         end
@@ -216,10 +216,10 @@ if SERVER then
         if baronEnabled then
             table.insert(JoelBotC.enabledMinions, ROLE_BARONJBC)
         end
-        if pukkaEnabled then
+        -- if pukkaEnabled then
             -- The Pukka is currently broken
             -- table.insert(JoelBotC.enabledDemons, ROLE_PUKKAJBC)
-        end
+        -- end
         if impEnabled then
             table.insert(JoelBotC.enabledDemons, ROLE_IMPJBC)
         end
@@ -448,59 +448,33 @@ if SERVER then
             end
         end
 
-        -- print("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~")
-        -- for key, value in ipairs(JoelBotC.demonBluffsTownsfolkPool) do
-        --     print(key, ROLE_STRINGS[value])
-        -- end
-        -- print("Empath avaialable as bluff = ".. tostring(empathAvailableAsBluff))
-        -- print("FT avaialable as bluff = ".. tostring(fortunetellerAvailableAsBluff))
-
         for _, role in ipairs(JoelBotC.demonBluffs) do
             if role == ROLE_EMPATHJBC or role == ROLE_FORTUNETELLERJBC then
                 empathOrFTAreBluff = true
             end
         end
 
-        -- print("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~")
-        -- for key, value in ipairs(JoelBotC.demonBluffs) do
-        --     print(key, ROLE_STRINGS[value])
-        -- end
-        -- print("Empath or FT are bluff: " .. tostring(empathOrFTAreBluff))
-
         if not empathOrFTAreBluff then
             local empathFTPool = {}
-            table.insert(empathFTPool, ROLE_EMPATHJBC)
-            table.insert(empathFTPool, ROLE_FORTUNETELLERJBC)
-
-            -- print("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~")
-            -- print("Empath/FT pool pre-remove:")
-            -- for key, value in ipairs(empathFTPool) do
-            --     print(key, ROLE_STRINGS[value])
-            -- end
-
-            for _, role in ipairs(JoelBotC.rolePool) do
-                if role == ROLE_EMPATHJBC or role == ROLE_FORTUNETELLERJBC then
-                    table.RemoveByValue(empathFTPool, role)
-                end
+            if empathAvailableAsBluff then
+                table.insert(empathFTPool, ROLE_EMPATHJBC)
+            end
+            if fortunetellerAvailableAsBluff then
+                table.insert(empathFTPool, ROLE_FORTUNETELLERJBC)
             end
 
-            -- print("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~")
-            -- print("Empath/FT pool post-remove:")
-            -- for key, value in ipairs(empathFTPool) do
-            --     print(key, ROLE_STRINGS[value])
-            -- end
-            -- print("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~")
-
+            local addedBluff = nil
             if #empathFTPool > 0 then
                 -- table.Shuffle(empathFTPool)
                 -- Not using table.Shuffle because it didn't actually seem to shuffle
-                JoelBotC.demonBluffs[1] = empathFTPool[math.random(1,2)]
+                JoelBotC.demonBluffs[1] = empathFTPool[math.random(1,#empathFTPool)]
+                addedBluff = JoelBotC.demonBluffs[1] or nil
+            end
+
+            if addedBluff then
+                table.RemoveByValue(empathFTPool, addedBluff)
             end
         end
-
-        -- for key, value in ipairs(JoelBotC.demonBluffs) do
-        --     print(key, ROLE_STRINGS[value])
-        -- end
     end
 
     function JoelBotC:AssignRolesAndSeats()
@@ -582,10 +556,10 @@ if SERVER then
         -- Create seating order table
         JoelBotC.seatingOrder = table.Copy(JoelBotC.players)
 
-        -- for i, ply in ipairs(JoelBotC.seatingOrder) do
-        --     PrintMessage(HUD_PRINTTALK, "Seat " .. i .. ": " .. ply:Nick() .. " - " .. ROLE_STRINGS[ply.botc_role])
-        --     ply.seatNumber = i
-        -- end
+        for i, ply in ipairs(JoelBotC.seatingOrder) do
+            PrintMessage(HUD_PRINTTALK, "Seat " .. i .. ": " .. ply:Nick() .. " - " .. ROLE_STRINGS[ply.botc_role])
+            ply.seatNumber = i
+        end
 
         net.Start("rdmtJoelBotCSeatingOrder")
             net.WriteTable(JoelBotC.seatingOrder)
@@ -599,7 +573,7 @@ if SERVER then
         for _, ply in ipairs(JoelBotC.players) do
             -- Give notebook and admin book
             GiveBookQuill(ply)
-            -- ply:Give("weapon_ttt_joelbotc_adminbook")
+            ply:Give("weapon_ttt_joelbotc_adminbook")
 
             -- Set up this player's info book segment store (role + ability + divider)
             JoelBotC:InitInfoBook(ply)

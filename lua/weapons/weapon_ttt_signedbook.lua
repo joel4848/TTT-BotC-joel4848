@@ -418,7 +418,7 @@ if CLIENT then
             local scroll = vgui.Create("DScrollPanel", Frame)
             scroll:SetPos(TAX, TAY)
             scroll:SetSize(TAW, TAH)
-            scroll.Paint = function(self, w, h)
+            scroll.Paint = function(_, w, h)
                 surface.SetDrawColor(Color(255, 250, 238))
                 surface.DrawRect(0, 0, w, h)
                 -- surface.SetDrawColor(Color(0, 0, 0))
@@ -433,7 +433,7 @@ if CLIENT then
             content:SetBackgroundColor(Color(0, 0, 0, 0))
             content._Layout = layout
             content._LineHeight = lineHeight
-            content.Paint = function(self, w, h)
+            content.Paint = function(_, w, h)
                 local y = 4
 
                 for _, line in ipairs(self._Layout or {}) do
