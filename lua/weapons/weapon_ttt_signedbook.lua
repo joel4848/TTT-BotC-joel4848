@@ -255,7 +255,6 @@ if CLIENT then
         self.BookTitle  = tostring(decoded.title or "Signed Book")
         self.BookAuthor = tostring(decoded.author or "")
 
-        PrintTable(decoded.pages)
         if istable(decoded.pages) and #decoded.pages > 0 then
             self.BookTexts = decoded.pages
         else
