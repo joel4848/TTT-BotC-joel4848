@@ -135,7 +135,7 @@ if CLIENT then
         additive = false,
         antialias = true
     })
-    
+
     resource.AddFile("resource/fonts/Minecraft.ttf")
     surface.CreateFont("Minecraft30", {
         font = "Minecraft",
@@ -280,13 +280,13 @@ if CLIENT then
                         net.WriteInt(id, 8)
                         print("Net sent button press - " .. tostring(id))
                     net.SendToServer()
-                    
+
                     -- if IsValid(AdminBookFrame) then
                     --     AdminBookFrame:Remove()
                     -- end
-                
+
                     -- gui.EnableScreenClicker(false)
-                
+
                     -- AdminBookFrame = nil
                     -- BookOpen = false
 
@@ -349,7 +349,7 @@ if CLIENT then
 
         -- Rotate to match natural holding angle
         ang:RotateAroundAxis(ang:Up(), 0)
-        ang:RotateAroundAxis(ang:Right(), 0) 
+        ang:RotateAroundAxis(ang:Right(), 0)
         ang:RotateAroundAxis(ang:Forward(), 0)
 
         self:SetPos(pos)

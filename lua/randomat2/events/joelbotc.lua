@@ -110,12 +110,12 @@ function EVENT:Begin()
     timer.Create("rdmtJoelBotC_gamestart_4", 10, 1, function()
         JoelBotC.isFirstNight = true
         JoelBotC.currentNight = 0
-        timer.Create("rdmtJoelBotCNominationsEnd", 5, 1, function() 
+        timer.Create("rdmtJoelBotCNominationsEnd", 5, 1, function()
             JoelBotC:SendMiddleMessage("Night " .. tostring(JoelBotC.currentNight + 1) .. " begins...", 5)
             net.Start("rdmtJoelBotCNightStarts")
             net.Broadcast()
 
-            timer.Create("rdmtJoelBotCStartNightAfterNominations", 5, 1, function() 
+            timer.Create("rdmtJoelBotCStartNightAfterNominations", 5, 1, function()
                 JoelBotC:StartNight()
             end)
         end)

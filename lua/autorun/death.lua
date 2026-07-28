@@ -10,7 +10,7 @@ JoelBotC.ghostVotes = JoelBotC.ghostVotes or {}
 if SERVER then
     util.AddNetworkString("rdmtJoelBotCAliveDeadUpdate")
     util.AddNetworkString("rdmtJoelBotCGhostVoteUpdate")
-    
+
     function JoelBotC:AlivePlayerCount()
         local alivePlayerCount = 0
         for _, ply in ipairs(JoelBotC.players) do
@@ -21,7 +21,7 @@ if SERVER then
 
         return alivePlayerCount
     end
-    
+
     -- Tell clients who's dead and who's alive
     function JoelBotC:AliveDeadUpdate()
         JoelBotC:DetermineGhostVotes()
@@ -58,7 +58,7 @@ if SERVER then
         end
 
         if target == JoelBotC.grandchild and not target.BotCDead and JoelBotC.grandmother.BotCDead then
-            JoelBotC.grandmother.BotCDead = true 
+            JoelBotC.grandmother.BotCDead = true
             table.insert(JoelBotC.morningDeaths, JoelBotC.grandmother)
         end
 
@@ -74,7 +74,7 @@ if SERVER then
     end
 
     function JoelBotC:MorningDeaths()
-        
+
         -- Announce who died in the night
         local names = {}
         for _, ply in ipairs(JoelBotC.morningDeaths) do
@@ -128,7 +128,7 @@ if SERVER then
         JoelBotC.isAlive[ply] = false
 
         ply:DoAnimationEvent(ACT_GMOD_DEATH, 2028)
-        
+
         timer.Simple(0, function()
             animationLength = ply:SequenceDuration()
 
@@ -137,7 +137,7 @@ if SERVER then
                 -- Create ragdoll at player position/pose etc.
                 ply:CreateRagdoll()
                 local rag = ply:GetRagdollEntity()
-                
+
                 timer.Simple(0.2, function()
                     if not IsValid(rag) then return end
 
@@ -159,7 +159,7 @@ if SERVER then
                                 bone:SetPos(bp)
                                 bone:SetAngles(ba)
                             end
-                        
+
                             -- not sure if this will work:
                             bone:SetVelocity(v)
                         end
@@ -192,111 +192,111 @@ if SERVER then
 
     -- function JoelBotC:Kill(ply)
     --     if not IsValid(ply) then return end
-    -- 
+    --
     --     if not ply.BotCDead then
     --         ply.hasGhostVote = true
     --     end
-    -- 
+    --
     --     ply.BotCDead = true
     --     JoelBotC.isAlive[ply] = false
-    -- 
+    --
     --     -- Play the falling death animation
     --     ply:DoAnimationEvent(ACT_GMOD_DEATH, 2028)
-    -- 
+    --
     --     local ragModel = nil
     --     local ragPos = nil
     --     local ragAngles = nil
-    -- 
+    --
     --     -- Wait until the player hits the ground
     --     timer.Create("JoelBotC_RagdollWait_" .. ply:SteamID64(), 0, 0, function()
-    -- 
+    --
     --         print("Timer running")
-    -- 
+    --
     --         if not IsValid(ply) then
     --             timer.Remove("JoelBotC_RagdollWait_" .. ply:SteamID64())
     --             return
     --         end
-    -- 
+    --
     --         if IsValid(rag) then
     --             rag:Remove()
     --         end
-    -- 
+    --
     --         if not ply:IsPlayingGesture(2028) then
     --             timer.Remove("JoelBotC_RagdollWait_" .. ply:SteamID64())
-    -- 
+    --
     --             -- local rag = ply:CreateRagdoll()
     --             -- local rag = ents.Create("prop_ragdoll")
     --             -- rag:SetModel(ragModel)
     --             -- rag:SetPos(ragPos)
     --             -- rag:SetAngles(ragAngles)
     --             -- rag:Spawn()
-    -- 
+    --
     --             ply:SetNoDraw(true)
-    -- 
+    --
     --             timer.Simple(3, function()
     --                 if not IsValid(ply) then return end
-    -- 
+    --
     --                 JoelBotC:AliveDeadUpdate()
     --                 ply:SetNoDraw(false)
-    -- 
+    --
     --                 ply:SetColor(Color(255,255,255,100))
     --                 ply:SetRenderMode(RENDERMODE_TRANSALPHA)
-    -- 
+    --
     --             end)
     --         end
-    -- 
+    --
     --         ragModel = ply:GetModel()
     --         ragPos = ply:GetPos()
     --         ragAngles = ply:GetAngles()
-    -- 
+    --
     --         local rag = ply:CreateRagdoll()
-    -- 
+    --
     --     end)
-    -- 
+    --
     -- end
 
     -- function JoelBotC:Kill(ply)
     --     if not IsValid(ply) then return end
--- 
+--
     --     if not ply.BotCDead then
     --         ply.hasGhostVote = true
     --     end
--- 
+--
     --     ply.BotCDead = true
     --     JoelBotC.isAlive[ply] = false
--- 
+--
     --     local originalCollisionGroup = ply:GetCollisionGroup() or 0
     --     print("Player collision group = " .. ply:GetCollisionGroup())
     --     ply:SetCollisionGroup(COLLISION_GROUP_IN_VEHICLE)
     --     print("Player collision group = " .. ply:GetCollisionGroup())
--- 
+--
     --     ply:DoAnimationEvent(ACT_GMOD_DEATH, 2028)
--- 
+--
     --     local ragModel = nil
     --     local ragPos = nil
     --     local ragAngles = nil
--- 
+--
     --     -- Wait until the player hits the ground
     --     timer.Create("JoelBotC_RagdollWait_" .. ply:SteamID64(), 0, 0, function()
--- 
+--
     --         print("Timer running")
--- 
+--
     --         if not IsValid(ply) then
     --             timer.Remove("JoelBotC_RagdollWait_" .. ply:SteamID64())
     --             return
     --         end
--- 
+--
     --         if not ply:IsPlayingGesture(2028) then
     --             timer.Remove("JoelBotC_RagdollWait_" .. ply:SteamID64())
     --             print("Timer removed ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~")
--- 
+--
     --             -- Hide the player and their weapons
     --             ply:SetNoDraw(true)
     --             local executeeWeapons = ply:GetWeapons() or {}
     --             for _, wep in ipairs(executeeWeapons) do
     --                 wep:SetNoDraw(true)
     --             end
--- 
+--
     --             -- Create ragdoll at the player's position
     --             local rag = ply:CreateRagdoll()
     --             -- local rag = ents.Create("prop_ragdoll")
@@ -304,46 +304,46 @@ if SERVER then
     --             -- rag:SetPos(ragPos)
     --             -- rag:SetAngles(ragAngles)
     --             -- rag:Spawn()
--- 
+--
     --             print("ragModel = " .. tostring(ragModel))
     --             print("ragPos = " .. tostring(ragPos))
     --             print("ragAngles = " .. tostring(ragAngles))
     --             print("ply:GetModel = " .. tostring(ply:GetModel()))
     --             print("ply:GetPos = " .. tostring(ply:GetPos()))
     --             print("ply:GetAngles = " .. tostring(ply:GetAngles()))
--- 
+--
     --             -- After 3 seconds, show ghost player
     --             timer.Simple(3, function()
     --                 if not IsValid(ply) then return end
-    --             
+    --
     --                 ply:SetNoDraw(false)
-    --             
+    --
     --                 ply:SelectWeapon("weapon_ttt_unarmed")
--- 
+--
     --                 ply:SetCollisionGroup(originalCollisionGroup)
     --                 print("Player collision group = " .. ply:GetCollisionGroup())
-    --             
+    --
     --                 for _, wep in ipairs(executeeWeapons) do
     --                     if IsValid(wep) then
     --                         wep:SetNoDraw(false)
     --                     end
     --                 end
-    --             
+    --
     --                 -- Ghost appearance
     --                 ply:SetColor(Color(255,255,255,100))
     --                 ply:SetRenderMode(RENDERMODE_TRANSALPHA)
-    --             
+    --
     --                 JoelBotC:AliveDeadUpdate()
-    --             
+    --
     --                 -- Remove ragdoll
     --                 -- if IsValid(rag) then rag:Remove() end
     --             end)
     --         end
--- 
+--
     --         ragModel = ply:GetModel()
     --         ragPos = ply:GetPos()
     --         ragAngles = ply:GetAngles()
--- 
+--
     --         print("****************************************************")
     --         print("ragModel = " .. tostring(ragModel))
     --         print("ragPos = " .. tostring(ragPos))
@@ -352,8 +352,8 @@ if SERVER then
     --         print("ply:GetPos = " .. tostring(ply:GetPos()))
     --         print("ply:GetAngles = " .. tostring(ply:GetAngles()))
     --         print("****************************************************")
--- 
--- 
+--
+--
     --     end)
     -- end
 

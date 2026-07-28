@@ -12,7 +12,7 @@ if SERVER then
     util.AddNetworkString("rdmtJoelBotCNightStarts")
 
     local nightStep = nil
-    
+
     function JoelBotC:DetermineRolesInGame()
 
         -- Reset some role stuff
@@ -56,8 +56,8 @@ if SERVER then
         }
 
         for _, entry in ipairs(JoelBotC.rolePool) do
-            local roleID = entry.role 
-            
+            local roleID = entry.role
+
             JoelBotC.rolesInGame[roleID] = true
         end
 
@@ -294,7 +294,7 @@ if SERVER then
 
                 timer.Simple(1, function()
                     JoelBotC:DemonInfo()
-                
+
                     timer.Simple(1, function()
                         JoelBotC:NextNightStep()
                     end)

@@ -174,7 +174,7 @@ if SERVER then
         JoelBotC:DetermineGhostVotes()
 
         JoelBotC.recentExecutee = nil
-        
+
         JoelBotC:SendNominationGUICreate()
 
         JoelBotC.nominationsOpen = true
@@ -221,13 +221,13 @@ if SERVER then
             else
                 msg = nomineePly:Nick() .. " has already been nominated today!"
             end
-            
+
             JoelBotC:SendMiddleMessage(msg, 3, nominatorPly)
 
             return
         end
 
-        local diesToGolem = nil 
+        local diesToGolem = nil
 
         if nominatorPly:IsGolem() then
             if nominatorPly.golemNominated then
@@ -410,7 +410,7 @@ if SERVER then
                     if not JoelBotC:IsOGSober() then
                         PrintMessage(HUD_PRINTTALK, ply:Nick() .. " voted - " .. votesReceived .. " vote" .. (votesReceived == 1 and "" or "s") .. " received")
                     end
-                    
+
                         if ply.BotCDead then
                         ply.hasGhostVote = false
                     end
@@ -544,12 +544,12 @@ if SERVER then
         JoelBotC._prosecutionEndCallback = nil
         JoelBotC._defenceEndCallback = nil
 
-        timer.Create("rdmtJoelBotCNominationsEnd", 5, 1, function() 
+        timer.Create("rdmtJoelBotCNominationsEnd", 5, 1, function()
             JoelBotC:SendMiddleMessage("Night " .. tostring(JoelBotC.currentNight + 1) .. " begins...", 5)
             net.Start("rdmtJoelBotCNightStarts")
             net.Broadcast()
 
-            timer.Create("rdmtJoelBotCStartNightAfterNominations", 5, 1, function() 
+            timer.Create("rdmtJoelBotCStartNightAfterNominations", 5, 1, function()
                 JoelBotC:StartNight()
             end)
         end)
@@ -797,7 +797,7 @@ if CLIENT then
     -------------------------------------------------------------------------------------
 
     net.Receive("rdmtJoelBotCOGActive", function()
-        JoelBotC.organgrinderActive = net.ReadBool() 
+        JoelBotC.organgrinderActive = net.ReadBool()
     end)
 
     net.Receive("rdmtJoelBotCGhostVoteUpdate", function()
@@ -807,7 +807,7 @@ if CLIENT then
         for _, ply in ipairs(JoelBotC.seatingOrderClient) do
             ply.hasGhostVote = nil
         end
-        
+
         for ply, hasVote in pairs(JoelBotC.ghostVotesClient) do
             ply.hasGhostVote = hasVote
         end
@@ -1022,7 +1022,7 @@ if CLIENT then
                 topBtnTop = finalY
             end
             if finalY + size > lowestBtnBottom then
-                lowestBtnBottom = finalY + size 
+                lowestBtnBottom = finalY + size
             end
 
             local btn = vgui.Create("DButton", nomGUI)
@@ -1061,38 +1061,38 @@ if CLIENT then
         for i = 1, count do
             local voteIconSize = size * 1.4
             local voteIconGap = 25 + 15/count
-        
+
             local baseAngle = (i - 1) * (2 * math.pi / count)
             local warpedAngle = baseAngle + (nomGUIPolePush * math.sin(2 * baseAngle))
             local finalAngle = warpedAngle - (math.pi / 2)
-        
+
             local buttonX = cx + math.cos(finalAngle) * baseRadius
             local buttonY = cy + math.sin(finalAngle) * (baseRadius * nomGUIVerticalStretch)
-        
+
             -- Direction from button to centre
             local dx = cx - buttonX
             local dy = cy - buttonY
-        
+
             local len = math.sqrt(dx * dx + dy * dy)
             dx = dx / len
             dy = dy / len
-        
+
             -- Button dimensions
             local bw = buttonWidth[i] or 100
             local bh = size
-        
+
             local hx = bw / 2
             local hy = bh / 2
-        
+
             -- Distance from button centre to edge in this direction
             local edgeDist = 1 / math.sqrt((dx * dx) / (hx * hx) + (dy * dy) / (hy * hy))
-        
+
             -- Icon centre distance from button centre
             local offset = edgeDist + voteIconGap + (voteIconSize / 2)
-        
+
             local iconX = buttonX + dx * offset
             local iconY = buttonY + dy * offset
-        
+
             voteIcon[i] = vgui.Create("DImage", nomGUI)
             voteIcon[i]:SetSize(voteIconSize, voteIconSize)
             voteIcon[i]:SetPos(iconX - voteIconSize / 2, iconY - voteIconSize / 2)

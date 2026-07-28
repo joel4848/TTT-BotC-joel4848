@@ -73,7 +73,7 @@ if SERVER then
         net.Start("rdmtJoelBotCEndDay")
         net.Broadcast()
         JoelBotC.votesToEndDay = {}
-        
+
         timer.Create("RdmtJoelBotCEndDayStartNominations", 5, 1, function()
             JoelBotC:StartNominations()
         end)
@@ -132,7 +132,7 @@ if CLIENT then
     function JoelBotC:ToggleEndDayEarly()
         local newState = not self.votingToEndDay
         self.votingToEndDay = newState
-        
+
         net.Start("rdmtJoelBotCEndDayVote")
             net.WriteBool(newState)
         net.SendToServer()
@@ -205,9 +205,9 @@ if CLIENT then
 
             -- Change colour based on time remaining
             local fillColour = Color(0, 200, 0)
-            if percentageKinda < 0.15 then 
+            if percentageKinda < 0.15 then
                 fillColour = Color(255, 0, 0)
-            elseif percentageKinda < 0.33 then 
+            elseif percentageKinda < 0.33 then
                 fillColour = Color(200, 150, 0)
             end
 

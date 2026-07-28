@@ -394,7 +394,7 @@ if SERVER then
                 end
             end
 
-            table.Shuffle(outsiderPool) 
+            table.Shuffle(outsiderPool)
 
             local outsidersAdded = 0
             for i = 1, 2 do

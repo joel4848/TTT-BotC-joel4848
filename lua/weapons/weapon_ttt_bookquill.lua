@@ -48,7 +48,7 @@ SWEP.BookOpen         = false
 -----------------------------------------------------
 
 function SWEP:SetupDataTables()
-    
+
 end
 
 function SWEP:Initialize()
@@ -355,7 +355,7 @@ if CLIENT then
 
         -- Rotate to match natural holding angle
         ang:RotateAroundAxis(ang:Up(), 0)
-        ang:RotateAroundAxis(ang:Right(), 0) 
+        ang:RotateAroundAxis(ang:Right(), 0)
         ang:RotateAroundAxis(ang:Forward(), 0)
 
         self:SetPos(pos)

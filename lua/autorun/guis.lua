@@ -138,9 +138,9 @@ if CLIENT then
         local count = #JoelBotC.seatingOrderClient
         if count <= 0 then return end
 
-        local ratio = 4 
+        local ratio = 4
         local seatingGUIVerticalStretch = 0.6
-        local seatingGUIPolePush = 0.1 
+        local seatingGUIPolePush = 0.1
 
         seatingGUI = vgui.Create("DPanel")
         seatingGUI:SetSize(ScrW(), ScrH())
@@ -283,7 +283,7 @@ if CLIENT then
             net.Start("rdmtJoelBotCOrganGrinderGUI")
                 net.WriteBool(false)
             net.SendToServer()
-        
+
             JoelBotC:OgGUIDestroy()
         end)
 
