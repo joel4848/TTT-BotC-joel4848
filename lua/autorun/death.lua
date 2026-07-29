@@ -6,6 +6,7 @@ JoelBotC.recentExecutee = JoelBotC.recentExecutee or nil
 JoelBotC.deadPlayers = JoelBotC.deadPlayers or {}
 JoelBotC.morningDeaths = JoelBotC.morningDeaths or {}
 JoelBotC.ghostVotes = JoelBotC.ghostVotes or {}
+JoelBotC.saintExecuted = JoelBotC.saintExecuted or nil
 
 if SERVER then
     util.AddNetworkString("rdmtJoelBotCRequestBoneData")
@@ -251,6 +252,8 @@ if SERVER then
 
     -- Execution kill (anvil go bonk)
     function JoelBotC:Execute(ply)
+        local saintExecuted = false
+
         if not IsValid(ply) or not ply:Alive() then return end
 
         JoelBotC.recentExecutee = ply
@@ -302,6 +305,10 @@ if SERVER then
 
             if ply.demon and JoelBotC:AlivePlayerCount() >= 5 then
                 JoelBotC:MakeScarletWomanDemon(ply.botc_role)
+            end
+
+            if ply:IsRole(ROLE_SAINTJBC) and ply.BotCDead ~= true and not JoelBotC:IsDroisoned(ply) then
+                saintExecuted = true
             end
 
             ply.BotCDead = true
@@ -373,6 +380,8 @@ if SERVER then
                 ply:SetRenderMode(RENDERMODE_TRANSALPHA)
 
                 JoelBotC:AliveDeadUpdate()
+
+                if saintExecuted then JoelBotC.saintExecuted = true end
             end)
 
             if ply:IsFrozen() then

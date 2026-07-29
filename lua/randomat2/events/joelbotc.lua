@@ -21,10 +21,11 @@ JoelBotC.rolePool = JoelBotC.rolePool or {}
 JoelBotC.recentExecutee = JoelBotC.recentExecutee or nil
 JoelBotC.deadPlayers = JoelBotC.deadPlayers or {}
 JoelBotC.BotCEventRunning = JoelBotC.BotCEventRunning or nil
+JoelBotC.testingMode = JoelBotC.testingMode or nil
 
 -- local originalDetectiveCvar = nil
 
-local testingMode = false
+JoelBotC.testingMode = false
 
 function EVENT:Begin()
     JoelBotC.players = {}
@@ -35,6 +36,8 @@ function EVENT:Begin()
     JoelBotC.outsidersInBag = {}
     JoelBotC.minionsInBag = {}
     JoelBotC.demonsInBag = {}
+
+    JoelBotC.saintExecuted = nil
 
     JoelBotC.BotCEventRunning = true
 
@@ -116,7 +119,7 @@ function EVENT:Begin()
         JoelBotC:GiveStartingBooks()
     end)
 
-    if not testingMode then
+    if not JoelBotC.testingMode then
         timer.Create("rdmtJoelBotC_gamestart_2", 5, 1, function()
             Randomat:SmallNotify("Check your inventory for your notebook and information book!", 5)
         end)
@@ -151,6 +154,9 @@ function EVENT:Begin()
                 demonAlive = true
             end
         end
+
+        -- If the Saint has been executed, the Evil team wins
+        if JoelBotC.saintExecuted then return WIN_TRAITOR end
 
         -- If there isn't an alive Demon, the Good team wins
         if not demonAlive then return WIN_INNOCENT end
