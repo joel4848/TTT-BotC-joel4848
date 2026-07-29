@@ -8,6 +8,9 @@ JoelBotC.morningDeaths = JoelBotC.morningDeaths or {}
 JoelBotC.ghostVotes = JoelBotC.ghostVotes or {}
 
 if SERVER then
+    util.AddNetworkString("rdmtJoelBotCRequestBoneData")
+    util.AddNetworkString("rdmtJoelBotCBSendBoneData")
+
     util.AddNetworkString("rdmtJoelBotCAliveDeadUpdate")
     util.AddNetworkString("rdmtJoelBotCGhostVoteUpdate")
 
@@ -74,7 +77,6 @@ if SERVER then
     end
 
     function JoelBotC:MorningDeaths()
-
         -- Announce who died in the night
         local names = {}
         for _, ply in ipairs(JoelBotC.morningDeaths) do
@@ -116,7 +118,86 @@ if SERVER then
         end)
     end
 
-    -- Non-execution kill (WIP)
+    --------------------------------------------------------------------------
+    -- Kill and body-creation bits
+    --------------------------------------------------------------------------
+    local function CreateBody(ply, plyPos, plyAng, boneTable)
+        if not IsValid(ply) then return end
+
+        local rag = ents.Create("prop_ragdoll")
+        if not IsValid(rag) then return end
+
+        rag:SetModel(ply:GetModel())
+        rag:SetPos(plyPos or ply:GetPos())
+        rag:SetAngles(plyAng or ply:GetAngles())
+        rag:SetSkin(ply:GetSkin())
+        rag:SetColor(ply:GetColor())
+        rag:SetMaterial(ply:GetMaterial())
+
+        for _, value in pairs(ply:GetBodyGroups()) do
+            rag:SetBodygroup(value.id, ply:GetBodygroup(value.id))
+        end
+
+        rag:Spawn()
+        rag:Activate()
+        rag:SetCollisionGroup(COLLISION_GROUP_WEAPON)
+
+        -- Map client bone positions onto the ragdoll
+        if boneTable and #boneTable > 0 then
+            local boneMap = {}
+            for _, boneData in ipairs(boneTable) do
+                boneMap[boneData.id] = boneData
+            end
+
+            local numPhys = rag:GetPhysicsObjectCount() - 1
+            local playerVel = ply:GetVelocity()
+
+            for i = 0, numPhys do
+                local phys = rag:GetPhysicsObjectNum(i)
+                if IsValid(phys) then
+                    local modelBone = rag:TranslatePhysBoneToBone(i)
+                    local data = boneMap[modelBone]
+
+                    if data then
+                        phys:SetPos(data.pos)
+                        phys:SetAngles(data.ang)
+                        phys:SetVelocity(playerVel)
+                    end
+                end
+            end
+        end
+
+        -------------- Corpse-searching stuff --------------
+        if CORPSE then
+            CORPSE.SetPlayerNick(rag, ply)
+            CORPSE.SetFound(rag, true)
+        end
+        ply:SetNWBool("body_found", true)
+
+        rag.sid64          = ply:SteamID64()
+        rag.sid            = ply:SteamID()
+        rag.player_ragdoll = true
+        rag.time           = CurTime()
+        rag.was_role       = ply.botc_role or ply:GetRole()
+        rag.kills          = table.Copy(ply.kills)
+        rag.is_botc_body   = true
+        ----------------------------------------------------
+
+        return rag
+    end
+
+    -- Receive correct body position from client
+    net.Receive("rdmtJoelBotCBSendBoneData", function(len, sender)
+        local plyPos = net.ReadVector()
+        local plyAng = net.ReadAngle()
+        local boneTable = net.ReadTable()
+
+        if not IsValid(sender) then return end
+
+        -- Create body in correct position
+        CreateBody(sender, plyPos, plyAng, boneTable)
+    end)
+
     function JoelBotC:Kill(ply)
         if not IsValid(ply) then return end
 
@@ -127,47 +208,25 @@ if SERVER then
         ply.BotCDead = true
         JoelBotC.isAlive[ply] = false
 
-        ply:DoAnimationEvent(ACT_GMOD_DEATH, 2028)
-
         timer.Simple(0, function()
-            animationLength = ply:SequenceDuration()
+            ply:DoAnimationEvent(ACT_GMOD_DEATH, 2028)
 
-            -- Wait until the player hits the ground
+            local seq = ply:SelectWeightedSequence(ACT_GMOD_DEATH)
+            local seqDuration = ply:SequenceDuration(seq)
+            local animationLength = 1
+
+            if seqDuration > 0.9 then
+                animationLength = 0.9
+            elseif seq and seq ~= -1 then
+                animationLength = ply:SequenceDuration(seq) - 0.1
+            end
+
+            -- Request bone data from the client near the end of the animation
             timer.Create("JoelBotC_RagdollWait_" .. ply:SteamID64(), animationLength, 1, function()
-                -- Create ragdoll at player position/pose etc.
-                ply:CreateRagdoll()
-                local rag = ply:GetRagdollEntity()
+                if not IsValid(ply) then return end
 
-                timer.Simple(0.2, function()
-                    if not IsValid(rag) then return end
-
-                    local rag2 = ents.Create("prop_ragdoll")
-                    if not IsValid(rag2) then return end
-
-                    rag2:SetModel(ply:GetModel())
-                    rag2:SetPos(rag:GetPos())
-                    rag2:SetAngles(rag:GetAngles())
-                    rag2:SetSkin(ply:GetSkin())
-
-                    local num = rag2:GetPhysicsObjectCount() - 1
-                    local v = rag:GetVelocity()
-                    for i = 0, num do
-                        local bone = rag2:GetPhysicsObjectNum(i)
-                        if IsValid(bone) then
-                            local bp, ba = rag:GetBonePosition(rag2:TranslatePhysBoneToBone(i))
-                            if bp and ba then
-                                bone:SetPos(bp)
-                                bone:SetAngles(ba)
-                            end
-
-                            -- not sure if this will work:
-                            bone:SetVelocity(v)
-                        end
-                    end
-
-                    rag2:Spawn()
-                    rag:Remove()
-                end)
+                net.Start("rdmtJoelBotCRequestBoneData")
+                net.Send(ply)
 
                 timer.Simple(0, function()
                     ply:SetNoDraw(true)
@@ -189,173 +248,6 @@ if SERVER then
             end)
         end)
     end
-
-    -- function JoelBotC:Kill(ply)
-    --     if not IsValid(ply) then return end
-    --
-    --     if not ply.BotCDead then
-    --         ply.hasGhostVote = true
-    --     end
-    --
-    --     ply.BotCDead = true
-    --     JoelBotC.isAlive[ply] = false
-    --
-    --     -- Play the falling death animation
-    --     ply:DoAnimationEvent(ACT_GMOD_DEATH, 2028)
-    --
-    --     local ragModel = nil
-    --     local ragPos = nil
-    --     local ragAngles = nil
-    --
-    --     -- Wait until the player hits the ground
-    --     timer.Create("JoelBotC_RagdollWait_" .. ply:SteamID64(), 0, 0, function()
-    --
-    --         print("Timer running")
-    --
-    --         if not IsValid(ply) then
-    --             timer.Remove("JoelBotC_RagdollWait_" .. ply:SteamID64())
-    --             return
-    --         end
-    --
-    --         if IsValid(rag) then
-    --             rag:Remove()
-    --         end
-    --
-    --         if not ply:IsPlayingGesture(2028) then
-    --             timer.Remove("JoelBotC_RagdollWait_" .. ply:SteamID64())
-    --
-    --             -- local rag = ply:CreateRagdoll()
-    --             -- local rag = ents.Create("prop_ragdoll")
-    --             -- rag:SetModel(ragModel)
-    --             -- rag:SetPos(ragPos)
-    --             -- rag:SetAngles(ragAngles)
-    --             -- rag:Spawn()
-    --
-    --             ply:SetNoDraw(true)
-    --
-    --             timer.Simple(3, function()
-    --                 if not IsValid(ply) then return end
-    --
-    --                 JoelBotC:AliveDeadUpdate()
-    --                 ply:SetNoDraw(false)
-    --
-    --                 ply:SetColor(Color(255,255,255,100))
-    --                 ply:SetRenderMode(RENDERMODE_TRANSALPHA)
-    --
-    --             end)
-    --         end
-    --
-    --         ragModel = ply:GetModel()
-    --         ragPos = ply:GetPos()
-    --         ragAngles = ply:GetAngles()
-    --
-    --         local rag = ply:CreateRagdoll()
-    --
-    --     end)
-    --
-    -- end
-
-    -- function JoelBotC:Kill(ply)
-    --     if not IsValid(ply) then return end
---
-    --     if not ply.BotCDead then
-    --         ply.hasGhostVote = true
-    --     end
---
-    --     ply.BotCDead = true
-    --     JoelBotC.isAlive[ply] = false
---
-    --     local originalCollisionGroup = ply:GetCollisionGroup() or 0
-    --     print("Player collision group = " .. ply:GetCollisionGroup())
-    --     ply:SetCollisionGroup(COLLISION_GROUP_IN_VEHICLE)
-    --     print("Player collision group = " .. ply:GetCollisionGroup())
---
-    --     ply:DoAnimationEvent(ACT_GMOD_DEATH, 2028)
---
-    --     local ragModel = nil
-    --     local ragPos = nil
-    --     local ragAngles = nil
---
-    --     -- Wait until the player hits the ground
-    --     timer.Create("JoelBotC_RagdollWait_" .. ply:SteamID64(), 0, 0, function()
---
-    --         print("Timer running")
---
-    --         if not IsValid(ply) then
-    --             timer.Remove("JoelBotC_RagdollWait_" .. ply:SteamID64())
-    --             return
-    --         end
---
-    --         if not ply:IsPlayingGesture(2028) then
-    --             timer.Remove("JoelBotC_RagdollWait_" .. ply:SteamID64())
-    --             print("Timer removed ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~")
---
-    --             -- Hide the player and their weapons
-    --             ply:SetNoDraw(true)
-    --             local executeeWeapons = ply:GetWeapons() or {}
-    --             for _, wep in ipairs(executeeWeapons) do
-    --                 wep:SetNoDraw(true)
-    --             end
---
-    --             -- Create ragdoll at the player's position
-    --             local rag = ply:CreateRagdoll()
-    --             -- local rag = ents.Create("prop_ragdoll")
-    --             -- rag:SetModel(ragModel)
-    --             -- rag:SetPos(ragPos)
-    --             -- rag:SetAngles(ragAngles)
-    --             -- rag:Spawn()
---
-    --             print("ragModel = " .. tostring(ragModel))
-    --             print("ragPos = " .. tostring(ragPos))
-    --             print("ragAngles = " .. tostring(ragAngles))
-    --             print("ply:GetModel = " .. tostring(ply:GetModel()))
-    --             print("ply:GetPos = " .. tostring(ply:GetPos()))
-    --             print("ply:GetAngles = " .. tostring(ply:GetAngles()))
---
-    --             -- After 3 seconds, show ghost player
-    --             timer.Simple(3, function()
-    --                 if not IsValid(ply) then return end
-    --
-    --                 ply:SetNoDraw(false)
-    --
-    --                 ply:SelectWeapon("weapon_ttt_unarmed")
---
-    --                 ply:SetCollisionGroup(originalCollisionGroup)
-    --                 print("Player collision group = " .. ply:GetCollisionGroup())
-    --
-    --                 for _, wep in ipairs(executeeWeapons) do
-    --                     if IsValid(wep) then
-    --                         wep:SetNoDraw(false)
-    --                     end
-    --                 end
-    --
-    --                 -- Ghost appearance
-    --                 ply:SetColor(Color(255,255,255,100))
-    --                 ply:SetRenderMode(RENDERMODE_TRANSALPHA)
-    --
-    --                 JoelBotC:AliveDeadUpdate()
-    --
-    --                 -- Remove ragdoll
-    --                 -- if IsValid(rag) then rag:Remove() end
-    --             end)
-    --         end
---
-    --         ragModel = ply:GetModel()
-    --         ragPos = ply:GetPos()
-    --         ragAngles = ply:GetAngles()
---
-    --         print("****************************************************")
-    --         print("ragModel = " .. tostring(ragModel))
-    --         print("ragPos = " .. tostring(ragPos))
-    --         print("ragAngles = " .. tostring(ragAngles))
-    --         print("ply:GetModel = " .. tostring(ply:GetModel()))
-    --         print("ply:GetPos = " .. tostring(ply:GetPos()))
-    --         print("ply:GetAngles = " .. tostring(ply:GetAngles()))
-    --         print("****************************************************")
---
---
-    --     end)
-    -- end
 
     -- Execution kill (anvil go bonk)
     function JoelBotC:Execute(ply)
@@ -433,6 +325,20 @@ if SERVER then
             rag:SetAngles(ply:GetAngles())
             rag:Spawn()
 
+            if CORPSE then
+                CORPSE.SetPlayerNick(rag, ply)
+                CORPSE.SetFound(rag, true)
+            end
+            ply:SetNWBool("body_found", true)
+
+            rag.sid64          = ply:SteamID64()
+            rag.sid            = ply:SteamID()
+            rag.player_ragdoll = true
+            rag.time           = CurTime()
+            rag.was_role       = ply.botc_role or ply:GetRole()
+            rag.kills          = table.Copy(ply.kills)
+            rag.is_botc_body   = true
+
             -- Bonk the ragdoll into the ground like it got squished
             for i = 0, rag:GetPhysicsObjectCount() - 1 do
                 local ragPhys = rag:GetPhysicsObjectNum(i)
@@ -467,9 +373,6 @@ if SERVER then
                 ply:SetRenderMode(RENDERMODE_TRANSALPHA)
 
                 JoelBotC:AliveDeadUpdate()
-
-                -- Remove ragdoll
-                -- if IsValid(rag) then rag:Remove() end
             end)
 
             if ply:IsFrozen() then
@@ -487,5 +390,33 @@ if SERVER then
             end
         end)
     end
+end
 
+if CLIENT then
+    net.Receive("rdmtJoelBotCRequestBoneData", function()
+        local ply = LocalPlayer()
+        if not IsValid(ply) then return end
+
+        ply:SetupBones()
+
+        local boneTable = {}
+        local count = ply:GetBoneCount() or 0
+
+        for i = 0, count - 1 do
+            local pos, ang = ply:GetBonePosition(i)
+            if pos and ang then
+                table.insert(boneTable, {
+                    id = i,
+                    pos = pos,
+                    ang = ang
+                })
+            end
+        end
+
+        net.Start("rdmtJoelBotCBSendBoneData")
+            net.WriteVector(ply:GetPos())
+            net.WriteAngle(ply:GetAngles())
+            net.WriteTable(boneTable)
+        net.SendToServer()
+    end)
 end

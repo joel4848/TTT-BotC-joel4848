@@ -74,39 +74,14 @@ function EVENT:Begin()
         ply.originalRenderMode = ply:GetRenderMode()
     end
 
-    -- net.Receive("rdmtJoelBotCNightStarts", function()
-    --     hook.Add("RenderScreenspaceEffects", "JoelBOTC_NightEffect", function()
-    --         local tab = {}
-    --         tab["$pp_colour_brightness"] = -0.25
-    --         tab["$pp_colour_contrast"] = 0.8
-    --         tab["$pp_colour_colour"] = 0.5
--- 
-    --         DrawColorModify(tab)
-    --     end)
--- 
-    --     hook.Add("SetupWorldFog", "NightFog", function()
--- 
-    --         render.FogMode(MATERIAL_FOG_LINEAR)
-    --         render.FogStart(1)
-    --         render.FogEnd(1)
-    --         render.FogMaxDensity(0.8)
--- 
-    --         render.FogColor(30, 30, 40)
--- 
-    --         return true
-    --     end)
--- 
-    --     hook.Add("PostDrawSkyBox", "DarkSky", function()
-    --         render.Clear(20,20,60,50,true,true)
-    --     end)
-    -- end)
+    local oldIsAliveClient = {}
 
     net.Receive("rdmtJoelBotCAliveDeadUpdate", function()
         JoelBotC.isAliveClient = net.ReadTable()
+        oldIsAliveClient = oldIsAliveClient or JoelBotC.isAliveClient
 
         for _, ply in ipairs(JoelBotC.seatingOrderClient) do
-            if JoelBotC.isAliveClient[ply] == false then
-
+            if JoelBotC.isAliveClient[ply] == false and oldIsAliveClient[ply] ~= false then
                 ply:SetRenderMode(RENDERMODE_TRANSALPHA)
                 ply:SetColor(Color(255,255,255,0))
 
@@ -124,11 +99,16 @@ function EVENT:Begin()
                     ply:SetColor(Color(255,255,255,alpha))
                 end)
 
+            elseif JoelBotC.isAliveClient[ply] == false then
+                ply:SetRenderMode(RENDERMODE_TRANSALPHA)
+                ply:SetColor(Color(255,255,255,100))
             else
                 ply:SetColor(Color(255, 255, 255, 255))
                 ply:SetRenderMode(RENDERMODE_NORMAL)
             end
         end
+
+        oldIsAliveClient = JoelBotC.isAliveClient
     end)
 
     -- Opening splash screen

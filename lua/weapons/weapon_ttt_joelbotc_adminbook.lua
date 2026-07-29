@@ -46,6 +46,8 @@ local BookOpen         = false
 if SERVER then
     util.AddNetworkString("TTT_adminBookChoice")
 
+    local ded = 2
+
     net.Receive("TTT_adminBookChoice", function(len, ply)
         local buttonPressed = net.ReadInt(8)
 
@@ -60,7 +62,10 @@ if SERVER then
             end
             JoelBotC:PoNight()
         elseif buttonPressed == 4 then
-            JoelBotC:Execute(JoelBotC.seatingOrder[2])
+            JoelBotC:Execute(JoelBotC.seatingOrder[ded])
+            ded = ded + 1
+            if ded > #JoelBotC.seatingOrder then ded = 1 end
+            ded = 2
         elseif buttonPressed == 7 then
             JoelBotC:Revive(JoelBotC.seatingOrder[2])
         elseif buttonPressed == 5 then
@@ -276,6 +281,8 @@ if CLIENT then
                         net.WriteInt(id, 8)
                     net.SendToServer()
 
+                    self:CloseBook()
+
                     -- if IsValid(AdminBookFrame) then
                     --     AdminBookFrame:Remove()
                     -- end
@@ -292,11 +299,11 @@ if CLIENT then
     end
 
     function SWEP:CloseBook()
+        gui.EnableScreenClicker(false)
+
         if IsValid(AdminBookFrame) then
             AdminBookFrame:Remove()
         end
-
-        gui.EnableScreenClicker(false)
 
         AdminBookFrame = nil
         BookOpen = false

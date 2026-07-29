@@ -556,6 +556,10 @@ if SERVER then
         -- Create seating order table
         JoelBotC.seatingOrder = table.Copy(JoelBotC.players)
 
+        -- repeat
+        --     table.Shuffle(JoelBotC.seatingOrder)
+        -- until (JoelBotC.seatingOrder[2]:Nick() == "Joel4848")
+
         for i, ply in ipairs(JoelBotC.seatingOrder) do
             -- PrintMessage(HUD_PRINTTALK, "Seat " .. i .. ": " .. ply:Nick() .. " - " .. ROLE_STRINGS[ply.botc_role])
             ply.seatNumber = i

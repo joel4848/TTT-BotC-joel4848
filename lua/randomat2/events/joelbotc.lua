@@ -24,6 +24,8 @@ JoelBotC.BotCEventRunning = JoelBotC.BotCEventRunning or nil
 
 -- local originalDetectiveCvar = nil
 
+local testingMode = false
+
 function EVENT:Begin()
     JoelBotC.players = {}
     JoelBotC.isAlive = {}
@@ -35,6 +37,12 @@ function EVENT:Begin()
     JoelBotC.demonsInBag = {}
 
     JoelBotC.BotCEventRunning = true
+
+    self:AddHook("TTTCanSearchCorpse", function(ply, rag)
+        if rag.is_botc_body then
+            return false
+        end
+    end)
 
     self:AddHook("EntityTakeDamage", function(target, _)
         if target:IsPlayer() then
@@ -108,27 +116,29 @@ function EVENT:Begin()
         JoelBotC:GiveStartingBooks()
     end)
 
-    timer.Create("rdmtJoelBotC_gamestart_2", 5, 1, function()
-        Randomat:SmallNotify("Check your inventory for your notebook and information book!", 5)
-    end)
+    if not testingMode then
+        timer.Create("rdmtJoelBotC_gamestart_2", 5, 1, function()
+            Randomat:SmallNotify("Check your inventory for your notebook and information book!", 5)
+        end)
 
-    timer.Create("rdmtJoelBotC_gamestart_3", 10, 1, function()
-        Randomat:SmallNotify("Night 1 will start in 5 seconds...", 5)
-    end)
+        timer.Create("rdmtJoelBotC_gamestart_3", 10, 1, function()
+            Randomat:SmallNotify("Night 1 will start in 5 seconds...", 5)
+        end)
 
-    timer.Create("rdmtJoelBotC_gamestart_4", 10, 1, function()
-        JoelBotC.isFirstNight = true
-        JoelBotC.currentNight = 0
-        timer.Create("rdmtJoelBotCNominationsEnd", 5, 1, function()
-            JoelBotC:SendMiddleMessage("Night " .. tostring(JoelBotC.currentNight + 1) .. " begins...", 5)
-            net.Start("rdmtJoelBotCNightStarts")
-            net.Broadcast()
+        timer.Create("rdmtJoelBotC_gamestart_4", 10, 1, function()
+            JoelBotC.isFirstNight = true
+            JoelBotC.currentNight = 0
+            timer.Create("rdmtJoelBotCNominationsEnd", 5, 1, function()
+                JoelBotC:SendMiddleMessage("Night " .. tostring(JoelBotC.currentNight + 1) .. " begins...", 5)
+                net.Start("rdmtJoelBotCNightStarts")
+                net.Broadcast()
 
-            timer.Create("rdmtJoelBotCStartNightAfterNominations", 5, 1, function()
-                JoelBotC:StartNight()
+                timer.Create("rdmtJoelBotCStartNightAfterNominations", 5, 1, function()
+                    JoelBotC:StartNight()
+                end)
             end)
         end)
-    end)
+    end
 
     self:AddHook("TTTCheckForWin", function()
         if JoelBotC.isCurrentlyNight then return WIN_NONE end
