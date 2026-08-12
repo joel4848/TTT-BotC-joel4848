@@ -3,40 +3,72 @@ JoelBotC = JoelBotC or {}
 if SERVER then
 
     -- 'Script' -----------------------------------------------------------------------------------------------------------------
-    local stewardEnabled = CreateConVar("randomat_joelbotc_steward_enabled", 1, FCVAR_NONE, "Whether the Steward is on the script", 0, 1):GetBool()
-    local knightEnabled = CreateConVar("randomat_joelbotc_knight_enabled", 1, FCVAR_NONE, "Whether the Knight is on the script", 0, 1):GetBool()
-    local oracleEnabled = CreateConVar("randomat_joelbotc_oracle_enabled", 1, FCVAR_NONE, "Whether the Oracle is on the script", 0, 1):GetBool()
-    local chefEnabled = CreateConVar("randomat_joelbotc_chef_enabled", 1, FCVAR_NONE, "Whether the Chef is on the script", 0, 1):GetBool()
-    local undertakerEnabled = CreateConVar("randomat_joelbotc_undertaker_enabled", 1, FCVAR_NONE, "Whether the Undertaker is on the script", 0, 1):GetBool()
-    local nobleEnabled = CreateConVar("randomat_joelbotc_noble_enabled", 1, FCVAR_NONE, "Whether the Noble is on the script", 0, 1):GetBool()
-    local investigatorEnabled = CreateConVar("randomat_joelbotc_investigator_enabled", 1, FCVAR_NONE, "Whether the Investigator is on the script", 0, 1):GetBool()
-    local monkEnabled = CreateConVar("randomat_joelbotc_monk_enabled", 1, FCVAR_NONE, "Whether the Monk is on the script", 0, 1):GetBool()
-    local washerwomanEnabled = CreateConVar("randomat_joelbotc_washerwoman_enabled", 1, FCVAR_NONE, "Whether the Washerwoman is on the script", 0, 1):GetBool()
-    local nightwatchmanEnabled = CreateConVar("randomat_joelbotc_nightwatchman_enabled", 1, FCVAR_NONE, "Whether the Nightwatchman is on the script", 0, 1):GetBool()
-    local grandmotherEnabled = CreateConVar("randomat_joelbotc_grandmother_enabled", 1, FCVAR_NONE, "Whether the Grandmother is on the script", 0, 1):GetBool()
-    local seamstressEnabled = CreateConVar("randomat_joelbotc_seamstress_enabled", 1, FCVAR_NONE, "Whether the Seamstress is on the script", 0, 1):GetBool()
-    local librarianEnabled = CreateConVar("randomat_joelbotc_librarian_enabled", 1, FCVAR_NONE, "Whether the Librarian is on the script", 0, 1):GetBool()
-    local empathEnabled = CreateConVar("randomat_joelbotc_empath_enabled", 1, FCVAR_NONE, "Whether the Empath is on the script", 0, 1):GetBool()
-    local soldierEnabled = CreateConVar("randomat_joelbotc_soldier_enabled", 1, FCVAR_NONE, "Whether the Soldier is on the script", 0, 1):GetBool()
-    local ravenkeeperEnabled = CreateConVar("randomat_joelbotc_ravenkeeper_enabled", 1, FCVAR_NONE, "Whether the Ravenkeeper is on the script", 0, 1):GetBool()
-    local fortunetellerEnabled = CreateConVar("randomat_joelbotc_fortuneteller_enabled", 1, FCVAR_NONE, "Whether the Fortune Teller is on the script", 0, 1):GetBool()
-    local virginEnabled = CreateConVar("randomat_joelbotc_virgin_enabled", 1, FCVAR_NONE, "Whether the Virgin is on the script", 0, 1):GetBool()
-    local ogreEnabled = CreateConVar("randomat_joelbotc_ogre_enabled", 1, FCVAR_NONE, "Whether the Ogre is on the script", 0, 1):GetBool()
-    local snitchEnabled = CreateConVar("randomat_joelbotc_snitch_enabled", 1, FCVAR_NONE, "Whether the Snitch is on the script", 0, 1):GetBool()
-    local golemEnabled = CreateConVar("randomat_joelbotc_golem_enabled", 1, FCVAR_NONE, "Whether the Golem is on the script", 0, 1):GetBool()
-    local sweetheartEnabled = CreateConVar("randomat_joelbotc_sweetheart_enabled", 1, FCVAR_NONE, "Whether the Sweetheart is on the script", 0, 1):GetBool()
-    local saintEnabled = CreateConVar("randomat_joelbotc_saint_enabled", 1, FCVAR_NONE, "Whether the Saint is on the script", 0, 1):GetBool()
-    -- local drunkEnabled = CreateConVar("randomat_joelbotc_drunk_enabled", 0, FCVAR_NONE, "Whether the Drunk is on the script", 0, 1):GetBool()
-    local recluseEnabled = CreateConVar("randomat_joelbotc_recluse_enabled", 1, FCVAR_NONE, "Whether the Recluse is on the script", 0, 1):GetBool()
-    local poisonerEnabled = CreateConVar("randomat_joelbotc_poisoner_enabled", 1, FCVAR_NONE, "Whether the Poisoner is on the script", 0, 1):GetBool()
-    local scarletwomanEnabled = CreateConVar("randomat_joelbotc_scarletwoman_enabled", 1, FCVAR_NONE, "Whether the Scarlet Woman is on the script", 0, 1):GetBool()
-    local organgrinderEnabled = CreateConVar("randomat_joelbotc_organgrinder_enabled", 1, FCVAR_NONE, "Whether the Organ Grinder is on the script", 0, 1):GetBool()
-    local assassinEnabled = CreateConVar("randomat_joelbotc_assassin_enabled", 1, FCVAR_NONE, "Whether the Assassin is on the script", 0, 1):GetBool()
-    local baronEnabled = CreateConVar("randomat_joelbotc_baron_enabled", 1, FCVAR_NONE, "Whether the Baron is on the script", 0, 1):GetBool()
+    CreateConVar("randomat_joelbotc_steward_enabled", 1, FCVAR_NONE, "Whether the Steward is on the script", 0, 1):GetBool()
+    CreateConVar("randomat_joelbotc_knight_enabled", 1, FCVAR_NONE, "Whether the Knight is on the script", 0, 1):GetBool()
+    CreateConVar("randomat_joelbotc_oracle_enabled", 1, FCVAR_NONE, "Whether the Oracle is on the script", 0, 1):GetBool()
+    CreateConVar("randomat_joelbotc_chef_enabled", 1, FCVAR_NONE, "Whether the Chef is on the script", 0, 1):GetBool()
+    CreateConVar("randomat_joelbotc_undertaker_enabled", 1, FCVAR_NONE, "Whether the Undertaker is on the script", 0, 1):GetBool()
+    CreateConVar("randomat_joelbotc_noble_enabled", 1, FCVAR_NONE, "Whether the Noble is on the script", 0, 1):GetBool()
+    CreateConVar("randomat_joelbotc_investigator_enabled", 1, FCVAR_NONE, "Whether the Investigator is on the script", 0, 1):GetBool()
+    CreateConVar("randomat_joelbotc_monk_enabled", 1, FCVAR_NONE, "Whether the Monk is on the script", 0, 1):GetBool()
+    CreateConVar("randomat_joelbotc_washerwoman_enabled", 1, FCVAR_NONE, "Whether the Washerwoman is on the script", 0, 1):GetBool()
+    CreateConVar("randomat_joelbotc_nightwatchman_enabled", 1, FCVAR_NONE, "Whether the Nightwatchman is on the script", 0, 1):GetBool()
+    CreateConVar("randomat_joelbotc_grandmother_enabled", 1, FCVAR_NONE, "Whether the Grandmother is on the script", 0, 1):GetBool()
+    CreateConVar("randomat_joelbotc_seamstress_enabled", 1, FCVAR_NONE, "Whether the Seamstress is on the script", 0, 1):GetBool()
+    CreateConVar("randomat_joelbotc_librarian_enabled", 1, FCVAR_NONE, "Whether the Librarian is on the script", 0, 1):GetBool()
+    CreateConVar("randomat_joelbotc_empath_enabled", 1, FCVAR_NONE, "Whether the Empath is on the script", 0, 1):GetBool()
+    CreateConVar("randomat_joelbotc_soldier_enabled", 1, FCVAR_NONE, "Whether the Soldier is on the script", 0, 1):GetBool()
+    CreateConVar("randomat_joelbotc_ravenkeeper_enabled", 1, FCVAR_NONE, "Whether the Ravenkeeper is on the script", 0, 1):GetBool()
+    CreateConVar("randomat_joelbotc_fortuneteller_enabled", 1, FCVAR_NONE, "Whether the Fortune Teller is on the script", 0, 1):GetBool()
+    CreateConVar("randomat_joelbotc_virgin_enabled", 1, FCVAR_NONE, "Whether the Virgin is on the script", 0, 1):GetBool()
+    CreateConVar("randomat_joelbotc_ogre_enabled", 1, FCVAR_NONE, "Whether the Ogre is on the script", 0, 1):GetBool()
+    CreateConVar("randomat_joelbotc_snitch_enabled", 1, FCVAR_NONE, "Whether the Snitch is on the script", 0, 1):GetBool()
+    CreateConVar("randomat_joelbotc_golem_enabled", 1, FCVAR_NONE, "Whether the Golem is on the script", 0, 1):GetBool()
+    CreateConVar("randomat_joelbotc_sweetheart_enabled", 1, FCVAR_NONE, "Whether the Sweetheart is on the script", 0, 1):GetBool()
+    CreateConVar("randomat_joelbotc_saint_enabled", 1, FCVAR_NONE, "Whether the Saint is on the script", 0, 1):GetBool()
+    CreateConVar("randomat_joelbotc_recluse_enabled", 1, FCVAR_NONE, "Whether the Recluse is on the script", 0, 1):GetBool()
+    CreateConVar("randomat_joelbotc_poisoner_enabled", 1, FCVAR_NONE, "Whether the Poisoner is on the script", 0, 1):GetBool()
+    CreateConVar("randomat_joelbotc_scarletwoman_enabled", 1, FCVAR_NONE, "Whether the Scarlet Woman is on the script", 0, 1):GetBool()
+    CreateConVar("randomat_joelbotc_organgrinder_enabled", 1, FCVAR_NONE, "Whether the Organ Grinder is on the script", 0, 1):GetBool()
+    CreateConVar("randomat_joelbotc_assassin_enabled", 1, FCVAR_NONE, "Whether the Assassin is on the script", 0, 1):GetBool()
+    CreateConVar("randomat_joelbotc_baron_enabled", 1, FCVAR_NONE, "Whether the Baron is on the script", 0, 1):GetBool()
+    CreateConVar("randomat_joelbotc_imp_enabled", 1, FCVAR_NONE, "Whether the Imp is on the script", 0, 1):GetBool()
+    CreateConVar("randomat_joelbotc_po_enabled", 1, FCVAR_NONE, "Whether the Po is on the script", 0, 1):GetBool()
     -- local pukkaEnabled = CreateConVar("randomat_joelbotc_pukka_enabled", 1, FCVAR_NONE, "Whether the Pukka is on the script", 0, 1):GetBool()
-    local impEnabled = CreateConVar("randomat_joelbotc_imp_enabled", 1, FCVAR_NONE, "Whether the Imp is on the script", 0, 1):GetBool()
-    local poEnabled = CreateConVar("randomat_joelbotc_po_enabled", 1, FCVAR_NONE, "Whether the Po is on the script", 0, 1):GetBool()
+    -- local drunkEnabled = CreateConVar("randomat_joelbotc_drunk_enabled", 0, FCVAR_NONE, "Whether the Drunk is on the script", 0, 1):GetBool()
     -- /'Script' ----------------------------------------------------------------------------------------------------------------
+
+    local stewardEnabled
+    local knightEnabled
+    local oracleEnabled
+    local chefEnabled
+    local undertakerEnabled
+    local nobleEnabled
+    local investigatorEnabled
+    local monkEnabled
+    local washerwomanEnabled
+    local nightwatchmanEnabled
+    local grandmotherEnabled
+    local seamstressEnabled
+    local librarianEnabled
+    local empathEnabled
+    local soldierEnabled
+    local ravenkeeperEnabled
+    local fortunetellerEnabled
+    local virginEnabled
+    local ogreEnabled
+    local snitchEnabled
+    local golemEnabled
+    local sweetheartEnabled
+    local saintEnabled
+    local recluseEnabled
+    local poisonerEnabled
+    local scarletwomanEnabled
+    local organgrinderEnabled
+    local assassinEnabled
+    local baronEnabled
+    local impEnabled
+    local poEnabled
 
     JoelBotC.original_COLOR_DETECTIVE = JoelBotC.original_COLOR_DETECTIVE or {}
     JoelBotC.original_COLOR_SPECIAL_INNOCENT = JoelBotC.original_COLOR_SPECIAL_INNOCENT or {}
@@ -119,6 +151,39 @@ if SERVER then
     end
 
     function JoelBotC:BuildGameScript()
+        -- Get convar values
+        stewardEnabled       = GetConVar("randomat_joelbotc_steward_enabled"):GetBool()
+        knightEnabled        = GetConVar("randomat_joelbotc_knight_enabled"):GetBool()
+        oracleEnabled        = GetConVar("randomat_joelbotc_oracle_enabled"):GetBool()
+        chefEnabled          = GetConVar("randomat_joelbotc_chef_enabled"):GetBool()
+        undertakerEnabled    = GetConVar("randomat_joelbotc_undertaker_enabled"):GetBool()
+        nobleEnabled         = GetConVar("randomat_joelbotc_noble_enabled"):GetBool()
+        investigatorEnabled  = GetConVar("randomat_joelbotc_investigator_enabled"):GetBool()
+        monkEnabled          = GetConVar("randomat_joelbotc_monk_enabled"):GetBool()
+        washerwomanEnabled   = GetConVar("randomat_joelbotc_washerwoman_enabled"):GetBool()
+        nightwatchmanEnabled = GetConVar("randomat_joelbotc_nightwatchman_enabled"):GetBool()
+        grandmotherEnabled   = GetConVar("randomat_joelbotc_grandmother_enabled"):GetBool()
+        seamstressEnabled    = GetConVar("randomat_joelbotc_seamstress_enabled"):GetBool()
+        librarianEnabled     = GetConVar("randomat_joelbotc_librarian_enabled"):GetBool()
+        empathEnabled        = GetConVar("randomat_joelbotc_empath_enabled"):GetBool()
+        soldierEnabled       = GetConVar("randomat_joelbotc_soldier_enabled"):GetBool()
+        ravenkeeperEnabled   = GetConVar("randomat_joelbotc_ravenkeeper_enabled"):GetBool()
+        fortunetellerEnabled = GetConVar("randomat_joelbotc_fortuneteller_enabled"):GetBool()
+        virginEnabled        = GetConVar("randomat_joelbotc_virgin_enabled"):GetBool()
+        ogreEnabled          = GetConVar("randomat_joelbotc_ogre_enabled"):GetBool()
+        snitchEnabled        = GetConVar("randomat_joelbotc_snitch_enabled"):GetBool()
+        golemEnabled         = GetConVar("randomat_joelbotc_golem_enabled"):GetBool()
+        sweetheartEnabled    = GetConVar("randomat_joelbotc_sweetheart_enabled"):GetBool()
+        saintEnabled         = GetConVar("randomat_joelbotc_saint_enabled"):GetBool()
+        recluseEnabled       = GetConVar("randomat_joelbotc_recluse_enabled"):GetBool()
+        poisonerEnabled      = GetConVar("randomat_joelbotc_poisoner_enabled"):GetBool()
+        scarletwomanEnabled  = GetConVar("randomat_joelbotc_scarletwoman_enabled"):GetBool()
+        organgrinderEnabled  = GetConVar("randomat_joelbotc_organgrinder_enabled"):GetBool()
+        assassinEnabled      = GetConVar("randomat_joelbotc_assassin_enabled"):GetBool()
+        baronEnabled         = GetConVar("randomat_joelbotc_baron_enabled"):GetBool()
+        impEnabled           = GetConVar("randomat_joelbotc_imp_enabled"):GetBool()
+        poEnabled            = GetConVar("randomat_joelbotc_po_enabled"):GetBool()
+
         -- Determine roles on the 'script'
         JoelBotC.enabledTownsfolk = {}
         JoelBotC.enabledOutsiders = {}
@@ -592,7 +657,11 @@ if SERVER then
             -- Issue the signed book (all 4 pages, "Your info" starts with just role/ability)
             JoelBotC:RebuildInfoBook(ply)
 
-            ply:SelectWeapon("weapon_ttt_signedbook")
+            if JoelBotC.testingMode then
+                ply:SelectWeapon("weapon_ttt_joelbotc_adminbook")
+            else
+                ply:SelectWeapon("weapon_ttt_signedbook")
+            end
         end
     end
 
