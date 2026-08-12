@@ -3,6 +3,7 @@ JoelBotC.seatingOrderClient = JoelBotC.seatingOrderClient or {}
 JoelBotC.clientGUIOpen = JoelBotC.clientGUIOpen or nil
 JoelBotC.ghostVotes = JoelBotC.ghostVotes or {}
 JoelBotC.overlayTimer = JoelBotC.overlayTimer or nil
+JoelBotC.seatingGUIButtons = JoelBotC.seatingGUIButtons or {}
 
 -----------------------------------------------------------------------------------------
 -- SHARED
@@ -18,7 +19,6 @@ local voteIntervalCvar = CreateConVar("randomat_joelbotc_vote_interval", 1.5, FC
 -----------------------------------------------------------------------------------------
 
 if SERVER then
-
     util.AddNetworkString("rdmtJoelBotCNominationGUIOpen")      -- tells player(s) to open the nomination GUI
     util.AddNetworkString("rdmtJoelBotCNominationGUIClose")     -- tells player(s) to close the nomination GUI (duh)
     util.AddNetworkString("rdmtJoelBotCNominationGUIChoice")    -- sends the button a player presses to the server
@@ -139,10 +139,15 @@ if SERVER then
 
     -- Receive when a player presses a button and which button it was that they pressed
     net.Receive("rdmtJoelBotCNominationGUIChoice", function(_, ply)
-        if not JoelBotC.nominationsOpen then return end
-        local nominatorSeat = ply.seatNumber
-        if not nominatorSeat then return end
-        JoelBotC:PlayerNominated(nominatorSeat, net.ReadInt(6))
+        local presserSeat = ply.seatNumber
+        if not presserSeat then return end
+        local pressedButton = net.ReadInt(6)
+
+        if JoelBotC.nominationsOpen then
+            JoelBotC:PlayerNominated(presserSeat, pressedButton)
+        elseif JoelBotC.votingOpen and pressedButton == presserSeat then
+            JoelBotC:ToggleVote(ply)
+        end
     end)
 
     -- Receive when nominator/nominee ends a speech phase early (true = prosecution, false = defence)
@@ -598,7 +603,6 @@ if CLIENT then
     -------------------------------------------------------------------------------------
     -- Rotation helper
     -------------------------------------------------------------------------------------
-
     function surface.DrawTexturedRectRotatedPoint(x, y, w, h, rot, x0, y0)
         local c = math.cos(math.rad(rot))
         local s = math.sin(math.rad(rot))
@@ -682,12 +686,33 @@ if CLIENT then
     -- Functions for the extra buttons and icons
     -------------------------------------------------------------------------------------
 
+    local function EnableSeatButtons()
+        for seat, btn in ipairs(JoelBotC.seatingGUIButtons) do
+            if IsValid(btn) then
+                btn:SetEnabled(true)
+                btn:SetMouseInputEnabled(true)
+            end
+        end
+    end
+
+    local function DisableSeatButtons(onlyOtherSeats)
+        local localSeat = LocalPlayer().seatNumber
+
+        for seat, btn in ipairs(JoelBotC.seatingGUIButtons) do
+            if IsValid(btn) then
+                btn:SetEnabled(onlyOtherSeats and seat == localSeat)
+                btn:SetMouseInputEnabled(onlyOtherSeats and seat == localSeat)
+            end
+        end
+    end
+
     local function DestroyEndSpeechButton()
         if IsValid(endSpeechBtn) then endSpeechBtn:Remove() endSpeechBtn = nil end
     end
 
     local function DestroyVoteToggleButton()
         if IsValid(voteToggleBtn) then voteToggleBtn:Remove() voteToggleBtn = nil end
+        EnableSeatButtons()
     end
 
     local function CreateEndSpeechButton(label, isProsecution)
@@ -713,6 +738,8 @@ if CLIENT then
     local function CreateVoteToggleButton()
         DestroyVoteToggleButton()
         if not IsValid(nomGUI) then return end
+
+        DisableSeatButtons(true)
 
         local btnW, btnH = 260, 60
         local btnY = ScrH() / 2 - btnH / 2
@@ -768,7 +795,6 @@ if CLIENT then
     -------------------------------------------------------------------------------------
     -- Announcement messages for each phase
     -------------------------------------------------------------------------------------
-
     local function GetOverlayLines()
         local t = JoelBotC.overlayTimer
 
@@ -800,7 +826,6 @@ if CLIENT then
     -------------------------------------------------------------------------------------
     -- Network receivers
     -------------------------------------------------------------------------------------
-
     net.Receive("rdmtJoelBotCOGActive", function()
         JoelBotC.organgrinderActive = net.ReadBool()
     end)
@@ -1001,6 +1026,8 @@ if CLIENT then
             surface.DrawTexturedRectRotatedPoint(cx, cy, smallHandThick, smallHandLength, smallCurrentAngle, 0, -smallHandLength / 2)
         end
 
+        JoelBotC.seatingGUIButtons = {}
+
         -- Build seat buttons
         for i = 1, count do
             local baseAngle = (i - 1) * (2 * math.pi / count)
@@ -1031,6 +1058,7 @@ if CLIENT then
             end
 
             local btn = vgui.Create("DButton", nomGUI)
+            table.insert(JoelBotC.seatingGUIButtons, btn)
             btn:SetSize(finalWidth, size)
             btn:SetPos(finalX, finalY)
             btn:SetText(btnText)

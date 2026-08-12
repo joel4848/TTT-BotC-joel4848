@@ -1,13 +1,12 @@
 JoelBotC = JoelBotC or {}
 JoelBotC.seatingOrderClient = JoelBotC.seatingOrderClient or {}
 JoelBotC.clientGUIOpen = JoelBotC.clientGUIOpen or nil
+JoelBotC.seatingGUIButtons = JoelBotC.seatingGUIButtons or {}
 
 -----------------------------------------------------------------------------------------
 ---------------------------------------SERVER--------------------------------------------
 -----------------------------------------------------------------------------------------
-
 if SERVER then
-
     util.AddNetworkString("rdmtJoelBotCSeatingGUIOpen")
     util.AddNetworkString("rdmtJoelBotCSeatingGUIClose")
     util.AddNetworkString("rdmtJoelBotCSeatingGUIChoice")
@@ -59,7 +58,6 @@ end
 -----------------------------------------------------------------------------------------
 
 if CLIENT then
-
     net.Receive("rdmtJoelBotCSeatingOrder", function()
         JoelBotC.seatingOrderClient = {}
         JoelBotC.seatingOrderClient = net.ReadTable()
@@ -74,10 +72,10 @@ if CLIENT then
             net.WriteInt(btn, 6)
         net.SendToServer()
     end
+
     -------------------------------------------------------------------------------------
     -- Title splash image
     -------------------------------------------------------------------------------------
-
     local botcTitleParent
     local titleFrameScale = 1
 
@@ -124,13 +122,14 @@ if CLIENT then
     -------------------------------------------------------------------------------------
     -- Seating GUI
     -------------------------------------------------------------------------------------
-
     local seatingGUI = nil
     local seatingGUIButtonSize = 60
     local seatingGUIScale = 1.0
 
     function JoelBotC:SeatingGUICreate(btntxt)
         if IsValid(seatingGUI) then return end
+
+        JoelBotC.seatingGUIButtons = {}
 
         JoelBotC.clientGUIOpen = true
 
@@ -167,6 +166,7 @@ if CLIENT then
             local finalY = y - (size / 2)
 
             local btn = vgui.Create("DButton", seatingGUI)
+            table.insert(JoelBotC.seatingGUIButtons, btn)
             btn:SetSize(size * ratio, size)
             btn:SetPos(finalX, finalY)
 
