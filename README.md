@@ -3,7 +3,6 @@
 - [ ] Add sounds (opening jingle, bell tolling, book opening etc.)
 - [ ] Make players look up while they're being executed
 - [ ] Disable mouse on seat buttons during voting, OR enable clicking own seat to toggle vote
-- [ ] Investigate report of end discussion early button not working
 - [ ] Game ends if no execution on final 3 and no protection role which might prevent the Demon killing
 - [ ] Grim reveal before game ends
 
@@ -13,6 +12,7 @@
 
 - Ghost votes now work (players were not being given a ghost vote on death, whoops)
 - "Nominations are now open" message/timer now disappears when a nomination happens
+- Fixed "End Defence Early" button not working
 
 ## Beta 1 - 2026.08.12
 

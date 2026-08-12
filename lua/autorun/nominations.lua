@@ -147,8 +147,14 @@ if SERVER then
 
     -- Receive when nominator/nominee ends a speech phase early (true = prosecution, false = defence)
     net.Receive("rdmtJoelBotCEndSpeech", function(_, ply)
-        if ply.seatNumber ~= JoelBotC.currentNominator then return end
         local isProsecution = net.ReadBool()
+
+        if isProsecution then
+            if ply.seatNumber ~= JoelBotC.currentNominator then return end
+        else
+            if ply.seatNumber ~= JoelBotC.currentNominee then return end
+        end
+
         if isProsecution and JoelBotC._prosecutionEndCallback then
             JoelBotC._prosecutionEndCallback()
         elseif not isProsecution and JoelBotC._defenceEndCallback then
