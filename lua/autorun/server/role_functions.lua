@@ -4,6 +4,9 @@ JoelBotC.monkProtectedPlayer = nil
 JoelBotC.poisonerPoisonedPlayer = nil
 JoelBotC.players = JoelBotC.players or {}
 JoelBotC.assassinAbilityUsed = nil
+JoelBotC.nightwatchmanAbilityUsed = nil
+JoelBotC.seamstressAbilityUsed = nil
+JoelBotC.ravenkeeperAbilityUsed = nil
 JoelBotC.nightFunctions = JoelBotC.nightFunctions or {}
 JoelBotC.recentExecutee = JoelBotC.recentExecutee or nil
 JoelBotC.deadPlayers = JoelBotC.deadPlayers or {}
@@ -314,7 +317,7 @@ function JoelBotC:InvestigatorNight()
             local investigatorMinionRole = nil
 
             table.Shuffle(investigatorMinionPool)
-            investigatorMinion    = investigatorMinionPool[1]
+            investigatorMinion     = investigatorMinionPool[1]
             investigatorMinionRole = investigatorMinion:GetRoleString()
 
             repeat
@@ -622,7 +625,7 @@ function JoelBotC:SeamstressNight()
     local didSeamstressStuff = false
 
     for _, ply in ipairs(JoelBotC.players) do
-        if ply:IsSeamstress() and not ply.BotCDead then
+        if ply:IsSeamstress() and not ply.BotCDead and not JoelBotC.seamstressAbilityUsed then
             didSeamstressStuff = true
 
             JoelBotC:SendSeatingGUICreate(ply)
@@ -684,6 +687,8 @@ function JoelBotC:SeamstressNight()
 
                             Randomat:SmallNotify(infoLine, 5, ply)
                             JoelBotC:AppendInfoBook(ply, "Night " .. JoelBotC.currentNight .. ":", infoLine)
+
+                            JoelBotC.seamstressAbilityUsed = true
 
                             JoelBotC:SendSeatingGUIDestroy(ply)
                             JoelBotC:NextNightStep()
@@ -874,7 +879,7 @@ function JoelBotC:RavenkeeperNight()
 
     for _, ply in ipairs(JoelBotC.players) do
         if ply:IsRavenkeeper() then
-            if JoelBotC.ravenkeeperKilledByDemon then
+            if JoelBotC.ravenkeeperKilledByDemon and not JoelBotC.ravenkeeperAbilityUsed then
                 didRavenkeeperStuff = true
 
                 JoelBotC:SendSeatingGUICreate(ply)
@@ -947,6 +952,7 @@ function JoelBotC:RavenkeeperNight()
                 end)
 
                 JoelBotC.ravenkeeperKilledByDemon = nil
+                JoelBotC.ravenkeeperAbilityUsed = true
             else
                 JoelBotC:NextNightStep()
             end

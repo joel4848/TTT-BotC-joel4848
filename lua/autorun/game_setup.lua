@@ -153,12 +153,14 @@ if SERVER then
         end
         if nightwatchmanEnabled then
             table.insert(JoelBotC.enabledTownsfolk, ROLE_NIGHTWATCHMANJBC)
+            JoelBotC.nightwatchmanAbilityUsed = false
         end
         if grandmotherEnabled then
             table.insert(JoelBotC.enabledTownsfolk, ROLE_GRANDMOTHERJBC)
         end
         if seamstressEnabled then
             table.insert(JoelBotC.enabledTownsfolk, ROLE_SEAMSTRESSJBC)
+            JoelBotC.seamstressAbilityUsed = false
         end
         if librarianEnabled then
             table.insert(JoelBotC.enabledTownsfolk, ROLE_LIBRARIANJBC)
@@ -171,6 +173,7 @@ if SERVER then
         end
         if ravenkeeperEnabled then
             table.insert(JoelBotC.enabledTownsfolk, ROLE_RAVENKEEPERJBC)
+            JoelBotC.ravenkeeperAbilityUsed = false
         end
         if fortunetellerEnabled then
             table.insert(JoelBotC.enabledTownsfolk, ROLE_FORTUNETELLERJBC)
@@ -579,7 +582,9 @@ if SERVER then
         for _, ply in ipairs(JoelBotC.players) do
             -- Give notebook and admin book
             GiveBookQuill(ply)
-            ply:Give("weapon_ttt_joelbotc_adminbook")
+            if JoelBotC.testingMode then
+                ply:Give("weapon_ttt_joelbotc_adminbook")
+            end
 
             -- Set up this player's info book segment store (role + ability + divider)
             JoelBotC:InitInfoBook(ply)

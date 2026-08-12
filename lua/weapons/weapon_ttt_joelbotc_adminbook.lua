@@ -52,7 +52,7 @@ if SERVER then
         local buttonPressed = net.ReadInt(8)
 
         if buttonPressed == 1 then
-            JoelBotC:SendSeatingGUICreate("Not tonight\n(Close GUI)")
+            JoelBotC:DoGrimReveal()
         elseif buttonPressed == 2 then
             JoelBotC:SendSeatingGUIDestroy(ply)
         elseif buttonPressed == 3 then
@@ -233,7 +233,11 @@ if CLIENT then
 
         BookOpen = true
 
-        gui.EnableScreenClicker(true)
+        hook.Add("OnPauseMenuShow", "RdmtJoelBotC_AdminBook_MenuSuppress", function()
+            return false
+        end)
+
+        -- gui.EnableScreenClicker(true)
 
         -- local swep = self
 
@@ -252,6 +256,10 @@ if CLIENT then
         AdminBookFrame:SetDraggable(false)
         AdminBookFrame:ShowCloseButton(true)
         AdminBookFrame:SetDeleteOnClose(true)
+
+        AdminBookFrame:SetMouseInputEnabled(true)
+        AdminBookFrame:MakePopup(true)
+        AdminBookFrame:SetKeyboardInputEnabled(false)
 
         -- Have to draw something apparently but then make it alpha 0
         AdminBookFrame.Paint = function(_,w,h)
@@ -307,6 +315,8 @@ if CLIENT then
 
         AdminBookFrame = nil
         BookOpen = false
+
+        hook.Remove("OnPauseMenuShow", "RdmtJoelBotC_AdminBook_MenuSuppress")
     end
 
     -----------------------------------------------------

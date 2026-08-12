@@ -331,6 +331,10 @@ if CLIENT then
         if self.BookOpen then return end
         self.BookOpen = true
 
+        hook.Add("OnPauseMenuShow", "RdmtJoelBotC_SignedBook_MenuSuppress", function()
+            return false
+        end)
+
         local swep = self
 
         local BW = ScrW() * 0.35
@@ -346,11 +350,6 @@ if CLIENT then
         local PBW = BW * 0.195
         local PBH = PBW * (31.5 / 48.75)
         local PBY = BY + BH * 0.81
-
-        local DoneW = BW * 0.51 * 0.5
-        local DoneH = 48 * (BH / 308) * 0.5
-        local DoneX = ScrW() / 2 + BW * 0.02
-        local DoneY = BY + BH + 4
 
         local Frame = vgui.Create("DFrame")
         Frame:SetBGColor(color_white)
@@ -538,10 +537,24 @@ if CLIENT then
             end
         end
 
-        local buttonClose = vgui.Create("DButton", Frame)
-        buttonClose:SetText("Close")
-        buttonClose:SetPos(DoneX, DoneY)
-        buttonClose:SetSize(DoneW, DoneH)
+        local doneX, doneY = 0, 0
+
+        local doneButtonPadding = 10
+        local doneW = 200
+        local doneH = 50
+        local doneButtonVerticalSpace = ScrH() - BY - BH
+        if doneButtonVerticalSpace >= doneH + 2 * doneButtonPadding then
+            doneX = BX + BW / 2 - doneW / 2
+            doneY = BY + BH + doneButtonPadding
+        else
+            doneX = BX - doneW - doneButtonPadding
+            doneY = BY + BH / 2 - doneH / 2
+        end
+
+        local buttonClose = vgui.Create("DImageButton", Frame)
+        buttonClose:SetPos(doneX, doneY)
+        buttonClose:SetSize(doneW, doneH)
+        buttonClose:SetImage("vgui/ttt/joelbotc/close_button.png")
         buttonClose.DoClick = function()
             surface.PlaySound("click.mp3")
             swep:CloseBook()
@@ -551,7 +564,8 @@ if CLIENT then
         hintLabel:SetText("Press ESC to close")
         hintLabel:SetColor(Color(180, 180, 180))
         hintLabel:SizeToContents()
-        hintLabel:SetPos(BX, DoneY + DoneH + 4)
+        local hintW, hintH = hintLabel:GetSize()
+        hintLabel:SetPos(BX + BW / 2 - hintW / 2, BY - hintH - doneButtonPadding)
     end
 
     function SWEP:CloseBook()
@@ -563,6 +577,8 @@ if CLIENT then
         self._TextScroll = nil
         self._TextContent = nil
         self.BookOpen = false
+
+        hook.Remove("OnPauseMenuShow", "RdmtJoelBotC_SignedBook_MenuSuppress")
     end
 
     -----------------------------------------------------

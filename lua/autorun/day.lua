@@ -1,7 +1,7 @@
 JoelBotC = JoelBotC or {}
 
+CreateConVar("randomat_joelbotc_discussion_duration", 30, FCVAR_REPLICATED, "How long (s) players have to discuss before nominations begin")
 CreateConVar("randomat_joelbotc_town_name", "San Joelsé", FCVAR_REPLICATED, "The town name displayed at the start of each new day")
-JoelBotC.townName = GetConVar("randomat_joelbotc_town_name"):GetString()
 
 if SERVER then
     util.AddNetworkString("rdmtJoelBotCNightEnds")
@@ -9,6 +9,8 @@ if SERVER then
     util.AddNetworkString("rdmtJoelBotCCentralMessage")
     util.AddNetworkString("rdmtJoelBotCEndDayVote")
     util.AddNetworkString("rdmtJoelBotCEndDay")
+
+    JoelBotC.townName = GetConVar("randomat_joelbotc_town_name"):GetString()
 
     JoelBotC.votesToEndDay = JoelBotC.votesToEndDay or {}
 
@@ -56,7 +58,7 @@ if SERVER then
         net.Start("rdmtJoelBotCDiscussionBegins")
         net.Broadcast()
 
-        timer.Simple(3, function()
+        timer.Create("rdmtJoelBotC_discussion_timer", GetConVar("randomat_joelbotc_discussion_duration"):GetInt(), 1, function()
             JoelBotC:EndDay()
         end)
 
@@ -114,7 +116,7 @@ if CLIENT then
     })
 
     local activeCentralMessage = nil
-    local bossBarData = nil
+    JoelBotC.bossBarData = nil
     local endDayButtonFrame = nil
     local voteStatus = "0/0 required votes"
 
@@ -185,7 +187,7 @@ if CLIENT then
     end
 
     function JoelBotC:StartDiscussionTimer(duration)
-        bossBarData = {
+        JoelBotC.bossBarData = {
             start = CurTime(),
             duration = duration,
             endTime = CurTime() + duration
@@ -195,9 +197,9 @@ if CLIENT then
 
     hook.Add("HUDPaint", "JoelBotC_DayHUD", function()
         -- Draw timer bar (kinda like a Minecraft boss bar)
-        if bossBarData and CurTime() < bossBarData.endTime then
-            local timeLeft = bossBarData.endTime - CurTime()
-            local percentageKinda = math.Clamp(timeLeft / bossBarData.duration, 0, 1)
+        if JoelBotC.bossBarData and CurTime() < JoelBotC.bossBarData.endTime then
+            local timeLeft = JoelBotC.bossBarData.endTime - CurTime()
+            local percentageKinda = math.Clamp(timeLeft / JoelBotC.bossBarData.duration, 0, 1)
 
             local barW, barH = ScrW() / 5, 8
             local x, y = (ScrW() - barW) / 2, 50
@@ -275,7 +277,7 @@ if CLIENT then
     -- end)
 
     net.Receive("rdmtJoelBotCDiscussionBegins", function()
-        JoelBotC:StartDiscussionTimer(3)
+        JoelBotC:StartDiscussionTimer(GetConVar("randomat_joelbotc_discussion_duration"):GetInt())
     end)
 
     net.Receive("rdmtJoelBotCEndDayVote", function()
@@ -285,7 +287,7 @@ if CLIENT then
     end)
 
     net.Receive("rdmtJoelBotCEndDay", function()
-        bossBarData = nil
+        JoelBotC.bossBarData = nil
         JoelBotC:DestroyEndDayEarlyButton()
         local message = {"Discussion time is over!", "Time for nominations..."}
         JoelBotC:DisplayCentralMessage(message, 5, Color(100, 255, 50), Color(0, 0, 0))

@@ -206,6 +206,10 @@ if SERVER then
             JoelBotC:MakeScarletWomanDemon(ply.botc_role)
         end
 
+        if ply:IsSweetheart() and not ply.BotCDead and not JoelBotC:IsDroisoned(ply) then
+            JoelBotC:SweetheartDeath(ply)
+        end
+
         ply.BotCDead = true
         JoelBotC.isAlive[ply] = false
 
@@ -309,6 +313,10 @@ if SERVER then
 
             if ply:IsRole(ROLE_SAINTJBC) and ply.BotCDead ~= true and not JoelBotC:IsDroisoned(ply) then
                 saintExecuted = true
+            end
+
+            if ply:IsSweetheart() and not ply.BotCDead and not JoelBotC:IsDroisoned(ply) then
+                JoelBotC:SweetheartDeath(ply)
             end
 
             ply.BotCDead = true

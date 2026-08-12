@@ -194,6 +194,9 @@ function EVENT:End()
     JoelBotC:SeatingGUIDestroy()
     JoelBotC:BotCTitleDestroy()
     JoelBotC:MessageOverlayDestroy()
+    JoelBotC:DestroyEndDayEarlyButton()
+
+    JoelBotC.bossBarData = nil
 
     -- Remove hooks
     hook.Remove("ScoreboardShow", "JoelBotC_BlockScoreboardShow")
@@ -208,6 +211,10 @@ function EVENT:End()
     hook.Remove("RenderScreenspaceEffects", "RdmtJoelBotC_Night_RenderScreenspaceEffects")
     hook.Remove("SetupSkyboxFog", "RdmtJoelBotC_Night_SetupSkyboxFog")
     hook.Remove("SetupWorldFog", "RdmtJoelBotC_Night_SetupWorldFog")
+
+    hook.Remove("OnPauseMenuShow", "RdmtJoelBotC_BookQuill_MenuSuppress")
+    hook.Remove("OnPauseMenuShow", "RdmtJoelBotC_SignedBook_MenuSuppress")
+    hook.Remove("OnPauseMenuShow", "RdmtJoelBotC_AdminBook_MenuSuppress")
 
     -- Remove timers
     timer.Remove("rdmtJoelBotCMoveBigHand")
@@ -233,8 +240,6 @@ function EVENT:End()
             end
         end
     end
-
-
 
     JoelBotC.eventActiveClient = nil
 end
