@@ -12,11 +12,6 @@ local prosecutionTimeCvar = CreateConVar("randomat_joelbotc_prosecution_time", 3
 local defenceTimeCvar = CreateConVar("randomat_joelbotc_defence_time", 30, FCVAR_REPLICATED, "Defence speech time (seconds)", 5, 60)
 local voteIntervalCvar = CreateConVar("randomat_joelbotc_vote_interval", 1.5, FCVAR_REPLICATED, "Time between each vote being locked in (seconds)", 0.1, 5)
 
--- local nominationTime = nominationTimeCvar:GetInt()
--- local prosecutionTime = prosecutionTimeCvar:GetInt()
--- local defenceTime = defenceTimeCvar:GetInt()
--- local voteInterval = voteIntervalCvar:GetFloat()
-
 -----------------------------------------------------------------------------------------
 ---------------------------------------SERVER--------------------------------------------
 -----------------------------------------------------------------------------------------
@@ -209,7 +204,7 @@ if SERVER then
         local alreadyBeenNominated = (nomineePly.hasBeenNominated == true)
         local nominatorDead = (nominatorPly.BotCDead == true)
 
-        if alreadyNominated or alreadyBeenNominated or nominatorDead then
+        if not JoelBotC.testingMode and (alreadyNominated or alreadyBeenNominated or nominatorDead) then
             local msg
             if nominatorDead then
                 msg = "You are dead and cannot nominate!"
@@ -338,6 +333,7 @@ if SERVER then
 
     function JoelBotC:ToggleVote(ply)
         if not JoelBotC.votingOpen then return end
+
         -- Prevent toggling once this player's vote has already been locked in
         if JoelBotC.lockedInSeats[ply.seatNumber] then return end
 
@@ -544,15 +540,17 @@ if SERVER then
         JoelBotC._prosecutionEndCallback = nil
         JoelBotC._defenceEndCallback = nil
 
-        timer.Create("rdmtJoelBotCNominationsEnd", 5, 1, function()
-            JoelBotC:SendMiddleMessage("Night " .. tostring(JoelBotC.currentNight + 1) .. " begins...", 5)
-            net.Start("rdmtJoelBotCNightStarts")
-            net.Broadcast()
+        if not JoelBotC.testingMode then
+            timer.Create("rdmtJoelBotCNominationsEnd", 5, 1, function()
+                JoelBotC:SendMiddleMessage("Night " .. tostring(JoelBotC.currentNight + 1) .. " begins...", 5)
+                net.Start("rdmtJoelBotCNightStarts")
+                net.Broadcast()
 
-            timer.Create("rdmtJoelBotCStartNightAfterNominations", 5, 1, function()
-                JoelBotC:StartNight()
+                timer.Create("rdmtJoelBotCStartNightAfterNominations", 5, 1, function()
+                    JoelBotC:StartNight()
+                end)
             end)
-        end)
+        end
     end
 end
 
