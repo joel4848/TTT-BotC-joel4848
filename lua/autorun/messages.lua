@@ -5,13 +5,15 @@ if SERVER then
     util.AddNetworkString("rdmtJoelBotCMiddleMessage") -- sends nomination 'error' messages
     util.AddNetworkString("rdmtJoelBotCBottomMessage") -- sends who (if anyone) is on the block, and minimum required votes
 
-    function JoelBotC:SendMiddleMessage(message, duration, target)
+    function JoelBotC:SendMiddleMessage(message, duration, target, clearTop)
         msg = message or ""
         dtn = duration or 3
+        ctp = clearTop or false
 
         net.Start("rdmtJoelBotCMiddleMessage")
             net.WriteString(msg)
             net.WriteInt(dtn, 7)
+            net.WriteBool(ctp)
         if target then
             net.Send(target)
         else
@@ -102,9 +104,7 @@ if CLIENT then
         middleMessage = net.ReadString()
         local duration = net.ReadInt(7)
         middleExpiry = CurTime() + duration
+        local clearTop = net.ReadBool()
+        if clearTop then JoelBotC.overlayTimer = 0 end
     end)
-
-
-
-
 end

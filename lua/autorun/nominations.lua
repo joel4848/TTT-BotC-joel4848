@@ -2,6 +2,7 @@ JoelBotC = JoelBotC or {}
 JoelBotC.seatingOrderClient = JoelBotC.seatingOrderClient or {}
 JoelBotC.clientGUIOpen = JoelBotC.clientGUIOpen or nil
 JoelBotC.ghostVotes = JoelBotC.ghostVotes or {}
+JoelBotC.overlayTimer = JoelBotC.overlayTimer or nil
 
 -----------------------------------------------------------------------------------------
 -- SHARED
@@ -231,7 +232,7 @@ if SERVER then
             else
                 nominatorPly.golemNominated = true
 
-                if not nomineePly.demon then
+                if not nomineePly.demon and not nomineePly.BotCDead then
                     diesToGolem = nomineePly
                 end
             end
@@ -247,10 +248,10 @@ if SERVER then
         JoelBotC:UpdateBottomMessage(false, nomineePly, JoelBotC.marked)
 
         if diesToGolem then
-            JoelBotC:SendMiddleMessage(nominatorPly:Nick() .. " has nominated " .. nomineePly:Nick() .. ", who dies", 5)
+            JoelBotC:SendMiddleMessage(nominatorPly:Nick() .. " has nominated " .. nomineePly:Nick() .. ", who dies", 5, nil, true)
             JoelBotC:Kill(nomineePly)
         else
-            JoelBotC:SendMiddleMessage(nominatorPly:Nick() .. " has nominated " .. nomineePly:Nick(), 5)
+            JoelBotC:SendMiddleMessage(nominatorPly:Nick() .. " has nominated " .. nomineePly:Nick(), 5, nil, true)
         end
 
         timer.Create("rdmtJoelBotC_nom_announcement_delay", 5, 1, function()
@@ -516,7 +517,7 @@ if SERVER then
             resultMsg = "The day ends and " .. JoelBotC.marked:Nick() .. " is executed!"
         end
         PrintMessage(HUD_PRINTTALK, resultMsg)
-        JoelBotC:SendMiddleMessage(resultMsg, 5, target)
+        JoelBotC:SendMiddleMessage(resultMsg, 5)
 
         -- Execute the marked player
         if IsValid(JoelBotC.marked) then
@@ -651,7 +652,7 @@ if CLIENT then
     local nomGUIScale = 1.0
 
     local overlayPhase = "none"
-    local overlayTimer = 0
+    JoelBotC.overlayTimer = 0
     local overlayData = {}
 
     local seatVoteOn = {} -- [seatIndex] = true/false
@@ -763,7 +764,8 @@ if CLIENT then
     -------------------------------------------------------------------------------------
 
     local function GetOverlayLines()
-        local t = overlayTimer
+        local t = JoelBotC.overlayTimer
+
         if overlayPhase == "nominations" then
             return {
                 overlayData.isFirstNomination and "Nominations are now open." or "",
@@ -824,7 +826,7 @@ if CLIENT then
         local mySeat = LocalPlayer().seatNumber
 
         if phase == "nominations" then
-            overlayTimer = data.nominationTime or nominationTime
+            JoelBotC.overlayTimer = data.nominationTime or nominationTime
             if data.isFirstNomination then
                 bigCurrentAngle = 0
                 bigStartAngle = 0
@@ -842,7 +844,7 @@ if CLIENT then
             end
 
         elseif phase == "prosecution" then
-            overlayTimer = data.prosecutionTime or prosecutionTime
+            JoelBotC.overlayTimer = data.prosecutionTime or prosecutionTime
             SetHandTarget(false, data.nomineeSeat)
             SetHandTarget(true, data.nominatorSeat)
 
@@ -853,7 +855,7 @@ if CLIENT then
             end
 
         elseif phase == "defence" then
-            overlayTimer = data.defenceTime or defenceTime
+            JoelBotC.overlayTimer = data.defenceTime or defenceTime
 
             CreateVoteToggleButton()
 
@@ -862,12 +864,12 @@ if CLIENT then
             end
 
         elseif phase == "votecountdown" then
-            overlayTimer = 3
+            JoelBotC.overlayTimer = 3
 
             CreateVoteToggleButton()
 
         elseif phase == "voting" then
-            overlayTimer = 0
+            JoelBotC.overlayTimer = 0
 
             CreateVoteToggleButton()
 
@@ -882,7 +884,7 @@ if CLIENT then
             end
 
         elseif phase == "result" then
-            overlayTimer = 0
+            JoelBotC.overlayTimer = 0
 
             if hiddenVoteIconsShowing then
                 for i, icon in ipairs(voteIcon) do
@@ -900,7 +902,7 @@ if CLIENT then
     end)
 
     net.Receive("rdmtJoelBotCNomTimer", function()
-        overlayTimer = net.ReadInt(8)
+        JoelBotC.overlayTimer = net.ReadInt(8)
     end)
 
     net.Receive("rdmtJoelBotCVoteToggle", function()
@@ -1148,7 +1150,7 @@ if CLIENT then
 
             -- Top message
             local lines = GetOverlayLines()
-            if #lines > 0 then
+            if #lines > 0 and JoelBotC.overlayTimer ~= 0 then
                 surface.SetFont("Minecraft40")
                 local lineH = 48
                 local totalH = lineH * #lines
@@ -1162,7 +1164,6 @@ if CLIENT then
 
             -- Bottom message
             if bottomMessage ~= "" then
-
                 surface.SetFont("Minecraft30")
                 local textW, textH = surface.GetTextSize(bottomMessage)
                 local bottomY = lowestBtnBottom + (ScrH() - lowestBtnBottom) * 2/3
