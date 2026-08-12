@@ -210,6 +210,10 @@ if SERVER then
             JoelBotC:SweetheartDeath(ply)
         end
 
+        if not ply.BotCDead then
+            ply.hasGhostVote = true
+        end
+
         ply.BotCDead = true
         JoelBotC.isAlive[ply] = false
 
@@ -317,6 +321,10 @@ if SERVER then
 
             if ply:IsSweetheart() and not ply.BotCDead and not JoelBotC:IsDroisoned(ply) then
                 JoelBotC:SweetheartDeath(ply)
+            end
+
+            if not ply.BotCDead then
+                ply.hasGhostVote = true
             end
 
             ply.BotCDead = true
