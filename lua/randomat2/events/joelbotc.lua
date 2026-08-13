@@ -146,18 +146,8 @@ function EVENT:Begin()
         end)
     end
 
-    local grimRevealLength = 0
-
-    for _, ply in ipairs(JoelBotC.players) do
-        grimRevealLength = grimRevealLength + 3
-    end
-
-    grimRevealLength = grimRevealLength + 7
-
-    local gameOver = false
-
     self:AddHook("TTTCheckForWin", function()
-        -- if JoelBotC.isCurrentlyNight then return WIN_NONE end
+        if JoelBotC.isCurrentlyNight then return WIN_NONE end
 
         local demonAlive = false
         local livingCount = JoelBotC:AlivePlayerCount()
@@ -169,30 +159,14 @@ function EVENT:Begin()
         end
 
         -- If the Saint has been executed, the Evil team wins
-        if JoelBotC.saintExecuted and not gameOver then
-            gameOver = true
-
-            timer.Create("RdmtJoelBotC_GameOver", grimRevealLength, 1, function()
-                return WIN_TRAITOR
-            end)
-        end
+        if JoelBotC.saintExecuted then return WIN_TRAITOR end
 
         -- If there isn't an alive Demon, the Good team wins
-        if not demonAlive and not gameOver then
-            gameOver = true
-
-            timer.Create("RdmtJoelBotC_GameOver", grimRevealLength, 1, function()
-                return WIN_INNOCENT
-            end)
-        end
+        if not demonAlive then return WIN_INNOCENT end
 
         -- Otherwise, if there are <= 2 players alive, one of which is the Demon, then the Evil team wins
-        if livingCount <= 2 and demonAlive and not gameOver then
-            gameOver = true
-
-            timer.Create("RdmtJoelBotC_GameOver", grimRevealLength, 1, function()
-                return WIN_TRAITOR
-            end)
+        if livingCount <= 2 and demonAlive then
+            return WIN_TRAITOR
         end
 
         -- Otherwise, keep on playing
