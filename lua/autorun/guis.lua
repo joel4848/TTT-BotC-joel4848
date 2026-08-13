@@ -78,9 +78,11 @@ if CLIENT then
     -------------------------------------------------------------------------------------
     local botcTitleParent
     local titleFrameScale = 1
+    local botCTitleAlpha
 
     function JoelBotC:BotCTitleCreate()
         local client = LocalPlayer()
+        botCTitleAlpha = 1
 
         if IsValid(client) and not client:IsSpec() then
             local scrW, scrH = ScrW(), ScrH()
@@ -110,12 +112,23 @@ if CLIENT then
             botcTitleImage = vgui.Create("DImage", botcTitleParent)
             botcTitleImage:SetSize(width, height)
             botcTitleImage:SetImage("vgui/ttt/joelbotc/joelbotctitle.png")
+            botcTitleImage:SetAlpha(255 * botCTitleAlpha)
         end
     end
 
-    function JoelBotC:BotCTitleDestroy()
+    function JoelBotC:BotCTitleDestroy(fade)
+        local fadeTime = fade or 0
+
         if IsValid(botcTitleParent) then
-            botcTitleParent:Remove()
+            timer.Create("rdmtJoelBotCTitleImageFade", fadeTime, 1, function()
+                botcTitleParent:Remove()
+                hook.Remove("Think", "Testtesttest")
+            end)
+
+            hook.Add("Think", "Testtesttest", function()
+                botCTitleAlpha = 255 / fadeTime * timer.TimeLeft("rdmtJoelBotCTitleImageFade")
+                botcTitleImage:SetAlpha(botCTitleAlpha)
+            end)
         end
     end
 
@@ -144,6 +157,7 @@ if CLIENT then
         seatingGUI = vgui.Create("DPanel")
         seatingGUI:SetSize(ScrW(), ScrH())
         seatingGUI:SetPos(0, 0)
+        seatingGUI:MakePopup(true)
         seatingGUI:SetMouseInputEnabled(true)
         seatingGUI:SetKeyboardInputEnabled(false)
         seatingGUI.Paint = nil

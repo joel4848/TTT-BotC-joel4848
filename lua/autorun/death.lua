@@ -235,6 +235,7 @@ if SERVER then
                 if not IsValid(ply) then return end
 
                 net.Start("rdmtJoelBotCRequestBoneData")
+                    net.WriteBool(false)
                 net.Send(ply)
 
                 timer.Simple(0, function()
@@ -284,6 +285,10 @@ if SERVER then
         anvil:SetCollisionGroup(COLLISION_GROUP_IN_VEHICLE)
 
         anvil:Spawn()
+
+        net.Start("rdmtJoelBotCRequestBoneData")
+            net.WriteBool(true)
+        net.Send(ply)
 
         local phys = anvil:GetPhysicsObject()
         if IsValid(phys) then
@@ -418,30 +423,44 @@ if SERVER then
 end
 
 if CLIENT then
+    local function LookUp()
+        local ply = LocalPlayer()
+        local eyeAngles = ply:EyeAngles()
+        eyeAngles.x = -180
+
+        ply:SetEyeAngles(eyeAngles)
+    end
+
     net.Receive("rdmtJoelBotCRequestBoneData", function()
         local ply = LocalPlayer()
         if not IsValid(ply) then return end
 
-        ply:SetupBones()
+        local isExecution = net.ReadBool()
 
-        local boneTable = {}
-        local count = ply:GetBoneCount() or 0
+        if isExecution then
+            LookUp()
+        else
+            ply:SetupBones()
 
-        for i = 0, count - 1 do
-            local pos, ang = ply:GetBonePosition(i)
-            if pos and ang then
-                table.insert(boneTable, {
-                    id = i,
-                    pos = pos,
-                    ang = ang
-                })
+            local boneTable = {}
+            local count = ply:GetBoneCount() or 0
+
+            for i = 0, count - 1 do
+                local pos, ang = ply:GetBonePosition(i)
+                if pos and ang then
+                    table.insert(boneTable, {
+                        id = i,
+                        pos = pos,
+                        ang = ang
+                    })
+                end
             end
-        end
 
-        net.Start("rdmtJoelBotCBSendBoneData")
-            net.WriteVector(ply:GetPos())
-            net.WriteAngle(ply:GetAngles())
-            net.WriteTable(boneTable)
-        net.SendToServer()
+            net.Start("rdmtJoelBotCBSendBoneData")
+                net.WriteVector(ply:GetPos())
+                net.WriteAngle(ply:GetAngles())
+                net.WriteTable(boneTable)
+            net.SendToServer()
+        end
     end)
 end

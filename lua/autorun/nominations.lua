@@ -331,11 +331,13 @@ if SERVER then
 
         JoelBotC._defenceEndCallback = nil
 
-        BroadcastPhase("votecountdown", { nomineeSeat = nomineeSeat })
+        BroadcastPhase("votecountdown", {nomineeSeat = nomineeSeat})
 
         RunCountdown("rdmtJoelBotCVoteCD", 3,
             function(remaining) BroadcastTimer(remaining) end,
-            function() JoelBotC:StartVote() end
+            -- Bodged in a 1-second delay in starting the vote so the countdown goes
+            -- 3, 2, 1, now, <start vote>
+            function() timer.Simple(1, function() JoelBotC:StartVote() end) end
         )
     end
 
@@ -814,7 +816,11 @@ if CLIENT then
                 "Defence: " .. t .. " seconds",
             }
         elseif overlayPhase == "votecountdown" then
-            return {"Voting will start in " .. t .. "..."}
+            if t > 0 then
+                return {"Voting will start in " .. t .. "..."}
+            else
+                return {"Now!"}
+            end
         elseif overlayPhase == "voting" then
             return {"Voting in progress..."}
         elseif overlayPhase == "result" then
@@ -899,6 +905,11 @@ if CLIENT then
 
             CreateVoteToggleButton()
 
+            LocalPlayer():EmitSound("bell_single.wav")
+
+            timer.Create("rdmtJoelBotCVoteCountdownBell", 1, 3, function()
+                LocalPlayer():EmitSound("bell_single.wav")
+            end)
         elseif phase == "voting" then
             JoelBotC.overlayTimer = 0
 
@@ -992,6 +1003,7 @@ if CLIENT then
         nomGUI = vgui.Create("DPanel")
         nomGUI:SetSize(ScrW(), ScrH())
         nomGUI:SetPos(0, 0)
+        nomGUI:MakePopup(true)
         nomGUI:SetMouseInputEnabled(true)
         nomGUI:SetKeyboardInputEnabled(false)
 
@@ -1184,7 +1196,7 @@ if CLIENT then
 
             -- Top message
             local lines = GetOverlayLines()
-            if #lines > 0 and JoelBotC.overlayTimer ~= 0 then
+            if #lines > 0 then
                 surface.SetFont("Minecraft40")
                 local lineH = 48
                 local totalH = lineH * #lines

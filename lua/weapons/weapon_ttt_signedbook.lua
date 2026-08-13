@@ -331,6 +331,8 @@ if CLIENT then
         if self.BookOpen then return end
         self.BookOpen = true
 
+        surface.PlaySound("book_2.wav")
+
         hook.Add("OnPauseMenuShow", "RdmtJoelBotC_SignedBook_MenuSuppress", function()
             return false
         end)
@@ -500,7 +502,7 @@ if CLIENT then
         end
 
         PageUp.DoClick = function()
-            surface.PlaySound("click.mp3")
+            surface.PlaySound("click.wav")
             if swep.BookPage < swep.BookPageCapacity then
                 swep.BookPage = swep.BookPage + 1
                 UpdatePageLabel()
@@ -521,7 +523,7 @@ if CLIENT then
         end
 
         PageDown.DoClick = function()
-            surface.PlaySound("click.mp3")
+            surface.PlaySound("click.wav")
             if swep.BookPage > 1 then
                 swep.BookPage = swep.BookPage - 1
                 UpdatePageLabel()
@@ -556,7 +558,7 @@ if CLIENT then
         buttonClose:SetSize(doneW, doneH)
         buttonClose:SetImage("vgui/ttt/joelbotc/close_button.png")
         buttonClose.DoClick = function()
-            surface.PlaySound("click.mp3")
+            surface.PlaySound("click.wav")
             swep:CloseBook()
         end
 
@@ -571,6 +573,7 @@ if CLIENT then
     function SWEP:CloseBook()
         if IsValid(self._BookFrame) then
             self._BookFrame:Remove()
+            surface.PlaySound("book_1.wav")
         end
 
         self._BookFrame = nil

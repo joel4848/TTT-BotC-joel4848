@@ -113,8 +113,9 @@ function EVENT:Begin()
 
     -- Opening splash screen
     JoelBotC:BotCTitleCreate()
+    surface.PlaySound("intro_loudest_8_5.wav")
     timer.Simple(5, function()
-        JoelBotC:BotCTitleDestroy()
+        JoelBotC:BotCTitleDestroy(3.5)
     end)
 
     -- JoelBotC:SeatingGUICreate()
@@ -189,10 +190,9 @@ function EVENT:Begin()
 end
 
 function EVENT:End()
-
     -- Remove any overlays etc.
     JoelBotC:SeatingGUIDestroy()
-    JoelBotC:BotCTitleDestroy()
+    JoelBotC:BotCTitleDestroy(2)
     JoelBotC:MessageOverlayDestroy()
     JoelBotC:DestroyEndDayEarlyButton()
 

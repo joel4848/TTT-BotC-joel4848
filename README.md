@@ -1,9 +1,9 @@
 ## To do:
 
-- [ ] Add sounds (opening jingle, bell tolling, book opening etc.)
-- [ ] Make players look up while they're being executed
+- [ ] Tooltip role abilities in info book
 - [ ] Game ends if no execution on final 3 and no protection role which might prevent the Demon killing
 - [ ] Grim reveal before game ends
+- [ ] Generic tokens (T, O, M, D) for roles
 
 ### Changelog
 
@@ -13,6 +13,9 @@
 - "Nominations are now open" message/timer now disappears when a nomination happens
 - Fixed "End Defence Early" button not working
 - Seat buttons are disabled during voting to avoid confusion; **but**, players can now click on their own seat button to toggle their vote
+- Mouse input is automatically enabled for nominations/other button UIs
+- Executed players now look upwards (to see their impending anvil-flavoured doom)
+- Added sounds (intro, books, morning/night/vote countdown)
 
 ## Beta 1 - 2026.08.12
 

@@ -112,6 +112,8 @@ if CLIENT then
         if self.BookOpen then return end
         self.BookOpen = true
 
+        surface.PlaySound("book_2.wav")
+
         hook.Add("OnPauseMenuShow", "RdmtJoelBotC_BookQuill_MenuSuppress", function()
             return false
         end)
@@ -233,7 +235,7 @@ if CLIENT then
         end
 
         PageUp.DoClick = function()
-            surface.PlaySound("click.mp3")
+            surface.PlaySound("click.wav")
             -- Save current page text first
             swep.BookTexts[swep.BookPage].Text = TextArea:GetText()
             if swep.BookPage >= swep.BookPageCapacity then
@@ -259,7 +261,7 @@ if CLIENT then
         end
 
         PageDown.DoClick = function()
-            surface.PlaySound("click.mp3")
+            surface.PlaySound("click.wav")
             swep.BookTexts[swep.BookPage].Text = TextArea:GetText()
             if swep.BookPage > 1 then
                 swep.BookPage = swep.BookPage - 1
@@ -296,7 +298,7 @@ if CLIENT then
         buttonClose:SetSize(doneW, doneH)
         buttonClose:SetImage("vgui/ttt/joelbotc/save_close_button.png")
         buttonClose.DoClick = function()
-            surface.PlaySound("click.mp3")
+            surface.PlaySound("click.wav")
             swep:CloseBook()
         end
 
@@ -312,6 +314,7 @@ if CLIENT then
     --  CloseBook – save text/close GUI
     -----------------------------------------------------
     function SWEP:CloseBook()
+        surface.PlaySound("book_1.wav")
         -- Save whatever is currently in the text area for the current page
         if IsValid(self._TextArea) then
             self.BookTexts[self.BookPage].Text = self._TextArea:GetText()

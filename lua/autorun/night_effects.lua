@@ -104,10 +104,14 @@ if CLIENT then
 
     net.Receive("rdmtJoelBotCNightStarts", function()
         isNight = true
+
+        LocalPlayer():EmitSound("bell_night.wav")
     end)
 
     net.Receive("rdmtJoelBotCNightEnds", function()
         isNight = false
+
+        LocalPlayer():EmitSound("bell_morning.wav")
     end)
 
     hook.Add("RdmtJoelBotC_Client_EventStarted", "RdmtJoelBotC_AddNightEffectHooks", function()

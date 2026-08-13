@@ -176,7 +176,6 @@ if CLIENT then
         btn.DoClick = function()
             JoelBotC:ToggleEndDayEarly()
         end
-
     end
 
     function JoelBotC:DestroyEndDayEarlyButton()

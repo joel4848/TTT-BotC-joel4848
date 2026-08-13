@@ -123,15 +123,15 @@ function EVENT:Begin()
     end)
 
     if not JoelBotC.testingMode then
-        timer.Create("rdmtJoelBotC_gamestart_2", 5, 1, function()
+        timer.Create("rdmtJoelBotC_gamestart_2", 8.5, 1, function()
             Randomat:SmallNotify("Check your inventory for your notebook and information book!", 5)
         end)
 
-        timer.Create("rdmtJoelBotC_gamestart_3", 10, 1, function()
+        timer.Create("rdmtJoelBotC_gamestart_3", 13.5, 1, function()
             Randomat:SmallNotify("Night 1 will start in 5 seconds...", 5)
         end)
 
-        timer.Create("rdmtJoelBotC_gamestart_4", 10, 1, function()
+        timer.Create("rdmtJoelBotC_gamestart_4", 13.5, 1, function()
             JoelBotC.isFirstNight = true
             JoelBotC.currentNight = 0
             timer.Create("rdmtJoelBotCNominationsEnd", 5, 1, function()

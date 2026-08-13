@@ -56,11 +56,7 @@ if SERVER then
         elseif buttonPressed == 2 then
             JoelBotC:SendSeatingGUIDestroy(ply)
         elseif buttonPressed == 3 then
-            if not ply:IsRole(ROLE_POJBC) then
-                Randomat:SetRole(ply, ROLE_POJBC)
-                SendFullStateUpdate()
-            end
-            JoelBotC:PoNight()
+            JoelBotC:PlayerNominated(3, 2)
         elseif buttonPressed == 4 then
             JoelBotC:Execute(JoelBotC.seatingOrder[ded])
             ded = ded + 1
@@ -94,8 +90,8 @@ if CLIENT then
     local buttonFunctions = {
         "Open Seat GUI",
         "Close Seat GUI",
-        "Open Po GUI",
-        "Execute seat 2",
+        "Nominate 2 as 3",
+        "Kill seat 2",
         "Open Nomination GUI",
         "Close Nomination GUI",
         "Revive seat 2",
