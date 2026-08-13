@@ -16,6 +16,7 @@ local function SanitisePages(pages)
                     italic    = seg.italic and true or false,
                     underline = seg.underline and true or false,
                     align     = (seg.align == "center" or seg.align == "right") and seg.align or "left",
+                    tooltip   = seg.tooltip and tostring(seg.tooltip) or nil
                 }
 
                 if istable(seg.color) then
@@ -245,48 +246,52 @@ local function BuildBookScript()
     local minions   = {}
     local demons    = {}
 
-    for _, role in ipairs(JoelBotC.enabledTownsfolk) do
-        local roleName = ROLE_STRINGS[role]
-        table.insert(townsfolk, roleName)
+    for _, role in ipairs(JoelBotC.enabledTownsfolk or {}) do
+        local name = (ROLE_STRINGS and ROLE_STRINGS[role]) or tostring(role)
+        local ability = (JoelBotC.roleAbilities and JoelBotC.roleAbilities[role]) or "No ability description available"
+        table.insert(townsfolk, { name = name, ability = ability })
     end
 
-    for _, role in ipairs(JoelBotC.enabledOutsiders) do
-        local roleName = ROLE_STRINGS[role]
-        table.insert(outsiders, roleName)
+    for _, role in ipairs(JoelBotC.enabledOutsiders or {}) do
+        local name = (ROLE_STRINGS and ROLE_STRINGS[role]) or tostring(role)
+        local ability = (JoelBotC.roleAbilities and JoelBotC.roleAbilities[role]) or "No ability description available"
+        table.insert(outsiders, { name = name, ability = ability })
     end
 
-    for _, role in ipairs(JoelBotC.enabledMinions) do
-        local roleName = ROLE_STRINGS[role]
-        table.insert(minions, roleName)
+    for _, role in ipairs(JoelBotC.enabledMinions or {}) do
+        local name = (ROLE_STRINGS and ROLE_STRINGS[role]) or tostring(role)
+        local ability = (JoelBotC.roleAbilities and JoelBotC.roleAbilities[role]) or "No ability description available"
+        table.insert(minions, { name = name, ability = ability })
     end
 
-    for _, role in ipairs(JoelBotC.enabledDemons) do
-        local roleName = ROLE_STRINGS[role]
-        table.insert(demons, roleName)
+    for _, role in ipairs(JoelBotC.enabledDemons or {}) do
+        local name = (ROLE_STRINGS and ROLE_STRINGS[role]) or tostring(role)
+        local ability = (JoelBotC.roleAbilities and JoelBotC.roleAbilities[role]) or "No ability description available"
+        table.insert(demons, { name = name, ability = ability })
     end
 
     -- Townsfolk
     table.insert(scriptSegments, {text = "Townsfolk\n", underline = true, align = "center", color = Color(31, 101, 255, 255)})
-    for _, roleName in ipairs(townsfolk) do
-        table.insert(scriptSegments, {text = roleName .. "\n", color = Color(31, 101, 255, 255)})
+    for _, r in ipairs(townsfolk) do
+        table.insert(scriptSegments, {text = r.name .. "\n", color = Color(31, 101, 255, 255), tooltip = r.ability})
     end
 
     -- Outsiders
     table.insert(scriptSegments, {text = "Outsiders\n", underline = true, align = "center", color = Color(70, 213, 255, 255)})
-    for _, roleName in ipairs(outsiders) do
-        table.insert(scriptSegments, {text = roleName .. "\n", color = Color(70, 213, 255, 255)})
+    for _, r in ipairs(outsiders) do
+        table.insert(scriptSegments, {text = r.name .. "\n", color = Color(70, 213, 255, 255), tooltip = r.ability})
     end
 
     -- Minions
     table.insert(scriptSegments, {text = "Minions\n", underline = true, align = "center", color = Color(255, 105, 0, 255)})
-    for _, roleName in ipairs(minions) do
-        table.insert(scriptSegments, {text = roleName .. "\n", color = Color(255, 105, 0, 255)})
+    for _, r in ipairs(minions) do
+        table.insert(scriptSegments, {text = r.name .. "\n", color = Color(255, 105, 0, 255), tooltip = r.ability})
     end
 
     -- Demons
     table.insert(scriptSegments, {text = "Demons\n", underline = true, align = "center", color = Color(206, 1, 0, 255)})
-    for _, roleName in ipairs(demons) do
-        table.insert(scriptSegments, {text = roleName .. "\n"})
+    for _, r in ipairs(demons) do
+        table.insert(scriptSegments, {text = r.name .. "\n", tooltip = r.ability})
     end
 
     return scriptSegments

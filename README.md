@@ -1,11 +1,15 @@
 ## To do:
 
-- [ ] Tooltip role abilities in info book
+- [ ] Figure out why the Pukka doesn't work? (Can't remember why I disabled it and said it doesn't work)
 - [ ] Game ends if no execution on final 3 and no protection role which might prevent the Demon killing
 - [ ] Grim reveal before game ends
 - [ ] Generic tokens (T, O, M, D) for roles
 
 ### Changelog
+
+## Beta 3 - 2026.08.13
+
+- Roles now show their ability text if you hover over them on the "Script" page of the Info Book
 
 ## Beta 2 - 2026.08.12
 

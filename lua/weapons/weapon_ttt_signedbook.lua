@@ -169,7 +169,7 @@ if CLIENT then
             end
         end
 
-        local function addToken(tokenText, fontName, tokenColor, drawUnderline, precomputedWidth)
+        local function addToken(tokenText, fontName, tokenColor, drawUnderline, precomputedWidth, segTooltip)
             if tokenText == "" then return end
 
             surface.SetFont(fontName)
@@ -192,11 +192,12 @@ if CLIENT then
                 color         = tokenColor,
                 drawUnderline = drawUnderline or false,
                 width         = tokenW,
+                tooltip       = segTooltip
             }
             currentLine.width = currentLine.width + tokenW
         end
 
-        local function processText(rawText, fontName, noUnderlineFontName, tokenColor, align, segUnderline)
+        local function processText(rawText, fontName, noUnderlineFontName, tokenColor, align, segUnderline, segTooltip)
             rawText = tostring(rawText or "")
             align   = align or "left"
 
@@ -215,17 +216,17 @@ if CLIENT then
                     local matched = false
                     for word, trailing in paragraph:gmatch("([^%s]+)(%s*)") do
                         matched = true
-                        addToken(word, fontName, tokenColor, false)
+                        addToken(word, fontName, tokenColor, false, nil, segTooltip)
                         if trailing ~= "" then
                             surface.SetFont(fontName)
                             local wordAndTrailingW = select(1, surface.GetTextSize(word .. trailing))
                             local wordOnlyW        = select(1, surface.GetTextSize(word))
                             local trailingW        = wordAndTrailingW - wordOnlyW
-                            addToken(trailing, noUnderlineFontName, tokenColor, segUnderline, trailingW)
+                            addToken(trailing, noUnderlineFontName, tokenColor, segUnderline, trailingW, segTooltip)
                         end
                     end
                     if not matched then
-                        addToken(paragraph, fontName, tokenColor, false)
+                        addToken(paragraph, fontName, tokenColor, false, nil, segTooltip)
                     end
                 end
             end
@@ -235,7 +236,7 @@ if CLIENT then
             local fontName            = BuildFormattedFont(seg.bold, seg.italic, seg.underline)
             local noUnderlineFontName = BuildFormattedFont(seg.bold, seg.italic, false)
             local tokenColor          = NormalizeSegmentColor(seg.color)
-            processText(seg.text, fontName, noUnderlineFontName, tokenColor, seg.align, seg.underline or false)
+            processText(seg.text, fontName, noUnderlineFontName, tokenColor, seg.align, seg.underline or false, seg.tooltip)
         end
 
         if #currentLine.tokens > 0 then
@@ -419,8 +420,6 @@ if CLIENT then
             scroll.Paint = function(_, w, h)
                 surface.SetDrawColor(Color(255, 250, 238))
                 surface.DrawRect(0, 0, w, h)
-                -- surface.SetDrawColor(Color(0, 0, 0))
-                -- surface.DrawOutlinedRect(0, 0, w, h, 2)
             end
 
             local contentWidth = math.max(TAW - 24, 32)
@@ -431,10 +430,12 @@ if CLIENT then
             content:SetBackgroundColor(Color(0, 0, 0, 0))
             content._Layout = layout
             content._LineHeight = lineHeight
-            content.Paint = function(_, w, h)
+
+            -- Page text
+            content.Paint = function(pnl, w, h)
                 local y = 4
 
-                for _, line in ipairs(content._Layout or {}) do
+                for _, line in ipairs(pnl._Layout or {}) do
                     local x = 4
 
                     if line.align == "center" then
@@ -449,16 +450,102 @@ if CLIENT then
 
                         if token.drawUnderline then
                             surface.SetDrawColor(token.color)
-                            surface.DrawRect(x - 4, y + (content._LineHeight or 18) - 5, token.width + 4, 1)
+                            surface.DrawRect(x - 4, y + (pnl._LineHeight or 18) - 5, token.width + 4, 1)
                         end
 
                         x = x + token.width
                     end
 
-                    y = y + (content._LineHeight or 18)
+                    y = y + (pnl._LineHeight or 18)
+                end
+            end
+
+            -- Sneaky lil invisible overlays that detect mouse hovering and do the tooltips
+            local posY = 4
+            for _, line in ipairs(layout or {}) do
+                local posX = 4
+
+                if line.align == "center" then
+                    posX = (contentWidth - line.width) / 2
                 end
 
-        end
+                for _, token in ipairs(line.tokens or {}) do
+                    if token.tooltip and token.tooltip ~= "" then
+                        local hoverBox = vgui.Create("DPanel", content)
+                        hoverBox:SetPos(posX, posY)
+                        hoverBox:SetSize(math.max(token.width, 1), lineHeight)
+                        hoverBox:SetMouseInputEnabled(true)
+                        hoverBox.Paint = function() end
+
+                        local activeTip = nil
+
+                        local tw, th
+                        local tipPadding
+
+                        hoverBox.OnCursorEntered = function()
+                            if IsValid(activeTip) then activeTip:Remove() end
+
+                            local tipPnl = vgui.Create("DPanel")
+                            tipPnl:SetDrawOnTop(true)
+
+                            surface.SetFont("Minecraft20")
+                            tw, th = surface.GetTextSize(token.tooltip)
+                            tipPadding = 16
+
+                            tipPnl:SetSize(tw + tipPadding, th + 12)
+                            tipPnl.Paint = function(_, boxW, boxH)
+                                draw.RoundedBox(4, 0, 0, boxW, boxH, Color(20, 20, 20, 240))
+                                surface.SetDrawColor(100, 100, 100, 255)
+                                surface.DrawOutlinedRect(0, 0, boxW, boxH, 1)
+
+                                draw.SimpleText(token.tooltip, "Minecraft20", 8, 6, Color(255, 255, 255, 255), TEXT_ALIGN_LEFT, TEXT_ALIGN_TOP)
+                            end
+
+                            local tipPnlX, tipPnlY = gui.MouseX() + 12, gui.MouseY() - th - 12
+
+                            if tw > ScrW() then
+                                tipPnlX = 0
+                            elseif gui.MouseX() + 22 + tw > ScrW() then
+                                tipPnlX = ScrW() - tw - 22
+                            end
+
+                            tipPnl:SetPos(tipPnlX, tipPnlY)
+                            activeTip = tipPnl
+                        end
+
+                        hoverBox.OnCursorMoved = function()
+                            local tipPnlX, tipPnlY = gui.MouseX() + 12, gui.MouseY() - th - 12
+
+                            if tw > ScrW() then
+                                tipPnlX = 0
+                            elseif gui.MouseX() + 22 + tw > ScrW() then
+                                tipPnlX = ScrW() - tw - 22
+                            end
+
+                            if IsValid(activeTip) then
+                                activeTip:SetPos(tipPnlX, tipPnlY)
+                            end
+                        end
+
+                        hoverBox.OnCursorExited = function()
+                            if IsValid(activeTip) then
+                                activeTip:Remove()
+                                activeTip = nil
+                            end
+                        end
+
+                        hoverBox.OnRemove = function()
+                            if IsValid(activeTip) then
+                                activeTip:Remove()
+                            end
+                        end
+                    end
+
+                    posX = posX + token.width
+                end
+
+                posY = posY + lineHeight
+            end
 
             scroll:AddItem(content)
 
@@ -467,8 +554,6 @@ if CLIENT then
         end
 
         RenderPage()
-
-
 
         -- PageUp
         local PageUp = vgui.Create("DImageButton", Frame)
