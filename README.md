@@ -1,10 +1,16 @@
 ## To do:
 
+- [ ] Indicate dead players on info book seating order page
+- [ ] Make vote UI not overdraw middle message
 - [ ] Figure out why the Pukka doesn't work? (Can't remember why I disabled it and said it doesn't work)
 - [ ] Game ends if no execution on final 3 and no protection role which might prevent the Demon killing
-- [ ] Grim reveal before game ends
 
 ### Changelog
+
+## Beta 4 - 2026.08.14
+
+- The game now displays a Grimoire reveal before ending the round
+- Fixed (?) the nomination overlay drawing over the middle messages
 
 ## Beta 3 - 2026.08.14
 

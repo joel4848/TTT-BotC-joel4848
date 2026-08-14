@@ -58,10 +58,9 @@ if SERVER then
         elseif buttonPressed == 3 then
             JoelBotC:PlayerNominated(3, 2)
         elseif buttonPressed == 4 then
-            JoelBotC:Execute(JoelBotC.seatingOrder[ded])
+            JoelBotC:Kill(JoelBotC.seatingOrder[ded])
             ded = ded + 1
             if ded > #JoelBotC.seatingOrder then ded = 1 end
-            ded = 2
         elseif buttonPressed == 7 then
             JoelBotC:Revive(JoelBotC.seatingOrder[2])
         elseif buttonPressed == 5 then

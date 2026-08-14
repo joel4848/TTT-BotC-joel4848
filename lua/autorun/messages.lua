@@ -77,6 +77,7 @@ if CLIENT then
         local middle = vgui.Create("DPanel", msgGUI)
         middle:SetSize(ScrW(), ScrH())
         middle:SetPos(0,0)
+        middle:MakePopup(true)
         middle:SetMouseInputEnabled(false)
         middle:SetKeyboardInputEnabled(false)
         middle:SetPaintBackgroundEnabled(false)

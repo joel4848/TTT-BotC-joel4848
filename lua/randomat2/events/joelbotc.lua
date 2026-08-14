@@ -10,6 +10,7 @@ EVENT.Categories = {"gamemode", "largeimpact", "rolechange"}
 CreateConVar("randomat_joelbotc_enable_testing_mode", 0, FCVAR_NONE, "Whether testing mode is enabled", 0, 1)
 
 util.AddNetworkString("rdmtJoelBotCSeatingOrder")
+-- util.AddNetworkString("rdmtJoelBotCSendGrimRevealRoles")
 
 JoelBotC.original_COLOR_DETECTIVE = JoelBotC.original_COLOR_DETECTIVE or {}
 JoelBotC.original_COLOR_SPECIAL_INNOCENT = JoelBotC.original_COLOR_SPECIAL_INNOCENT or {}
@@ -146,7 +147,44 @@ function EVENT:Begin()
         end)
     end
 
+    -------------------------------------------------------------------------------------
+    -- Win condition stuff
+    -------------------------------------------------------------------------------------
+
+    local pendingWinType
+    local grimRevealOngoing
+    local grimRevealComplete
+
+    self:AddHook("TTTWinCheckBlocks", function(winBlocks)
+        table.insert(winBlocks, function(win_type)
+            if win_type == WIN_NONE then return win_type end
+
+            if grimRevealComplete then
+                return pendingWinType
+            end
+
+            if not grimRevealOngoing then
+                grimRevealOngoing = true
+
+                -- Backup in case nothing is received from clients?
+                local maxRevealTime = 60
+
+                JoelBotC:DoGrimReveal()
+
+                timer.Create("JoelBotC_RevealBackup", maxRevealTime, 1, function()
+                    grimRevealComplete = true
+                end)
+            end
+
+            return WIN_NONE
+        end)
+    end)
+
     self:AddHook("TTTCheckForWin", function()
+        if pendingWinType then
+            return pendingWinType
+        end
+
         if JoelBotC.isCurrentlyNight then return WIN_NONE end
 
         local demonAlive = false
@@ -158,19 +196,28 @@ function EVENT:Begin()
             end
         end
 
-        -- If the Saint has been executed, the Evil team wins
-        if JoelBotC.saintExecuted then return WIN_TRAITOR end
-
-        -- If there isn't an alive Demon, the Good team wins
-        if not demonAlive then return WIN_INNOCENT end
-
-        -- Otherwise, if there are <= 2 players alive, one of which is the Demon, then the Evil team wins
-        if livingCount <= 2 and demonAlive then
+        if JoelBotC.saintExecuted then
+            pendingWinType = WIN_TRAITOR
             return WIN_TRAITOR
         end
 
-        -- Otherwise, keep on playing
+        if not demonAlive then
+            pendingWinType = WIN_INNOCENT
+            return WIN_INNOCENT
+        end
+
+        if livingCount <= 2 and demonAlive then
+            pendingWinType = WIN_TRAITOR
+            return WIN_TRAITOR
+        end
+
         return WIN_NONE
+    end)
+
+    net.Receive("rdmtJoelBotCSendGrimRevealRoles", function(len, ply)
+        grimRevealComplete = true
+
+        timer.Remove("JoelBotC_RevealBackup")
     end)
 end
 

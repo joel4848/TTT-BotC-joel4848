@@ -28,6 +28,16 @@ if SERVER then
 end
 
 if CLIENT then
+    resource.AddFile("resource/fonts/Minecraft.ttf")
+    surface.CreateFont("Minecraft80", {
+        font = "Minecraft",
+        size = 80,
+        weight = 1000,
+        additive = false,
+        antialias = true
+    })
+
+
     local FADE_IN_ROLE_TIME    = 0.5
     local DELAY_BETWEEN_ROLES  = 3.0
     local DELAY_BEFORE_FADEOUT = 5.0
@@ -56,10 +66,13 @@ if CLIENT then
         return weight
     end
 
-    net.Receive("rdmtJoelBotCSendGrimRevealRoles", function()
-        local grimReveal = net.ReadTable()
-        if not grimReveal then return end
+    JoelBotC.GOMPanels = JoelBotC.GOMPanels or {}
 
+    for _, pnl in ipairs(JoelBotC.GOMPanels) do
+        pnl:Remove()
+    end
+
+    local function DoGrimReveal(grimReveal)
         local playersList = {}
 
         for seat, data in pairs(grimReveal) do
@@ -69,7 +82,8 @@ if CLIENT then
                 roleName = ROLE_STRINGS[data.role] or "Unknown",
                 team = data.team or "townsfolk",
                 weight = GetSortWeight(data.dead, data.team),
-                rand = math.random()
+                rand = math.random(),
+                dead = data.dead
             })
         end
 
@@ -88,12 +102,23 @@ if CLIENT then
             return a.seat < b.seat
         end)
 
+        local allAlive = true
+        for _, data in ipairs(playersList) do
+            if data.dead then allAlive = false end
+        end
+
         surface.SetFont("Minecraft40")
         local maxWidth = 0
         local textHeight = 0
 
         for _, pData in ipairs(playersList) do
-            local fullText = pData.seat .. ". " .. pData.nick .. " was your " .. pData.roleName
+            local part2 = " was your "
+
+            if pData.team == "minion" or pData.team == "demon" then
+                part2 = " was the "
+            end
+
+            local fullText = pData.seat .. ". " .. pData.nick .. part2 .. pData.roleName
             local w, h = surface.GetTextSize(fullText)
             if w > maxWidth then maxWidth = w end
             if h > textHeight then textHeight = h end
@@ -109,6 +134,8 @@ if CLIENT then
             totalHeight = totalHeight,
             lineHeight = lineHeight
         }
+
+        local matGhost = Material("vgui/ttt/joelbotc/ghost_grim.png", "mips smooth")
 
         hook.Add("HUDPaint", "JoelBotC_DrawGrimReveal", function()
             if not revealData then
@@ -130,6 +157,9 @@ if CLIENT then
                 if alphaMult <= 0 then
                     revealData = nil
                     hook.Remove("HUDPaint", "JoelBotC_DrawGrimReveal")
+
+                    net.Start("rdmtJoelBotCSendGrimRevealRoles")
+                    net.SendToServer()
                     return
                 end
             end
@@ -143,16 +173,32 @@ if CLIENT then
             local backgroundWidth  = revealData.maxWidth + 2 * LINE_PADDING
             local backgroundHeight = revealData.totalHeight + 2 * LINE_PADDING
 
+            if not allAlive then
+                backgroundX     = backgroundX - LINE_PADDING - textHeight
+                backgroundWidth = backgroundWidth + LINE_PADDING + textHeight
+            end
+
             draw.RoundedBox(10, backgroundX, backgroundY, backgroundWidth, backgroundHeight, Color(0, 0, 0, 220 * alphaMult))
 
             surface.SetFont("Minecraft40")
 
+            local iconSize = textHeight or revealData.lineHeight
+
             for _, pData in ipairs(revealData.players) do
-                local baseColor = Color(255, 255, 255, 255 * alphaMult)
+                local baseColour = pData.dead and Color(200, 200, 200, 255 * alphaMult) or Color(255, 255, 255, 255 * alphaMult)
+
+                -- Draw a ghost icon if the player's dead
+                if pData.dead then
+                    local ghostX = startX - LINE_PADDING - iconSize
+
+                    surface.SetDrawColor(baseColour)
+                    surface.SetMaterial(matGhost)
+                    surface.DrawTexturedRect(ghostX, currentY, iconSize, iconSize)
+                end
 
                 -- Seat numbers
                 local part1 = pData.seat .. ". " .. pData.nick
-                draw.SimpleText(part1, "Minecraft40", startX, currentY, baseColor, TEXT_ALIGN_LEFT, TEXT_ALIGN_TOP)
+                draw.SimpleText(part1, "Minecraft40", startX, currentY, baseColour, TEXT_ALIGN_LEFT, TEXT_ALIGN_TOP)
 
                 local myRevealStartTime = sTime + (pData.revealIndex * DELAY_BETWEEN_ROLES)
 
@@ -163,6 +209,10 @@ if CLIENT then
                     local p1Width, _ = surface.GetTextSize(part1)
 
                     local part2 = " was your "
+
+                    if pData.team == "minion" or pData.team == "demon" then
+                        part2 = " was the "
+                    end
                     local part2Color = Color(255, 255, 255, roleAlpha)
                     draw.SimpleText(part2, "Minecraft40", startX + p1Width, currentY, part2Color, TEXT_ALIGN_LEFT, TEXT_ALIGN_TOP)
 
@@ -177,5 +227,102 @@ if CLIENT then
                 currentY = currentY + revealData.lineHeight
             end
         end)
+    end
+
+    local function DoGameOverMessage(grimReveal)
+        local gom = vgui.Create("DPanel")
+        gom:SetSize(ScrW(), ScrH())
+        gom:SetPos(0, 0)
+
+        table.insert(JoelBotC.GOMPanels, gom)
+
+        local msg1 = "And with that..."
+        local msg2 = "the game "
+        local msg3 = "is "
+        local msg4 = "over."
+        local msg5 = "Let's take a look at the Grim..."
+
+        local fullLine1Text = msg1
+        local fullLine2Text = msg2 .. msg3 .. msg4
+        local line3Text     = msg5
+
+        local startTime = CurTime()
+
+        gom.Paint = function(_, w, h)
+            local elapsed = CurTime() - startTime
+
+            surface.SetFont("Minecraft80")
+
+            -- Lines 1 and 2
+            if elapsed < 7 then
+                local alpha = 255
+                if elapsed >= 6 then
+                    alpha = math.Clamp((1 - (elapsed - 6)) * 255, 0, 255)
+                end
+
+                local colText    = Color(20, 0, 100, alpha)
+                local colOutline = Color(50, 0, 255, alpha)
+
+                local _, line1H      = surface.GetTextSize(fullLine1Text)
+                local line2W, line2H = surface.GetTextSize(fullLine2Text)
+                local padding        = line1H / 2
+                local totalH         = line1H + padding + line2H
+
+                local line1X, line1Y = (ScrW() / 2), (ScrH() / 2) - (totalH / 2)
+                local line2Y         = line1Y + line1H + padding
+                local line2LeftX     = (ScrW() / 2) - (line2W / 2)
+
+                -- Line 1
+                draw.SimpleTextOutlined(fullLine1Text, "Minecraft80", line1X, line1Y, colText, TEXT_ALIGN_CENTER, TEXT_ALIGN_CENTER, 2, colOutline)
+
+                -- Line 2 bit by bit
+                local curLine2Text = ""
+                if elapsed >= 4 then
+                    curLine2Text = fullLine2Text
+                elseif elapsed >= 3 then
+                    curLine2Text = msg2 .. msg3
+                elseif elapsed >= 2 then
+                    curLine2Text = msg2
+                end
+
+                if curLine2Text ~= "" then
+                    draw.SimpleTextOutlined(curLine2Text, "Minecraft80", line2LeftX, line2Y, colText, TEXT_ALIGN_LEFT, TEXT_ALIGN_CENTER, 2, colOutline)
+                end
+
+            -- Line 3
+            elseif elapsed < 10 then
+                local alpha = 255
+                if elapsed >= 9 then
+                    alpha = math.Clamp((1 - (elapsed - 9)) * 255, 0, 255)
+                end
+
+                local colText    = Color(20, 0, 100, alpha)
+                local colOutline = Color(50, 0, 255, alpha)
+
+                draw.SimpleTextOutlined(line3Text, "Minecraft80", ScrW() / 2, ScrH() / 2, colText, TEXT_ALIGN_CENTER, TEXT_ALIGN_CENTER, 2, colOutline)
+
+            -- Remove the panel
+            else
+                if not gom.Finished then
+                    gom.Finished = true
+                    timer.Simple(0, function()
+                        if IsValid(gom) then
+                            gom:Remove()
+                        end
+                    end)
+                    timer.Simple(1, function()
+                        DoGrimReveal(grimReveal)
+                    end)
+                end
+            end
+        end
+    end
+
+    net.Receive("rdmtJoelBotCSendGrimRevealRoles", function()
+        local grimReveal = net.ReadTable()
+        if not grimReveal then return end
+
+        -- DoGrimReveal(grimReveal)
+        DoGameOverMessage(grimReveal)
     end)
 end

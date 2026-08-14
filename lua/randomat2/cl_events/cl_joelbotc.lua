@@ -166,7 +166,10 @@ function EVENT:Begin()
         JoelBotC:SeatingGUICreate()
     end)
 
+    -------------------------------------------------------------------------------------
     -- Win condition stuff
+    -------------------------------------------------------------------------------------
+
     LANG.AddToLanguage("english", "win_joelbotc_good", string.upper("The Good team wins!"))
     LANG.AddToLanguage("english", "win_joelbotc_evil", string.upper("The Evil team wins!"))
 
