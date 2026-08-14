@@ -175,7 +175,7 @@ function EVENT:Begin()
 
         if wintype == WIN_INNOCENT then
             newTitle.txt = "win_joelbotc_good"
-            newTitle.c = Color(31, 101, 255, 255)
+            newTitle.c = Color(70, 213, 255, 255)
         else
             newTitle.txt = "win_joelbotc_evil"
             newTitle.c = Color(206, 1, 0, 255)
@@ -186,6 +186,25 @@ function EVENT:Begin()
 
     hook.Add("TTTPrepareRound", "JoelBotCWinTitle", function()
         hook.Remove("TTTScoringWinTitleOverride", "JoelBotCWinTitle")
+    end)
+
+    local iconNames = {
+        [ROLE_TEAM_DETECTIVE] = "botctwn",
+        [ROLE_TEAM_INNOCENT]  = "botcots",
+        [ROLE_TEAM_TRAITOR]   = "botcmin",
+        [ROLE_TEAM_MONSTER]   = "botcdmn"
+    }
+
+    self:AddHook("TTTScoringSummaryRender", function(_, _, _, _, _, _, finalRole)
+        local roleData = ROLE_DATA_EXTERNAL and ROLE_DATA_EXTERNAL[finalRole]
+
+        if roleData and roleData.isBotC then
+            local iconFileName = iconNames[roleData.team]
+
+            if iconFileName then
+                return iconFileName
+            end
+        end
     end)
 end
 

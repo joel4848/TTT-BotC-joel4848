@@ -6,6 +6,8 @@ ROLE.nameplural = "Washerwomans"
 ROLE.nameext = "the Washerwoman"
 ROLE.nameshort = "jbcwwm"
 
+ROLE.isBotC = true
+
 ROLE.blockspawnconvars = true
 
 ROLE.desc = [[]]

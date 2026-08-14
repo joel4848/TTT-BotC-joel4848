@@ -6,6 +6,8 @@ ROLE.nameplural = "Poisoners"
 ROLE.nameext = "the Poisoner"
 ROLE.nameshort = "jbcpsn"
 
+ROLE.isBotC = true
+
 ROLE.blockspawnconvars = true
 
 ROLE.desc = [[]]

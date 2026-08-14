@@ -6,6 +6,8 @@ ROLE.nameplural = "Golems"
 ROLE.nameext = "the Golem"
 ROLE.nameshort = "jbcglm"
 
+ROLE.isBotC = true
+
 ROLE.blockspawnconvars = true
 
 ROLE.desc = [[]]

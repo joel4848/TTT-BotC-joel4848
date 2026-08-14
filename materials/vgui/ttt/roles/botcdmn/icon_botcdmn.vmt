@@ -1,0 +1,7 @@
+"UnlitGeneric"
+{
+	"$basetexture" "vgui/ttt/roles/botcdmn/icon_botcdmn"
+	"$vertexcolor" 1
+	"$vertexalpha" 1
+	"$translucent" 1
+}
