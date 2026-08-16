@@ -37,6 +37,15 @@ if CLIENT then
         antialias = true
     })
 
+    resource.AddFile("resource/fonts/Minecraft.ttf")
+    surface.CreateFont("Minecraft30_bold", {
+        font = "Minecraft",
+        size = 30,
+        weight = 2000,
+        additive = false,
+        antialias = true
+    })
+
 
     local FADE_IN_ROLE_TIME    = 0.5
     local DELAY_BETWEEN_ROLES  = 3.0
@@ -107,7 +116,7 @@ if CLIENT then
             if data.dead then allAlive = false end
         end
 
-        surface.SetFont("Minecraft40")
+        surface.SetFont("Minecraft25")
         local maxWidth = 0
         local textHeight = 0
 
@@ -135,7 +144,8 @@ if CLIENT then
             lineHeight = lineHeight
         }
 
-        local matGhost = Material("vgui/ttt/joelbotc/ghost_grim.png", "mips smooth")
+        -- local matGhost = Material("vgui/ttt/joelbotc/ghost_grim.png")
+        local matScroll = Material("vgui/ttt/joelbotc/scroll_with_border.png")
 
         hook.Add("HUDPaint", "JoelBotC_DrawGrimReveal", function()
             if not revealData then
@@ -164,46 +174,61 @@ if CLIENT then
                 end
             end
 
+            local scrollW, scrollH = 920, 920
+            local scrollX, scrollY = ScrW() / 2 - scrollW / 2, ScrH() / 2 - scrollH / 2
+            surface.SetDrawColor(255, 255, 255, 255 * alphaMult)
+            surface.SetMaterial(matScroll)
+            surface.DrawTexturedRect(scrollX, scrollY, scrollW, scrollH)
+
             -- Layout positions
-            local startX   = (ScrW() / 2) - (revealData.maxWidth / 2)
-            local currentY = (ScrH() / 2) - (revealData.totalHeight / 2)
+            local scrollPadding = 10
+            local startX        = scrollX + 115 + scrollPadding -- (ScrW() / 2) - (revealData.maxWidth / 2)
+            local currentY      = scrollY + 180 + scrollPadding -- (ScrH() / 2) - (revealData.totalHeight / 2)
 
-            local backgroundX      = startX - LINE_PADDING
-            local backgroundY      = currentY - LINE_PADDING
-            local backgroundWidth  = revealData.maxWidth + 2 * LINE_PADDING
-            local backgroundHeight = revealData.totalHeight + 2 * LINE_PADDING
+            -- local backgroundX      = startX - LINE_PADDING
+            -- local backgroundY      = currentY - LINE_PADDING
+            -- local backgroundWidth  = revealData.maxWidth + 2 * LINE_PADDING
+            -- local backgroundHeight = revealData.totalHeight + 2 * LINE_PADDING
 
-            if not allAlive then
-                backgroundX     = backgroundX - LINE_PADDING - textHeight
-                backgroundWidth = backgroundWidth + LINE_PADDING + textHeight
-            end
+            -- if not allAlive then
+            --     backgroundX     = backgroundX - LINE_PADDING - textHeight
+            --     backgroundWidth = backgroundWidth + LINE_PADDING + textHeight
+            -- end
 
-            draw.RoundedBox(10, backgroundX, backgroundY, backgroundWidth, backgroundHeight, Color(0, 0, 0, 220 * alphaMult))
+            -- draw.RoundedBox(10, backgroundX, backgroundY, backgroundWidth, backgroundHeight, Color(0, 0, 0, 220 * alphaMult))
 
-            surface.SetFont("Minecraft40")
+            surface.SetFont("Minecraft25")
 
-            local iconSize = textHeight or revealData.lineHeight
+            local skullWidth, _ = surface.GetTextSize("☠ ")
+
+            -- local iconSize = textHeight * 1.2 or revealData.lineHeight * 1.2
 
             for _, pData in ipairs(revealData.players) do
-                local baseColour = pData.dead and Color(200, 200, 200, 255 * alphaMult) or Color(255, 255, 255, 255 * alphaMult)
+                local baseColour = pData.dead and Color(100, 100, 100, 255 * alphaMult) or Color(0, 0, 0, 255 * alphaMult)
 
                 -- Draw a ghost icon if the player's dead
-                if pData.dead then
-                    local ghostX = startX - LINE_PADDING - iconSize
+                -- if pData.dead then
+                --     local ghostX = startX - math.floor(LINE_PADDING / 2) - math.floor(iconSize / 2)
 
-                    surface.SetDrawColor(baseColour)
-                    surface.SetMaterial(matGhost)
-                    surface.DrawTexturedRect(ghostX, currentY, iconSize, iconSize)
-                end
+                --     surface.SetDrawColor(baseColour)
+                --     surface.SetMaterial(matGhost)
+                --     surface.DrawTexturedRect(ghostX, currentY, iconSize, iconSize)
+                -- end
 
                 -- Seat numbers
-                local part1 = pData.seat .. ". " .. pData.nick
-                draw.SimpleText(part1, "Minecraft40", startX, currentY, baseColour, TEXT_ALIGN_LEFT, TEXT_ALIGN_TOP)
+                local segStartX = startX + skullWidth
+                if pData.seat < 10 then segStartX = segStartX + 18 end
+                local part1   = pData.seat .. ". " .. pData.nick
+                draw.SimpleText(part1, "Minecraft25", segStartX, currentY, baseColour, TEXT_ALIGN_LEFT, TEXT_ALIGN_TOP)
 
-                local myRevealStartTime = sTime + (pData.revealIndex * DELAY_BETWEEN_ROLES)
+                if pData.dead then
+                    draw.SimpleText("☠ ", "Minecraft25", startX, currentY, baseColour, TEXT_ALIGN_LEFT, TEXT_ALIGN_TOP)
+                end
 
-                if cTime >= myRevealStartTime then
-                    local roleAlphaProg = math.Clamp((cTime - myRevealStartTime) / FADE_IN_ROLE_TIME, 0, 1)
+                local thisRevealStartTime = sTime + (pData.revealIndex * DELAY_BETWEEN_ROLES)
+
+                if cTime >= thisRevealStartTime then
+                    local roleAlphaProg = math.Clamp((cTime - thisRevealStartTime) / FADE_IN_ROLE_TIME, 0, 1)
                     local roleAlpha = 255 * roleAlphaProg * alphaMult
 
                     local p1Width, _ = surface.GetTextSize(part1)
@@ -213,15 +238,22 @@ if CLIENT then
                     if pData.team == "minion" or pData.team == "demon" then
                         part2 = " was the "
                     end
-                    local part2Color = Color(255, 255, 255, roleAlpha)
-                    draw.SimpleText(part2, "Minecraft40", startX + p1Width, currentY, part2Color, TEXT_ALIGN_LEFT, TEXT_ALIGN_TOP)
+
+                    draw.SimpleText(part2, "Minecraft25", segStartX + p1Width, currentY, Color(baseColour.r, baseColour.g, baseColour.b, roleAlpha), TEXT_ALIGN_LEFT, TEXT_ALIGN_TOP)
 
                     local p2Width, _ = surface.GetTextSize(part2)
 
                     -- Role
+                    surface.SetFont("Minecraft30_bold")
+                    local _, roleHeightLarge = surface.GetTextSize(pData.roleName)
+                    surface.SetFont("Minecraft25")
+                    local _, roleHeightSmall = surface.GetTextSize(pData.roleName)
+                    local roleHeightOffset = 0
+                    if pData.team == "demon" then roleHeightOffset = (roleHeightLarge - roleHeightSmall) / 2 end
+
                     local tColor = TEAM_COLORS[pData.team] or TEAM_COLORS["townsfolk"]
                     local part3Color = Color(tColor.r, tColor.g, tColor.b, roleAlpha)
-                    draw.SimpleText(pData.roleName, "Minecraft40", startX + p1Width + p2Width, currentY, part3Color, TEXT_ALIGN_LEFT, TEXT_ALIGN_TOP)
+                    draw.SimpleText(pData.roleName, pData.team == "demon" and "Minecraft30_bold" or "Minecraft25", segStartX + p1Width + p2Width, currentY - roleHeightOffset, part3Color, TEXT_ALIGN_LEFT, TEXT_ALIGN_TOP)
                 end
 
                 currentY = currentY + revealData.lineHeight

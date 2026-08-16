@@ -19,11 +19,11 @@ local function SanitisePages(pages)
                     tooltip   = seg.tooltip and tostring(seg.tooltip) or nil
                 }
 
-                if istable(seg.color) then
-                    s.color = {
-                        r = tonumber(seg.color.r) or 0,
-                        g = tonumber(seg.color.g) or 0,
-                        b = tonumber(seg.color.b) or 0,
+                if istable(seg.colour) then
+                    s.colour = {
+                        r = tonumber(seg.colour.r) or 0,
+                        g = tonumber(seg.colour.g) or 0,
+                        b = tonumber(seg.colour.b) or 0,
                     }
                 end
 
@@ -214,7 +214,7 @@ function JoelBotC:InitInfoBook(ply)
     ply.infoBookSegments = {
         {text = "Role:\n",    bold = true, underline = true},
         {text = roleName .. " - " .. roleAbility .. "\n"},
-        {text = "------------------------\n", color = Color(100, 100, 100)},
+        {text = "------------------------\n", colour = Color(100, 100, 100)},
     }
 end
 
@@ -271,25 +271,25 @@ local function BuildBookScript()
     end
 
     -- Townsfolk
-    table.insert(scriptSegments, {text = "Townsfolk\n", underline = true, align = "center", color = Color(31, 101, 255, 255)})
+    table.insert(scriptSegments, {text = "Townsfolk\n", underline = true, align = "center", colour = Color(31, 101, 255, 255)})
     for _, r in ipairs(townsfolk) do
-        table.insert(scriptSegments, {text = r.name .. "\n", color = Color(31, 101, 255, 255), tooltip = r.ability})
+        table.insert(scriptSegments, {text = r.name .. "\n", colour = Color(31, 101, 255, 255), tooltip = r.ability})
     end
 
     -- Outsiders
-    table.insert(scriptSegments, {text = "Outsiders\n", underline = true, align = "center", color = Color(70, 213, 255, 255)})
+    table.insert(scriptSegments, {text = "Outsiders\n", underline = true, align = "center", colour = Color(70, 213, 255, 255)})
     for _, r in ipairs(outsiders) do
-        table.insert(scriptSegments, {text = r.name .. "\n", color = Color(70, 213, 255, 255), tooltip = r.ability})
+        table.insert(scriptSegments, {text = r.name .. "\n", colour = Color(70, 213, 255, 255), tooltip = r.ability})
     end
 
     -- Minions
-    table.insert(scriptSegments, {text = "Minions\n", underline = true, align = "center", color = Color(255, 105, 0, 255)})
+    table.insert(scriptSegments, {text = "Minions\n", underline = true, align = "center", colour = Color(255, 105, 0, 255)})
     for _, r in ipairs(minions) do
-        table.insert(scriptSegments, {text = r.name .. "\n", color = Color(255, 105, 0, 255), tooltip = r.ability})
+        table.insert(scriptSegments, {text = r.name .. "\n", colour = Color(255, 105, 0, 255), tooltip = r.ability})
     end
 
     -- Demons
-    table.insert(scriptSegments, {text = "Demons\n", underline = true, align = "center", color = Color(206, 1, 0, 255)})
+    table.insert(scriptSegments, {text = "Demons\n", underline = true, align = "center", colour = Color(206, 1, 0, 255)})
     for _, r in ipairs(demons) do
         table.insert(scriptSegments, {text = r.name .. "\n", tooltip = r.ability})
     end
@@ -303,16 +303,20 @@ function JoelBotC:RebuildInfoBook(ply)
     local seatingSegments = {}
     table.insert(seatingSegments, {
         text      = "Seating:\n\n",
-        color     = Color(100, 0, 200),
+        colour     = Color(100, 0, 200),
         bold      = true,
         underline = true,
         align     = "center",
     })
     for i, p in ipairs(JoelBotC.seatingOrder) do
-        local prefix = (i < 10) and ("Seat " .. i .. ":   ") or ("Seat " .. i .. ": ")
+        local seatPrefix = "Seat " -- p.BotCDead and "☠ Seat " or "Seat "
+        local seatSuffix = p.BotCDead and " ☠\n" or "\n"
+        local prefix = (i < 10) and (seatPrefix .. i .. ":   ") or (seatPrefix .. i .. ": ")
+        local colour = p.BotCDead and Color(100, 100, 100) or Color(0, 0, 0) -- Color(85, 255, 85)
+
         table.insert(seatingSegments, {
-            text      = prefix .. p:Nick() .. "\n",
-            color     = Color(0, 0, 0),
+            text      = prefix .. p:Nick() .. seatSuffix,
+            colour    = colour,
             bold      = false,
             italic    = false,
             underline = false,

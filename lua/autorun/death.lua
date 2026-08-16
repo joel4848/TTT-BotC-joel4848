@@ -33,6 +33,10 @@ if SERVER then
         net.Start("rdmtJoelBotCAliveDeadUpdate")
             net.WriteTable(JoelBotC.isAlive)
         net.Broadcast()
+
+        for _, ply in ipairs(JoelBotC.players) do
+            JoelBotC:RebuildInfoBook(ply)
+        end
     end
 
     function JoelBotC:Revive(ply)

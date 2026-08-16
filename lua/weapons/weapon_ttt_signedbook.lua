@@ -96,7 +96,7 @@ if CLIENT then
     local pendingSignedBookData = {}
     local createdFonts = {}
 
-    local function NormalizeSegmentColor(c)
+    local function NormalizeSegmentColour(c)
         if istable(c) then
             return Color(
                 tonumber(c.r) or 0,
@@ -169,7 +169,7 @@ if CLIENT then
             end
         end
 
-        local function addToken(tokenText, fontName, tokenColor, drawUnderline, precomputedWidth, segTooltip)
+        local function addToken(tokenText, fontName, tokenColour, drawUnderline, precomputedWidth, segTooltip)
             if tokenText == "" then return end
 
             surface.SetFont(fontName)
@@ -189,7 +189,7 @@ if CLIENT then
             currentLine.tokens[#currentLine.tokens + 1] = {
                 text          = tokenText,
                 font          = fontName,
-                color         = tokenColor,
+                colour        = tokenColour,
                 drawUnderline = drawUnderline or false,
                 width         = tokenW,
                 tooltip       = segTooltip
@@ -197,7 +197,7 @@ if CLIENT then
             currentLine.width = currentLine.width + tokenW
         end
 
-        local function processText(rawText, fontName, noUnderlineFontName, tokenColor, align, segUnderline, segTooltip)
+        local function processText(rawText, fontName, noUnderlineFontName, tokenColour, align, segUnderline, segTooltip)
             rawText = tostring(rawText or "")
             align   = align or "left"
 
@@ -216,17 +216,17 @@ if CLIENT then
                     local matched = false
                     for word, trailing in paragraph:gmatch("([^%s]+)(%s*)") do
                         matched = true
-                        addToken(word, fontName, tokenColor, false, nil, segTooltip)
+                        addToken(word, fontName, tokenColour, false, nil, segTooltip)
                         if trailing ~= "" then
                             surface.SetFont(fontName)
                             local wordAndTrailingW = select(1, surface.GetTextSize(word .. trailing))
                             local wordOnlyW        = select(1, surface.GetTextSize(word))
                             local trailingW        = wordAndTrailingW - wordOnlyW
-                            addToken(trailing, noUnderlineFontName, tokenColor, segUnderline, trailingW, segTooltip)
+                            addToken(trailing, noUnderlineFontName, tokenColour, segUnderline, trailingW, segTooltip)
                         end
                     end
                     if not matched then
-                        addToken(paragraph, fontName, tokenColor, false, nil, segTooltip)
+                        addToken(paragraph, fontName, tokenColour, false, nil, segTooltip)
                     end
                 end
             end
@@ -235,8 +235,8 @@ if CLIENT then
         for _, seg in ipairs(segments) do
             local fontName            = BuildFormattedFont(seg.bold, seg.italic, seg.underline)
             local noUnderlineFontName = BuildFormattedFont(seg.bold, seg.italic, false)
-            local tokenColor          = NormalizeSegmentColor(seg.color)
-            processText(seg.text, fontName, noUnderlineFontName, tokenColor, seg.align, seg.underline or false, seg.tooltip)
+            local tokenColour         = NormalizeSegmentColour(seg.colour)
+            processText(seg.text, fontName, noUnderlineFontName, tokenColour, seg.align, seg.underline or false, seg.tooltip)
         end
 
         if #currentLine.tokens > 0 then
@@ -273,9 +273,9 @@ if CLIENT then
 
     function SWEP:ApplyRawBookData(raw)
         if not isstring(raw) or raw == "" then return end
-        if raw == self._LastRaw then return end
+        if raw == self.lastRaw then return end
 
-        self._LastRaw = raw
+        self.lastRaw = raw
 
         local decoded = util.JSONToTable(raw)
         if decoded then
@@ -444,12 +444,12 @@ if CLIENT then
 
                     for _, token in ipairs(line.tokens or {}) do
                         surface.SetFont(token.font)
-                        surface.SetTextColor(token.color)
+                        surface.SetTextColor(token.colour)
                         surface.SetTextPos(x, y)
                         surface.DrawText(token.text)
 
                         if token.drawUnderline then
-                            surface.SetDrawColor(token.color)
+                            surface.SetDrawColor(token.colour)
                             surface.DrawRect(x - 4, y + (pnl._LineHeight or 18) - 5, token.width + 4, 1)
                         end
 
